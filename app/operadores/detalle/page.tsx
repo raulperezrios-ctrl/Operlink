@@ -18,11 +18,13 @@ function DetalleOperadorContent() {
   const [loading, setLoading] = useState(true)
   const [sesion, setSesion] = useState<any>(null)
   const [tipoUsuario, setTipoUsuario] = useState<string | null>(null)
+  const [membresiaActiva, setMembresiaActiva] = useState(false)
+  const [contactosDisponibles, setContactosDisponibles] = useState(0)
 
   useEffect(() => {
     const cargar = async () => {
-      // Cargar operador
       if (!id) return
+
       const { data } = await supabase
         .from('operadores')
         .select('*')
@@ -30,18 +32,28 @@ function DetalleOperadorContent() {
         .single()
       setOp(data)
 
-      // Verificar sesión activa
       const { data: sessionData } = await supabase.auth.getSession()
       const userId = sessionData.session?.user?.id
 
       if (userId) {
         setSesion(sessionData.session)
+
         const { data: usuario } = await supabase
           .from('usuarios')
           .select('tipo')
           .eq('id', userId)
           .single()
         setTipoUsuario(usuario?.tipo || null)
+
+        if (usuario?.tipo === 'empresa') {
+          const { data: empresa } = await supabase
+            .from('empresas')
+            .select('membresia_activa, contactos_disponibles')
+            .eq('user_id', userId)
+            .single()
+          setMembresiaActiva(empresa?.membresia_activa || false)
+          setContactosDisponibles(empresa?.contactos_disponibles || 0)
+        }
       }
 
       setLoading(false)
@@ -56,6 +68,7 @@ function DetalleOperadorContent() {
   const iniciales = `${op.nombre?.charAt(0) || ''}. ${op.apellido?.charAt(0) || ''}.`
   const maquinarias: string[] = op.maquinaria || []
   const esEmpresa = tipoUsuario === 'empresa'
+  const puedeVerContacto = esEmpresa && membresiaActiva
 
   return (
     <div className="bg-gray-50 pb-6">
@@ -78,7 +91,7 @@ function DetalleOperadorContent() {
       <section className="px-4 py-4 bg-white border-b border-gray-100">
         <div className="flex items-center gap-2 mb-1">
           <h1 className="text-lg font-black" style={{color: '#152337'}}>
-            {esEmpresa ? `${op.nombre} ${op.apellido}` : iniciales}
+            {puedeVerContacto ? `${op.nombre} ${op.apellido}` : iniciales}
           </h1>
           {op.verificado && (
             <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{backgroundColor: '#dbeafe', color: '#1d4ed8'}}>✔ Verificado</span>
@@ -124,8 +137,8 @@ function DetalleOperadorContent() {
 
       {/* Contacto */}
       <section className="px-4 py-4 mt-2">
-        {esEmpresa ? (
-          // Empresa autenticada — ver contacto completo
+        {puedeVerContacto ? (
+          // Empresa con membresía activa — ver contacto completo
           <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
             <h2 className="text-sm font-bold mb-3" style={{color: '#152337'}}>📞 Información de contacto</h2>
             <div className="flex flex-col gap-2">
@@ -138,14 +151,21 @@ function DetalleOperadorContent() {
                 <a href={`mailto:${op.correo}`} className="text-sm font-bold" style={{color: '#9A2120'}}>{op.correo}</a>
               </div>
             </div>
-            <a href={`https://wa.me/52${op.telefono}`} target="_blank"
-              className="mt-4 w-full py-3 rounded-xl text-white font-bold text-sm text-center block"
-              style={{backgroundColor: '#25D366'}}>
-              💬 Contactar por WhatsApp
+          </div>
+        ) : esEmpresa && !membresiaActiva ? (
+          // Empresa sin membresía — invitar a comprar plan
+          <div className="rounded-2xl border-2 border-dashed p-6 text-center" style={{borderColor: '#9A2120'}}>
+            <div className="text-3xl mb-2">🔒</div>
+            <h2 className="font-black text-base" style={{color: '#152337'}}>Activa tu plan</h2>
+            <p className="text-xs text-gray-500 mt-2 leading-relaxed">
+              Para ver el contacto completo de este operador necesitas activar un plan OperLink.
+            </p>
+            <a href="/planes" className="mt-4 w-full py-3 rounded-xl text-white font-bold text-sm text-center block" style={{backgroundColor: '#9A2120'}}>
+              Ver planes
             </a>
           </div>
         ) : (
-          // No autenticado o es operador — contacto protegido
+          // No autenticado
           <div className="rounded-2xl border-2 border-dashed p-6 text-center" style={{borderColor: '#9A2120'}}>
             <div className="text-3xl mb-2">🔒</div>
             <h2 className="font-black text-base" style={{color: '#152337'}}>Contacto protegido</h2>
