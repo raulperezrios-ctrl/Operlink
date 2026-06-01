@@ -10,16 +10,35 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [tipo, setTipo] = useState('empresa')
 
   const handleLogin = async () => {
     setLoading(true)
     setError('')
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) {
+
+    const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password })
+
+    if (authError) {
       setError('Correo o contraseña incorrectos')
-    } else {
-      router.push('/empresas')
+      setLoading(false)
+      return
     }
+
+    // Verificar el tipo de usuario en la tabla usuarios
+    const { data: usuario } = await supabase
+      .from('usuarios')
+      .select('tipo')
+      .eq('id', data.user.id)
+      .single()
+
+    if (usuario?.tipo === 'operador') {
+      router.push('/registro-operador/listo')
+    } else if (usuario?.tipo === 'empresa') {
+      router.push('/empresas')
+    } else {
+      router.push('/')
+    }
+
     setLoading(false)
   }
 
@@ -47,10 +66,14 @@ export default function Login() {
         {/* Tipo de usuario */}
         <p className="text-xs font-semibold mb-2" style={{color: '#152337'}}>¿Quién eres?</p>
         <div className="flex gap-2 mb-4">
-          <button className="flex-1 border-2 rounded-xl py-2 text-xs font-bold text-white" style={{backgroundColor: '#9A2120', borderColor: '#9A2120'}}>
+          <button onClick={() => setTipo('operador')}
+            className="flex-1 border-2 rounded-xl py-2 text-xs font-bold"
+            style={{backgroundColor: tipo === 'operador' ? '#9A2120' : 'white', color: tipo === 'operador' ? 'white' : '#152337', borderColor: tipo === 'operador' ? '#9A2120' : '#e5e7eb'}}>
             👷 Operador
           </button>
-          <button className="flex-1 border-2 rounded-xl py-2 text-xs font-bold" style={{borderColor: '#e5e7eb', color: '#152337'}}>
+          <button onClick={() => setTipo('empresa')}
+            className="flex-1 border-2 rounded-xl py-2 text-xs font-bold"
+            style={{backgroundColor: tipo === 'empresa' ? '#9A2120' : 'white', color: tipo === 'empresa' ? 'white' : '#152337', borderColor: tipo === 'empresa' ? '#9A2120' : '#e5e7eb'}}>
             🏢 Empresa
           </button>
         </div>
@@ -106,7 +129,7 @@ export default function Login() {
 
       </div>
 
-      {/* Registro — dos opciones */}
+      {/* Registro */}
       <div id="registro" className="w-full max-w-sm mt-4 bg-white rounded-2xl shadow-sm p-4">
         <p className="text-xs font-bold text-center mb-3" style={{color: '#152337'}}>¿No tienes cuenta? Regístrate gratis</p>
         <div className="flex gap-2">

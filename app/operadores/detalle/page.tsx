@@ -16,9 +16,12 @@ function DetalleOperadorContent() {
   const id = searchParams.get('id')
   const [op, setOp] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [sesion, setSesion] = useState<any>(null)
+  const [tipoUsuario, setTipoUsuario] = useState<string | null>(null)
 
   useEffect(() => {
     const cargar = async () => {
+      // Cargar operador
       if (!id) return
       const { data } = await supabase
         .from('operadores')
@@ -26,6 +29,21 @@ function DetalleOperadorContent() {
         .eq('id', id)
         .single()
       setOp(data)
+
+      // Verificar sesión activa
+      const { data: sessionData } = await supabase.auth.getSession()
+      const userId = sessionData.session?.user?.id
+
+      if (userId) {
+        setSesion(sessionData.session)
+        const { data: usuario } = await supabase
+          .from('usuarios')
+          .select('tipo')
+          .eq('id', userId)
+          .single()
+        setTipoUsuario(usuario?.tipo || null)
+      }
+
       setLoading(false)
     }
     cargar()
@@ -37,6 +55,7 @@ function DetalleOperadorContent() {
   const foto = fotosAleatorias[Math.floor(Math.random() * fotosAleatorias.length)]
   const iniciales = `${op.nombre?.charAt(0) || ''}. ${op.apellido?.charAt(0) || ''}.`
   const maquinarias: string[] = op.maquinaria || []
+  const esEmpresa = tipoUsuario === 'empresa'
 
   return (
     <div className="bg-gray-50 pb-6">
@@ -58,7 +77,9 @@ function DetalleOperadorContent() {
       {/* Info básica */}
       <section className="px-4 py-4 bg-white border-b border-gray-100">
         <div className="flex items-center gap-2 mb-1">
-          <h1 className="text-lg font-black" style={{color: '#152337'}}>{iniciales}</h1>
+          <h1 className="text-lg font-black" style={{color: '#152337'}}>
+            {esEmpresa ? `${op.nombre} ${op.apellido}` : iniciales}
+          </h1>
           {op.verificado && (
             <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{backgroundColor: '#dbeafe', color: '#1d4ed8'}}>✔ Verificado</span>
           )}
@@ -101,18 +122,41 @@ function DetalleOperadorContent() {
         </section>
       )}
 
-      {/* Contacto protegido */}
+      {/* Contacto */}
       <section className="px-4 py-4 mt-2">
-        <div className="rounded-2xl border-2 border-dashed p-6 text-center" style={{borderColor: '#9A2120'}}>
-          <div className="text-3xl mb-2">🔒</div>
-          <h2 className="font-black text-base" style={{color: '#152337'}}>Contacto protegido</h2>
-          <p className="text-xs text-gray-500 mt-2 leading-relaxed">
-            Desbloquea el nombre completo y contacto de este operador siendo parte de OperLink.
-          </p>
-          <a href="/login" className="mt-4 w-full py-3 rounded-xl text-white font-bold text-sm text-center block" style={{backgroundColor: '#9A2120'}}>
-            Solicitar contacto
-          </a>
-        </div>
+        {esEmpresa ? (
+          // Empresa autenticada — ver contacto completo
+          <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
+            <h2 className="text-sm font-bold mb-3" style={{color: '#152337'}}>📞 Información de contacto</h2>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-400">Teléfono:</span>
+                <a href={`tel:${op.telefono}`} className="text-sm font-bold" style={{color: '#9A2120'}}>{op.telefono}</a>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-400">Correo:</span>
+                <a href={`mailto:${op.correo}`} className="text-sm font-bold" style={{color: '#9A2120'}}>{op.correo}</a>
+              </div>
+            </div>
+            <a href={`https://wa.me/52${op.telefono}`} target="_blank"
+              className="mt-4 w-full py-3 rounded-xl text-white font-bold text-sm text-center block"
+              style={{backgroundColor: '#25D366'}}>
+              💬 Contactar por WhatsApp
+            </a>
+          </div>
+        ) : (
+          // No autenticado o es operador — contacto protegido
+          <div className="rounded-2xl border-2 border-dashed p-6 text-center" style={{borderColor: '#9A2120'}}>
+            <div className="text-3xl mb-2">🔒</div>
+            <h2 className="font-black text-base" style={{color: '#152337'}}>Contacto protegido</h2>
+            <p className="text-xs text-gray-500 mt-2 leading-relaxed">
+              Desbloquea el nombre completo y contacto de este operador siendo parte de OperLink.
+            </p>
+            <a href="/login" className="mt-4 w-full py-3 rounded-xl text-white font-bold text-sm text-center block" style={{backgroundColor: '#9A2120'}}>
+              Iniciar sesión como empresa
+            </a>
+          </div>
+        )}
       </section>
 
     </div>
