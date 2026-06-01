@@ -24,6 +24,7 @@ function PagoContent() {
   const [procesando, setProcesando] = useState(false)
   const [error, setError] = useState('')
   const [exito, setExito] = useState(false)
+  const [conektaListo, setConektaListo] = useState(false)
 
   useEffect(() => {
     const cargar = async () => {
@@ -45,11 +46,28 @@ function PagoContent() {
       setLoading(false)
     }
     cargar()
+
+    // Esperar a que el script de Conekta cargue
+    const verificarConekta = setInterval(() => {
+      if (window.Conekta) {
+        window.Conekta.setPublicKey(process.env.NEXT_PUBLIC_CONEKTA_PUBLIC_KEY!)
+        window.Conekta.setLanguage('es')
+        setConektaListo(true)
+        clearInterval(verificarConekta)
+      }
+    }, 300)
+
+    return () => clearInterval(verificarConekta)
   }, [planId])
 
   const handlePagar = async () => {
     if (!nombre || !tarjeta || !expiry || !cvc) {
       setError('Por favor completa todos los campos')
+      return
+    }
+
+    if (!conektaListo) {
+      setError('Sistema de pago cargando, intenta de nuevo en un momento')
       return
     }
 
@@ -62,64 +80,52 @@ function PagoContent() {
     setProcesando(true)
     setError('')
 
-    try {
-      // Inicializar Conekta con llave pública
-      window.Conekta.setPublicKey(process.env.NEXT_PUBLIC_CONEKTA_PUBLIC_KEY!)
-      window.Conekta.setLanguage('es')
-
-      // Tokenizar tarjeta en el navegador
-      const tokenParams = {
-        card: {
-          number: tarjeta.replace(/\s/g, ''),
-          name: nombre,
-          exp_year: `20${expAnio.trim()}`,
-          exp_month: expMes.trim(),
-          cvc: cvc,
-        }
+    const tokenParams = {
+      card: {
+        number: tarjeta.replace(/\s/g, ''),
+        name: nombre,
+        exp_year: `20${expAnio.trim()}`,
+        exp_month: expMes.trim(),
+        cvc: cvc,
       }
+    }
 
-      window.Conekta.Token.create(tokenParams, 
-        async (token: any) => {
-          // Token creado exitosamente — enviar al servidor
-          try {
-            const res = await fetch('/api/pago', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                planId,
-                userId: sesion?.user?.id,
-                nombre,
-                correo,
-                tokenId: token.id,
-              })
+    window.Conekta.Token.create(
+      tokenParams,
+      async (token: any) => {
+        try {
+          const res = await fetch('/api/pago', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              planId,
+              userId: sesion?.user?.id,
+              nombre,
+              correo,
+              tokenId: token.id,
             })
+          })
 
-            const data = await res.json()
+          const data = await res.json()
 
-            if (!res.ok) {
-              setError(data.error || 'Error al procesar el pago')
-              setProcesando(false)
-              return
-            }
-
-            setExito(true)
-
-          } catch (err: any) {
-            setError('Error de conexión. Intenta de nuevo.')
+          if (!res.ok) {
+            setError(data.error || 'Error al procesar el pago')
             setProcesando(false)
+            return
           }
-        },
-        (err: any) => {
-          // Error al tokenizar
-          setError(err.message_to_purchaser || 'Error al procesar la tarjeta')
+
+          setExito(true)
+
+        } catch (err: any) {
+          setError('Error de conexión. Intenta de nuevo.')
           setProcesando(false)
         }
-      )
-
-    } catch (err: any) {
-      setError('Error al inicializar el sistema de pago')
-      setProcesando(false)
-    }
+      },
+      (err: any) => {
+        setError(err.message_to_purchaser || 'Error al procesar la tarjeta')
+        setProcesando(false)
+      }
+    )
   }
 
   if (loading) return <div className="text-center py-20 text-sm text-gray-400">Cargando...</div>
@@ -143,7 +149,6 @@ function PagoContent() {
   return (
     <div className="bg-gray-50 min-h-screen pb-24">
 
-      {/* Header */}
       <div className="bg-white px-4 py-4 border-b border-gray-100 flex items-center gap-3">
         <a href="/planes" className="text-gray-400 text-lg">←</a>
         <h1 className="text-base font-black" style={{color: '#152337'}}>Checkout</h1>
@@ -151,7 +156,6 @@ function PagoContent() {
 
       <div className="px-4 py-4 flex flex-col gap-4">
 
-        {/* Resumen del plan */}
         <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
           <p className="text-xs text-gray-400 mb-1">Plan seleccionado</p>
           <p className="text-base font-black" style={{color: '#152337'}}>{plan.nombre}</p>
@@ -162,14 +166,12 @@ function PagoContent() {
           </div>
         </div>
 
-        {/* Tarjetas de prueba */}
         <div className="bg-yellow-50 rounded-xl p-3 border border-yellow-200">
           <p className="text-xs font-bold text-yellow-800 mb-1">🧪 Modo pruebas — usa esta tarjeta:</p>
           <p className="text-xs text-yellow-700">Número: <strong>4111 1111 1111 1111</strong></p>
           <p className="text-xs text-yellow-700">Vencimiento: <strong>12/25</strong> — CVC: <strong>123</strong></p>
         </div>
 
-        {/* Formulario de pago */}
         <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
           <h2 className="text-sm font-bold mb-3" style={{color: '#152337'}}>💳 Datos de pago</h2>
 
@@ -219,10 +221,10 @@ function PagoContent() {
 
           <button
             onClick={handlePagar}
-            disabled={procesando}
+            disabled={procesando || !conektaListo}
             className="w-full py-3 rounded-xl text-white font-bold text-sm mt-4"
-            style={{backgroundColor: '#9A2120', opacity: procesando ? 0.7 : 1}}>
-            {procesando ? 'Procesando pago...' : `Pagar $${plan.precio.toLocaleString('es-MX')} MXN`}
+            style={{backgroundColor: '#9A2120', opacity: (procesando || !conektaListo) ? 0.7 : 1}}>
+            {procesando ? 'Procesando pago...' : !conektaListo ? 'Cargando...' : `Pagar $${plan.precio.toLocaleString('es-MX')} MXN`}
           </button>
 
           <p className="text-[10px] text-gray-400 text-center mt-2">🔒 Pago seguro con Conekta</p>
