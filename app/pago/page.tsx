@@ -4,6 +4,12 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '../lib/supabase'
 
+declare global {
+  interface Window {
+    Conekta: any
+  }
+}
+
 function PagoContent() {
   const searchParams = useSearchParams()
   const planId = searchParams.get('plan')
@@ -57,33 +63,61 @@ function PagoContent() {
     setError('')
 
     try {
-      const res = await fetch('/api/pago', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          planId,
-          userId: sesion?.user?.id,
-          nombre,
-          correo,
-          tarjeta: tarjeta.replace(/\s/g, ''),
-          expMes: expMes.trim(),
-          expAnio: `20${expAnio.trim()}`,
-          cvc,
-        })
-      })
+      // Inicializar Conekta con llave pública
+      window.Conekta.setPublicKey(process.env.NEXT_PUBLIC_CONEKTA_PUBLIC_KEY!)
+      window.Conekta.setLanguage('es')
 
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.error || 'Error al procesar el pago')
-        setProcesando(false)
-        return
+      // Tokenizar tarjeta en el navegador
+      const tokenParams = {
+        card: {
+          number: tarjeta.replace(/\s/g, ''),
+          name: nombre,
+          exp_year: `20${expAnio.trim()}`,
+          exp_month: expMes.trim(),
+          cvc: cvc,
+        }
       }
 
-      setExito(true)
+      window.Conekta.Token.create(tokenParams, 
+        async (token: any) => {
+          // Token creado exitosamente — enviar al servidor
+          try {
+            const res = await fetch('/api/pago', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                planId,
+                userId: sesion?.user?.id,
+                nombre,
+                correo,
+                tokenId: token.id,
+              })
+            })
+
+            const data = await res.json()
+
+            if (!res.ok) {
+              setError(data.error || 'Error al procesar el pago')
+              setProcesando(false)
+              return
+            }
+
+            setExito(true)
+
+          } catch (err: any) {
+            setError('Error de conexión. Intenta de nuevo.')
+            setProcesando(false)
+          }
+        },
+        (err: any) => {
+          // Error al tokenizar
+          setError(err.message_to_purchaser || 'Error al procesar la tarjeta')
+          setProcesando(false)
+        }
+      )
 
     } catch (err: any) {
-      setError('Error de conexión. Intenta de nuevo.')
+      setError('Error al inicializar el sistema de pago')
       setProcesando(false)
     }
   }
@@ -165,7 +199,11 @@ function PagoContent() {
               <div>
                 <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Vencimiento</label>
                 <input type="text" placeholder="MM/AA" value={expiry}
-                  onChange={(e) => setExpiry(e.target.value)}
+                  onChange={(e) => {
+                    let val = e.target.value.replace(/\D/g, '').slice(0, 4)
+                    if (val.length >= 3) val = val.slice(0,2) + '/' + val.slice(2)
+                    setExpiry(val)
+                  }}
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
               </div>
               <div>

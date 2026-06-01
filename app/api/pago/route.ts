@@ -8,7 +8,7 @@ const supabase = createClient(
 
 export async function POST(req: NextRequest) {
   try {
-    const { planId, userId, nombre, correo, tarjeta, expMes, expAnio, cvc } = await req.json()
+    const { planId, userId, nombre, correo, tokenId } = await req.json()
 
     // 1. Obtener el plan
     const { data: plan } = await supabase
@@ -19,29 +19,7 @@ export async function POST(req: NextRequest) {
 
     if (!plan) return NextResponse.json({ error: 'Plan no encontrado' }, { status: 400 })
 
-    // 2. Crear token de tarjeta en Conekta
-    const tokenRes = await fetch('https://api.conekta.io/tokens', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/vnd.conekta-v2.1.0+json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.CONEKTA_PRIVATE_KEY}`,
-      },
-      body: JSON.stringify({
-        card: {
-          number: tarjeta,
-          name: nombre,
-          exp_year: expAnio,
-          exp_month: expMes,
-          cvc: cvc,
-        }
-      })
-    })
-
-    const tokenData = await tokenRes.json()
-    if (!tokenRes.ok) return NextResponse.json({ error: tokenData.details?.[0]?.message || 'Error al procesar tarjeta' }, { status: 400 })
-
-    // 3. Crear orden en Conekta
+    // 2. Crear orden en Conekta con el token
     const ordenRes = await fetch('https://api.conekta.io/orders', {
       method: 'POST',
       headers: {
@@ -57,13 +35,13 @@ export async function POST(req: NextRequest) {
         },
         line_items: [{
           name: plan.nombre,
-          unit_price: plan.precio * 100, // Conekta usa centavos
+          unit_price: plan.precio * 100,
           quantity: 1,
         }],
         charges: [{
           payment_method: {
             type: 'card',
-            token_id: tokenData.id,
+            token_id: tokenId,
           }
         }]
       })
@@ -72,12 +50,11 @@ export async function POST(req: NextRequest) {
     const ordenData = await ordenRes.json()
     if (!ordenRes.ok) return NextResponse.json({ error: ordenData.details?.[0]?.message || 'Error al procesar pago' }, { status: 400 })
 
-    // 4. Activar membresía en Supabase
+    // 3. Activar membresía en Supabase
     const fechaFin = new Date()
     if (plan.duracion === 'mensual') fechaFin.setMonth(fechaFin.getMonth() + 1)
     if (plan.duracion === 'anual') fechaFin.setFullYear(fechaFin.getFullYear() + 1)
 
-    // Actualizar empresa
     await supabase
       .from('empresas')
       .update({
@@ -86,7 +63,6 @@ export async function POST(req: NextRequest) {
       })
       .eq('user_id', userId)
 
-    // Registrar suscripción
     await supabase.from('suscripciones').insert({
       user_id: userId,
       plan_id: planId,
@@ -97,7 +73,6 @@ export async function POST(req: NextRequest) {
       conekta_order_id: ordenData.id,
     })
 
-    // Registrar pago
     await supabase.from('pagos').insert({
       comprador_id: userId,
       comprador_tipo: 'empresa',
