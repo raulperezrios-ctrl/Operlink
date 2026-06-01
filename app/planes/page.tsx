@@ -27,20 +27,20 @@ export default function Planes() {
     <div className="bg-gray-50 min-h-screen pb-24">
 
       {/* Header */}
-      <div className="px-4 py-6 text-center" style={{backgroundColor: '#152337'}}>
-        <h1 className="text-xl font-black text-white">Planes OperLink</h1>
-        <p className="text-xs text-gray-300 mt-1">Conecta con los mejores operadores de México</p>
+      <div className="px-4 py-6 text-center bg-white border-b border-gray-100">
+        <h1 className="text-xl font-black" style={{color: '#152337'}}>Planes OperLink</h1>
+        <p className="text-xs text-gray-400 mt-1">Conecta con los mejores operadores de México</p>
 
         {/* Selector */}
-        <div className="flex rounded-xl overflow-hidden border border-white/20 mt-4 mx-auto max-w-xs">
+        <div className="flex rounded-xl overflow-hidden border border-gray-200 mt-4 mx-auto max-w-xs">
           <button onClick={() => setTipo('empresa')}
             className="flex-1 py-2 text-xs font-bold"
-            style={{backgroundColor: tipo === 'empresa' ? '#9A2120' : 'transparent', color: 'white'}}>
+            style={{backgroundColor: tipo === 'empresa' ? '#9A2120' : 'white', color: tipo === 'empresa' ? 'white' : '#152337'}}>
             🏢 Empresa
           </button>
           <button onClick={() => setTipo('operador')}
             className="flex-1 py-2 text-xs font-bold"
-            style={{backgroundColor: tipo === 'operador' ? '#9A2120' : 'transparent', color: 'white'}}>
+            style={{backgroundColor: tipo === 'operador' ? '#9A2120' : 'white', color: tipo === 'operador' ? 'white' : '#152337'}}>
             👷 Operador
           </button>
         </div>
