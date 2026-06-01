@@ -17,6 +17,7 @@ function PagoContent() {
   const [cvc, setCvc] = useState('')
   const [procesando, setProcesando] = useState(false)
   const [error, setError] = useState('')
+  const [exito, setExito] = useState(false)
 
   useEffect(() => {
     const cargar = async () => {
@@ -40,12 +41,70 @@ function PagoContent() {
     cargar()
   }, [planId])
 
+  const handlePagar = async () => {
+    if (!nombre || !tarjeta || !expiry || !cvc) {
+      setError('Por favor completa todos los campos')
+      return
+    }
+
+    const [expMes, expAnio] = expiry.split('/')
+    if (!expMes || !expAnio) {
+      setError('Formato de vencimiento inválido. Usa MM/AA')
+      return
+    }
+
+    setProcesando(true)
+    setError('')
+
+    try {
+      const res = await fetch('/api/pago', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planId,
+          userId: sesion?.user?.id,
+          nombre,
+          correo,
+          tarjeta: tarjeta.replace(/\s/g, ''),
+          expMes: expMes.trim(),
+          expAnio: `20${expAnio.trim()}`,
+          cvc,
+        })
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error || 'Error al procesar el pago')
+        setProcesando(false)
+        return
+      }
+
+      setExito(true)
+
+    } catch (err: any) {
+      setError('Error de conexión. Intenta de nuevo.')
+      setProcesando(false)
+    }
+  }
+
   if (loading) return <div className="text-center py-20 text-sm text-gray-400">Cargando...</div>
   if (!plan) return <div className="text-center py-20 text-sm text-gray-400">Plan no encontrado</div>
   if (!sesion) {
     window.location.href = `/login?redirect=/pago&plan=${planId}`
     return null
   }
+
+  if (exito) return (
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-6 text-center">
+      <div className="text-6xl mb-4">🎉</div>
+      <h1 className="text-xl font-black mb-2" style={{color: '#152337'}}>¡Pago exitoso!</h1>
+      <p className="text-sm text-gray-500 mb-6">Tu plan <strong>{plan.nombre}</strong> está activo. Ya puedes ver los contactos de los operadores.</p>
+      <a href="/operadores" className="py-3 px-8 rounded-xl text-white font-bold text-sm" style={{backgroundColor: '#9A2120'}}>
+        Ver operadores
+      </a>
+    </div>
+  )
 
   return (
     <div className="bg-gray-50 min-h-screen pb-24">
@@ -69,6 +128,13 @@ function PagoContent() {
           </div>
         </div>
 
+        {/* Tarjetas de prueba */}
+        <div className="bg-yellow-50 rounded-xl p-3 border border-yellow-200">
+          <p className="text-xs font-bold text-yellow-800 mb-1">🧪 Modo pruebas — usa esta tarjeta:</p>
+          <p className="text-xs text-yellow-700">Número: <strong>4111 1111 1111 1111</strong></p>
+          <p className="text-xs text-yellow-700">Vencimiento: <strong>12/25</strong> — CVC: <strong>123</strong></p>
+        </div>
+
         {/* Formulario de pago */}
         <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
           <h2 className="text-sm font-bold mb-3" style={{color: '#152337'}}>💳 Datos de pago</h2>
@@ -90,7 +156,7 @@ function PagoContent() {
 
             <div>
               <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Número de tarjeta</label>
-              <input type="text" placeholder="0000 0000 0000 0000" value={tarjeta}
+              <input type="text" placeholder="4111 1111 1111 1111" value={tarjeta}
                 onChange={(e) => setTarjeta(e.target.value.replace(/\D/g, '').slice(0, 16))}
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
             </div>
@@ -114,11 +180,11 @@ function PagoContent() {
           {error && <p className="text-xs text-red-500 text-center mt-2">{error}</p>}
 
           <button
-            onClick={() => alert('Pago con Conekta próximamente')}
+            onClick={handlePagar}
             disabled={procesando}
             className="w-full py-3 rounded-xl text-white font-bold text-sm mt-4"
             style={{backgroundColor: '#9A2120', opacity: procesando ? 0.7 : 1}}>
-            {procesando ? 'Procesando...' : `Pagar $${plan.precio.toLocaleString('es-MX')} MXN`}
+            {procesando ? 'Procesando pago...' : `Pagar $${plan.precio.toLocaleString('es-MX')} MXN`}
           </button>
 
           <p className="text-[10px] text-gray-400 text-center mt-2">🔒 Pago seguro con Conekta</p>
