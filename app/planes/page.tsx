@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import Link from 'next/link'
 
 export default function Planes() {
   const [tipo, setTipo] = useState<'empresa' | 'operador'>('empresa')
@@ -94,16 +93,17 @@ export default function Planes() {
                   </div>
 
                   {sesion ? (
-                    <button className="w-full py-2 rounded-xl text-white text-[11px] font-bold mt-auto"
-                      style={{backgroundColor: esPopular ? '#9A2120' : '#6b7280'}}>
-                      Contratar
-                    </button>
-                  ) : (
-                    <Link href="/login"
+                    <a href={`/pago?plan=${plan.id}`}
                       className="w-full py-2 rounded-xl text-white text-[11px] font-bold text-center block mt-auto"
                       style={{backgroundColor: esPopular ? '#9A2120' : '#6b7280'}}>
                       Contratar
-                    </Link>
+                    </a>
+                  ) : (
+                    <a href={`/login?redirect=/pago&plan=${plan.id}`}
+                      className="w-full py-2 rounded-xl text-white text-[11px] font-bold text-center block mt-auto"
+                      style={{backgroundColor: esPopular ? '#9A2120' : '#6b7280'}}>
+                      Contratar
+                    </a>
                   )}
                 </div>
               </div>
