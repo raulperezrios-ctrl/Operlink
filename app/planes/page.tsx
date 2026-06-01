@@ -95,13 +95,13 @@ export default function Planes() {
 
                   {sesion ? (
                     <button className="w-full py-2 rounded-xl text-white text-[11px] font-bold mt-auto"
-                      style={{backgroundColor: esPopular ? '#9A2120' : '#152337'}}>
+                      style={{backgroundColor: esPopular ? '#9A2120' : '#6b7280'}}>
                       Contratar
                     </button>
                   ) : (
                     <Link href="/login"
                       className="w-full py-2 rounded-xl text-white text-[11px] font-bold text-center block mt-auto"
-                      style={{backgroundColor: esPopular ? '#9A2120' : '#152337'}}>
+                      style={{backgroundColor: esPopular ? '#9A2120' : '#6b7280'}}>
                       Contratar
                     </Link>
                   )}
