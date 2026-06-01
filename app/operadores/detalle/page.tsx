@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 
@@ -11,7 +11,7 @@ const fotosAleatorias = [
   '/Operador_Montacargas2.png',
 ]
 
-export default function DetalleOperador() {
+function DetalleOperadorContent() {
   const searchParams = useSearchParams()
   const id = searchParams.get('id')
   const [op, setOp] = useState<any>(null)
@@ -116,5 +116,13 @@ export default function DetalleOperador() {
       </section>
 
     </div>
+  )
+}
+
+export default function DetalleOperador() {
+  return (
+    <Suspense fallback={<div className="text-center py-20 text-sm text-gray-400">Cargando...</div>}>
+      <DetalleOperadorContent />
+    </Suspense>
   )
 }
