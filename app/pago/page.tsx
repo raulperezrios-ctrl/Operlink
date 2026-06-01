@@ -47,10 +47,9 @@ function PagoContent() {
     }
     cargar()
 
-    // Esperar a que el script de Conekta cargue
     const verificarConekta = setInterval(() => {
       if (window.Conekta) {
-        window.Conekta.setPublicKey(process.env.NEXT_PUBLIC_CONEKTA_PUBLIC_KEY!)
+        window.Conekta.setPublicKey('key_B67CMqaqhbTVDKZ7mZOHntj')
         window.Conekta.setLanguage('es')
         setConektaListo(true)
         clearInterval(verificarConekta)
