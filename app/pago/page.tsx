@@ -50,7 +50,6 @@ function PagoContent() {
     const verificarConekta = setInterval(() => {
       if (window.Conekta) {
         window.Conekta.setPublicKey('key_B67CMqaqhbTVDKZ7mZOHntj')
-        window.Conekta.setLanguage('es')
         setConektaListo(true)
         clearInterval(verificarConekta)
       }
@@ -66,7 +65,7 @@ function PagoContent() {
     }
 
     if (!conektaListo) {
-      setError('Sistema de pago cargando, intenta de nuevo en un momento')
+      setError('Sistema de pago cargando, intenta de nuevo')
       return
     }
 
@@ -79,18 +78,17 @@ function PagoContent() {
     setProcesando(true)
     setError('')
 
-    const tokenParams = {
-      card: {
-        number: tarjeta.replace(/\s/g, ''),
-        name: nombre,
-        exp_year: `20${expAnio.trim()}`,
-        exp_month: expMes.trim(),
-        cvc: cvc,
-      }
-    }
-
-    window.Conekta.Token.create(
-      tokenParams,
+    // Nuevo formato de Conekta con objeto único
+    window.Conekta.token.create(
+      {
+        card: {
+          number: tarjeta.replace(/\s/g, ''),
+          name: nombre,
+          exp_year: `20${expAnio.trim()}`,
+          exp_month: expMes.trim(),
+          cvc: cvc,
+        }
+      },
       async (token: any) => {
         try {
           const res = await fetch('/api/pago', {
