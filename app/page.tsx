@@ -30,7 +30,7 @@ export default function Home() {
           {/* Soy Operador */}
           <a href="/registro-operador" className="flex-1 rounded-2xl overflow-hidden shadow-lg" style={{backgroundColor: '#9A2120'}}>
             <div className="relative h-48 overflow-hidden">
-              <img src="/los_operadores.png" alt="Operador" className="w-full h-full object-cover object-top" />
+              <img src="/Los_operadores.png" alt="Operador" className="w-full h-full object-cover object-top" />
               <div className="absolute inset-0" style={{background: 'linear-gradient(to bottom, transparent 40%, #9A2120 100%)'}}></div>
             </div>
             <div className="p-3 text-white text-center">
