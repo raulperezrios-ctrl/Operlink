@@ -98,7 +98,7 @@ export default function RegistroMaquinaria() {
 
       {/* Header */}
       <div className="bg-white px-4 py-4 border-b border-gray-100">
-        <h1 className="text-lg font-black" style={{color: '#152337'}}>Maquinaria que operas</h1>
+        <h1 className="text-lg font-black" style={{color: '#575757'}}>Maquinaria que operas</h1>
         <p className="text-xs text-gray-500 mt-1">Selecciona todo el equipo que sabes operar</p>
         <div className="flex gap-2 mt-3">
           {['Datos', 'Maquinaria', 'Documentos', 'Foto'].map((paso, i) => (
@@ -125,7 +125,7 @@ export default function RegistroMaquinaria() {
 
           {/* Selección de maquinaria */}
           <div>
-            <h2 className="text-sm font-bold mb-3" style={{color: '#152337'}}>
+            <h2 className="text-sm font-bold mb-3" style={{color: '#575757'}}>
               ¿Qué maquinaria sabes operar? *
               <span className="text-[10px] font-normal text-gray-400 ml-1">({seleccionadas.length} seleccionadas)</span>
             </h2>
@@ -135,7 +135,7 @@ export default function RegistroMaquinaria() {
                   className="border-2 rounded-xl py-2.5 px-3 text-xs font-semibold text-left"
                   style={{
                     borderColor: seleccionadas.includes(m) ? '#9A2120' : '#e5e7eb',
-                    color: seleccionadas.includes(m) ? '#9A2120' : '#152337',
+                    color: seleccionadas.includes(m) ? '#9A2120' : '#575757',
                     backgroundColor: seleccionadas.includes(m) ? '#fff5f5' : 'white'
                   }}>
                   {seleccionadas.includes(m) ? '✅ ' : ''}{m}
@@ -146,14 +146,14 @@ export default function RegistroMaquinaria() {
 
           {/* Tiene equipo propio */}
           <div>
-            <h2 className="text-sm font-bold mb-2" style={{color: '#152337'}}>¿Tienes tu propio equipo?</h2>
+            <h2 className="text-sm font-bold mb-2" style={{color: '#575757'}}>¿Tienes tu propio equipo?</h2>
             <div className="flex gap-2">
               <button onClick={() => setTieneEquipo('si')} className="flex-1 border-2 rounded-xl py-2 text-xs font-bold"
-                style={{backgroundColor: tieneEquipo === 'si' ? '#9A2120' : 'white', color: tieneEquipo === 'si' ? 'white' : '#152337', borderColor: tieneEquipo === 'si' ? '#9A2120' : '#e5e7eb'}}>
+                style={{backgroundColor: tieneEquipo === 'si' ? '#9A2120' : 'white', color: tieneEquipo === 'si' ? 'white' : '#575757', borderColor: tieneEquipo === 'si' ? '#9A2120' : '#e5e7eb'}}>
                 ✅ Sí tengo equipo
               </button>
               <button onClick={() => setTieneEquipo('no')} className="flex-1 border-2 rounded-xl py-2 text-xs font-bold"
-                style={{backgroundColor: tieneEquipo === 'no' ? '#9A2120' : 'white', color: tieneEquipo === 'no' ? 'white' : '#152337', borderColor: tieneEquipo === 'no' ? '#9A2120' : '#e5e7eb'}}>
+                style={{backgroundColor: tieneEquipo === 'no' ? '#9A2120' : 'white', color: tieneEquipo === 'no' ? 'white' : '#575757', borderColor: tieneEquipo === 'no' ? '#9A2120' : '#e5e7eb'}}>
                 Solo soy operador
               </button>
             </div>
@@ -161,13 +161,13 @@ export default function RegistroMaquinaria() {
 
           {tieneEquipo === 'si' && (
             <div className="border border-gray-100 rounded-xl p-3 bg-gray-50">
-              <h3 className="text-xs font-bold mb-2" style={{color: '#152337'}}>Detalles de tu equipo</h3>
+              <h3 className="text-xs font-bold mb-2" style={{color: '#575757'}}>Detalles de tu equipo</h3>
               <div className="flex flex-col gap-2">
                 <input type="text" placeholder="Marca (Ej. Caterpillar, John Deere)" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm" />
                 <input type="text" placeholder="Modelo (Ej. 416F)" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm" />
                 <input type="number" placeholder="Año del equipo" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm" />
                 <div>
-                  <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Tarifa por hora (MXN)</label>
+                  <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Tarifa por hora (MXN)</label>
                   <input type="number" placeholder="$ por hora" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm" />
                 </div>
               </div>

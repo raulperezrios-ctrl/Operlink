@@ -30,7 +30,7 @@ export default function AdminOperadores() {
 
       {/* Título */}
       <div className="px-4 pt-4 pb-2">
-        <h1 className="text-base font-black" style={{color: '#152337'}}>Operadores</h1>
+        <h1 className="text-base font-black" style={{color: '#575757'}}>Operadores</h1>
         <p className="text-xs text-gray-400 mt-0.5">{operadores.length} registrados</p>
       </div>
 
@@ -46,7 +46,7 @@ export default function AdminOperadores() {
           <div key={op.id} className="bg-white rounded-xl shadow-sm p-3 border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-bold" style={{color: '#152337'}}>
+                <p className="text-sm font-bold" style={{color: '#575757'}}>
                   {op.nombre} {op.apellido}
                 </p>
                 <p className="text-xs text-gray-400">{op.tipo_operador}</p>

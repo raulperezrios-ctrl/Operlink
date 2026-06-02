@@ -12,7 +12,7 @@ export default function Solicitudes() {
       {/* Header de página */}
       <div className="bg-white px-4 py-3 border-b border-gray-100 flex justify-between items-center">
         <div>
-          <h1 className="text-base font-black" style={{color: '#152337'}}>Solicitudes</h1>
+          <h1 className="text-base font-black" style={{color: '#575757'}}>Solicitudes</h1>
           <p className="text-xs text-gray-400">{solicitudes.filter(s => s.estatus === 'Activa').length} activas</p>
         </div>
         <a href="/solicitudes/nueva" className="px-3 py-2 rounded-xl text-white text-xs font-bold" style={{backgroundColor: '#9A2120'}}>
@@ -25,7 +25,7 @@ export default function Solicitudes() {
         <div className="flex gap-2 overflow-x-auto pb-1">
           {['Todas', 'Activas', 'Cerradas'].map((filtro, i) => (
             <button key={i} className="whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold border"
-              style={i === 0 ? {backgroundColor: '#9A2120', color: 'white', borderColor: '#9A2120'} : {backgroundColor: 'white', color: '#152337', borderColor: '#e5e7eb'}}>
+              style={i === 0 ? {backgroundColor: '#9A2120', color: 'white', borderColor: '#9A2120'} : {backgroundColor: 'white', color: '#575757', borderColor: '#e5e7eb'}}>
               {filtro}
             </button>
           ))}
@@ -48,7 +48,7 @@ export default function Solicitudes() {
               </span>
             </div>
 
-            <h2 className="text-sm font-black" style={{color: '#152337'}}>{sol.maquina}</h2>
+            <h2 className="text-sm font-black" style={{color: '#575757'}}>{sol.maquina}</h2>
             <p className="text-xs text-gray-500 mt-0.5">🏢 {sol.empresa}</p>
             <p className="text-xs text-gray-500">📍 {sol.ciudad}</p>
             <p className="text-xs text-gray-500">🔧 {sol.tipo}</p>

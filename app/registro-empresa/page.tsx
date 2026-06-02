@@ -101,7 +101,7 @@ export default function RegistroEmpresa() {
 
       {/* Header */}
       <div className="bg-white px-4 py-4 border-b border-gray-100">
-        <h1 className="text-lg font-black" style={{color: '#152337'}}>Crear perfil de empresa</h1>
+        <h1 className="text-lg font-black" style={{color: '#575757'}}>Crear perfil de empresa</h1>
         <p className="text-xs text-gray-500 mt-1">Encuentra los mejores operadores para tu negocio</p>
         <div className="flex gap-2 mt-3">
           {['Datos', 'Logo'].map((paso, i) => (
@@ -117,42 +117,42 @@ export default function RegistroEmpresa() {
       <div className="px-4 py-4">
         <div className="bg-white rounded-2xl shadow-sm p-4 flex flex-col gap-3">
 
-          <h2 className="text-sm font-bold" style={{color: '#152337'}}>Cuenta</h2>
+          <h2 className="text-sm font-bold" style={{color: '#575757'}}>Cuenta</h2>
 
           <div>
-            <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Correo electrónico *</label>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Correo electrónico *</label>
             <input name="email" type="email" placeholder="tucorreo@ejemplo.com" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
           </div>
 
           <div>
-            <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Contraseña *</label>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Contraseña *</label>
             <input name="password" type="password" placeholder="••••••••" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
           </div>
 
-          <h2 className="text-sm font-bold mt-2" style={{color: '#152337'}}>Información de la empresa</h2>
+          <h2 className="text-sm font-bold mt-2" style={{color: '#575757'}}>Información de la empresa</h2>
 
           <div>
-            <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Nombre de la empresa *</label>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Nombre de la empresa *</label>
             <input name="nombre_empresa" type="text" placeholder="Ej. Construcciones del Pacífico" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
           </div>
 
           <div>
-            <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Nombre del contacto *</label>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Nombre del contacto *</label>
             <input name="nombre_contacto" type="text" placeholder="Tu nombre completo" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
           </div>
 
           <div>
-            <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Teléfono *</label>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Teléfono *</label>
             <input name="telefono" type="tel" placeholder="33 1234 5678" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Ciudad *</label>
+              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Ciudad *</label>
               <input name="ciudad" type="text" placeholder="Ciudad" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
             </div>
             <div>
-              <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Estado *</label>
+              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Estado *</label>
               <select name="estado" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
                 <option>Jalisco</option>
                 <option>Nuevo León</option>
@@ -167,14 +167,14 @@ export default function RegistroEmpresa() {
           </div>
 
           <div>
-            <label className="text-xs font-semibold block mb-2" style={{color: '#152337'}}>Industria *</label>
+            <label className="text-xs font-semibold block mb-2" style={{color: '#575757'}}>Industria *</label>
             <div className="grid grid-cols-2 gap-2">
               {industrias.map((ind, i) => (
                 <button key={i} onClick={() => setIndustria(ind.label)}
                   className="flex items-center gap-2 border-2 rounded-xl p-2.5 text-left"
                   style={{borderColor: industria === ind.label ? '#9A2120' : '#e5e7eb', backgroundColor: industria === ind.label ? '#fff5f5' : 'white'}}>
                   <span className="text-lg">{ind.emoji}</span>
-                  <p className="text-xs font-semibold" style={{color: industria === ind.label ? '#9A2120' : '#152337'}}>{ind.label}</p>
+                  <p className="text-xs font-semibold" style={{color: industria === ind.label ? '#9A2120' : '#575757'}}>{ind.label}</p>
                   {industria === ind.label && <span className="ml-auto text-xs font-bold" style={{color: '#9A2120'}}>✓</span>}
                 </button>
               ))}
@@ -182,12 +182,12 @@ export default function RegistroEmpresa() {
           </div>
 
           <div>
-            <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Sitio web (opcional)</label>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Sitio web (opcional)</label>
             <input name="sitio_web" type="url" placeholder="www.tuempresa.com" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
           </div>
 
           <div>
-            <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Descripción breve</label>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Descripción breve</label>
             <textarea name="descripcion" placeholder="Cuéntanos sobre tu empresa..." rows={3} onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none resize-none" />
           </div>
 

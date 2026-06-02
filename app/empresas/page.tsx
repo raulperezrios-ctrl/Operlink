@@ -7,7 +7,7 @@ export default function Empresas() {
         <img src="/Operador_MAquinaria.png" alt="Operador" className="absolute right-0 top-0 h-full object-cover" style={{width: '55%'}} />
         <div className="absolute inset-0" style={{background: 'linear-gradient(to right, white 45%, transparent 75%)'}}></div>
         <div className="relative z-10 px-5 py-8 max-w-[55%]">
-          <h1 className="text-xl font-black leading-tight" style={{color: '#152337'}}>
+          <h1 className="text-xl font-black leading-tight" style={{color: '#575757'}}>
             Encuentra operadores certificados y maquinaria especializada
           </h1>
           <p className="text-xs text-gray-500 mt-2">Conectamos empresas con operadores para construcción, logística e industria.</p>
@@ -17,11 +17,11 @@ export default function Empresas() {
       {/* Buscador */}
       <section className="px-4 -mt-2">
         <div className="bg-white rounded-2xl shadow-lg p-4 border border-gray-100">
-          <h2 className="font-bold text-sm mb-3" style={{color: '#152337'}}>¿Qué operador o maquinaria necesitas?</h2>
+          <h2 className="font-bold text-sm mb-3" style={{color: '#575757'}}>¿Qué operador o maquinaria necesitas?</h2>
           
           <div className="flex flex-col gap-2">
             <div>
-              <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Maquinaria requerida</label>
+              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Maquinaria requerida</label>
               <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs">
                 <option>Selecciona maquinaria</option>
                 <option>Excavadora</option>
@@ -35,17 +35,17 @@ export default function Empresas() {
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Ciudad</label>
+                <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Ciudad</label>
                 <input type="text" placeholder="Ingresa ciudad" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs" />
               </div>
               <div>
-                <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Fecha inicio</label>
+                <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Fecha inicio</label>
                 <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs" />
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Tipo de solicitud</label>
+              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Tipo de solicitud</label>
               <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs">
                 <option>Selecciona tipo de solicitud</option>
                 <option>Solo Operador</option>
@@ -63,7 +63,7 @@ export default function Empresas() {
       {/* Operadores destacados */}
       <section className="px-4 mt-6">
         <div className="flex justify-between items-center mb-3">
-          <h2 className="font-bold text-sm" style={{color: '#152337'}}>Operadores destacados</h2>
+          <h2 className="font-bold text-sm" style={{color: '#575757'}}>Operadores destacados</h2>
           <a href="/operadores" className="text-xs font-semibold" style={{color: '#9A2120'}}>Ver todos →</a>
         </div>
 

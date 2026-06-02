@@ -162,7 +162,7 @@ function DetalleOperadorContent() {
       {/* Info básica */}
       <section className="px-4 py-4 bg-white border-b border-gray-100">
         <div className="flex items-center gap-2 mb-1">
-          <h1 className="text-lg font-black" style={{color: '#152337'}}>
+          <h1 className="text-lg font-black" style={{color: '#575757'}}>
             {contactoDesbloqueado ? `${op.nombre} ${op.apellido}` : iniciales}
           </h1>
           {op.verificado && (
@@ -192,7 +192,7 @@ function DetalleOperadorContent() {
 
       {/* Maquinaria */}
       <section className="px-4 py-4 bg-white mt-2 border-b border-gray-100">
-        <h2 className="text-sm font-bold mb-2" style={{color: '#152337'}}>Maquinaria que opera</h2>
+        <h2 className="text-sm font-bold mb-2" style={{color: '#575757'}}>Maquinaria que opera</h2>
         {maquinarias.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {maquinarias.map((m, i) => (
@@ -209,7 +209,7 @@ function DetalleOperadorContent() {
       {/* Descripción */}
       {op.descripcion && (
         <section className="px-4 py-4 bg-white mt-2 border-b border-gray-100">
-          <h2 className="text-sm font-bold mb-2" style={{color: '#152337'}}>Acerca del operador</h2>
+          <h2 className="text-sm font-bold mb-2" style={{color: '#575757'}}>Acerca del operador</h2>
           <p className="text-xs text-gray-500 leading-relaxed">{op.descripcion}</p>
         </section>
       )}
@@ -217,7 +217,7 @@ function DetalleOperadorContent() {
       {/* Certificaciones */}
       {op.licencia_url && (
         <section className="px-4 py-4 bg-white mt-2 border-b border-gray-100">
-          <h2 className="text-sm font-bold mb-2" style={{color: '#152337'}}>📄 Documentos</h2>
+          <h2 className="text-sm font-bold mb-2" style={{color: '#575757'}}>📄 Documentos</h2>
           <div className="flex flex-col gap-2">
             {op.licencia_url && (
               <a href={op.licencia_url} target="_blank"
@@ -241,7 +241,7 @@ function DetalleOperadorContent() {
       <section className="px-4 py-4 mt-2">
         {contactoDesbloqueado ? (
           <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
-            <h2 className="text-sm font-bold mb-3" style={{color: '#152337'}}>📞 Información de contacto</h2>
+            <h2 className="text-sm font-bold mb-3" style={{color: '#575757'}}>📞 Información de contacto</h2>
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <span className="text-xs text-gray-400">Teléfono:</span>
@@ -256,7 +256,7 @@ function DetalleOperadorContent() {
         ) : sinContactos ? (
           <div className="rounded-2xl border-2 border-dashed p-6 text-center" style={{borderColor: '#9A2120'}}>
             <div className="text-3xl mb-2">🔒</div>
-            <h2 className="font-black text-base" style={{color: '#152337'}}>Sin contactos disponibles</h2>
+            <h2 className="font-black text-base" style={{color: '#575757'}}>Sin contactos disponibles</h2>
             <p className="text-xs text-gray-500 mt-2 leading-relaxed">
               Usaste todos tus contactos. Adquiere más para seguir conectando.
             </p>
@@ -267,7 +267,7 @@ function DetalleOperadorContent() {
         ) : planVencido ? (
           <div className="rounded-2xl border-2 border-dashed p-6 text-center" style={{borderColor: '#9A2120'}}>
             <div className="text-3xl mb-2">⏰</div>
-            <h2 className="font-black text-base" style={{color: '#152337'}}>Tu plan venció</h2>
+            <h2 className="font-black text-base" style={{color: '#575757'}}>Tu plan venció</h2>
             <p className="text-xs text-gray-500 mt-2 leading-relaxed">
               Tu membresía expiró. Renueva para seguir viendo contactos de operadores.
             </p>
@@ -278,7 +278,7 @@ function DetalleOperadorContent() {
         ) : sinMembresia ? (
           <div className="rounded-2xl border-2 border-dashed p-6 text-center" style={{borderColor: '#9A2120'}}>
             <div className="text-3xl mb-2">🔒</div>
-            <h2 className="font-black text-base" style={{color: '#152337'}}>Activa tu plan</h2>
+            <h2 className="font-black text-base" style={{color: '#575757'}}>Activa tu plan</h2>
             <p className="text-xs text-gray-500 mt-2 leading-relaxed">
               Para ver el contacto de este operador necesitas activar un plan OperLink.
             </p>
@@ -289,7 +289,7 @@ function DetalleOperadorContent() {
         ) : (
           <div className="rounded-2xl border-2 border-dashed p-6 text-center" style={{borderColor: '#9A2120'}}>
             <div className="text-3xl mb-2">🔒</div>
-            <h2 className="font-black text-base" style={{color: '#152337'}}>Contacto protegido</h2>
+            <h2 className="font-black text-base" style={{color: '#575757'}}>Contacto protegido</h2>
             <p className="text-xs text-gray-500 mt-2 leading-relaxed">
               Inicia sesión como empresa para ver el contacto de este operador.
             </p>

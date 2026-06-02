@@ -91,7 +91,7 @@ export default function RegistroOperador() {
 
       {/* Header */}
       <div className="bg-white px-4 py-4 border-b border-gray-100">
-        <h1 className="text-lg font-black" style={{color: '#152337'}}>Crear perfil de operador</h1>
+        <h1 className="text-lg font-black" style={{color: '#575757'}}>Crear perfil de operador</h1>
         <p className="text-xs text-gray-500 mt-1">Completa tu información para aparecer en el catálogo</p>
         <div className="flex gap-2 mt-3">
           {['Datos', 'Maquinaria', 'Documentos', 'Foto'].map((paso, i) => (
@@ -107,42 +107,42 @@ export default function RegistroOperador() {
       <div className="px-4 py-4">
         <div className="bg-white rounded-2xl shadow-sm p-4 flex flex-col gap-3">
 
-          <h2 className="text-sm font-bold" style={{color: '#152337'}}>Cuenta</h2>
+          <h2 className="text-sm font-bold" style={{color: '#575757'}}>Cuenta</h2>
 
           <div>
-            <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Correo electrónico *</label>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Correo electrónico *</label>
             <input name="email" type="email" placeholder="tucorreo@ejemplo.com" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
           </div>
 
           <div>
-            <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Contraseña *</label>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Contraseña *</label>
             <input name="password" type="password" placeholder="••••••••" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
           </div>
 
-          <h2 className="text-sm font-bold mt-2" style={{color: '#152337'}}>Información personal</h2>
+          <h2 className="text-sm font-bold mt-2" style={{color: '#575757'}}>Información personal</h2>
 
           <div>
-            <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Nombre *</label>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Nombre *</label>
             <input name="nombre" type="text" placeholder="Tu nombre" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
           </div>
 
           <div>
-            <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Apellido *</label>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Apellido *</label>
             <input name="apellido" type="text" placeholder="Tu apellido" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
           </div>
 
           <div>
-            <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Teléfono *</label>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Teléfono *</label>
             <input name="telefono" type="tel" placeholder="33 1234 5678" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Ciudad *</label>
+              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Ciudad *</label>
               <input name="ciudad" type="text" placeholder="Ciudad" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
             </div>
             <div>
-              <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Estado *</label>
+              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Estado *</label>
               <select name="estado" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
                 <option>Jalisco</option>
                 <option>Nuevo León</option>
@@ -158,7 +158,7 @@ export default function RegistroOperador() {
 
           {/* Tipo de operador */}
           <div>
-            <label className="text-xs font-semibold block mb-2" style={{color: '#152337'}}>¿Qué tipo de operador eres? *</label>
+            <label className="text-xs font-semibold block mb-2" style={{color: '#575757'}}>¿Qué tipo de operador eres? *</label>
             <div className="grid grid-cols-1 gap-2">
               {tipos.map((op, i) => (
                 <button key={i} onClick={() => setTipoOperador(op.label)}
@@ -166,7 +166,7 @@ export default function RegistroOperador() {
                   style={{borderColor: tipoOperador === op.label ? '#9A2120' : '#e5e7eb', backgroundColor: tipoOperador === op.label ? '#fff5f5' : 'white'}}>
                   <span className="text-2xl">{op.emoji}</span>
                   <div>
-                    <p className="text-xs font-bold" style={{color: tipoOperador === op.label ? '#9A2120' : '#152337'}}>{op.label}</p>
+                    <p className="text-xs font-bold" style={{color: tipoOperador === op.label ? '#9A2120' : '#575757'}}>{op.label}</p>
                     <p className="text-[10px] text-gray-400">{op.desc}</p>
                   </div>
                   {tipoOperador === op.label && <span className="ml-auto text-xs font-bold" style={{color: '#9A2120'}}>✓</span>}
@@ -176,17 +176,17 @@ export default function RegistroOperador() {
           </div>
 
           <div>
-            <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Años de experiencia *</label>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Años de experiencia *</label>
             <input name="experiencia_anos" type="number" placeholder="Ej. 5" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
           </div>
 
           <div>
-            <label className="text-xs font-semibold block mb-2" style={{color: '#152337'}}>Disponibilidad *</label>
+            <label className="text-xs font-semibold block mb-2" style={{color: '#575757'}}>Disponibilidad *</label>
             <div className="grid grid-cols-2 gap-2">
               {['disponible', 'no_disponible'].map((op) => (
                 <button key={op} onClick={() => setDisponibilidad(op)}
                   className="border-2 rounded-xl py-2 text-xs font-bold"
-                  style={{backgroundColor: disponibilidad === op ? '#9A2120' : 'white', color: disponibilidad === op ? 'white' : '#152337', borderColor: disponibilidad === op ? '#9A2120' : '#e5e7eb'}}>
+                  style={{backgroundColor: disponibilidad === op ? '#9A2120' : 'white', color: disponibilidad === op ? 'white' : '#575757', borderColor: disponibilidad === op ? '#9A2120' : '#e5e7eb'}}>
                   {op === 'disponible' ? '✅ Disponible' : '❌ No disponible'}
                 </button>
               ))}
@@ -194,12 +194,12 @@ export default function RegistroOperador() {
           </div>
 
           <div>
-            <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Tipo de trabajo *</label>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Tipo de trabajo *</label>
             <div className="grid grid-cols-3 gap-2">
               {['Temporal', 'Fijo', 'Ambos'].map((tipo) => (
                 <button key={tipo} onClick={() => setTipoTrabajo(tipo)}
                   className="border-2 rounded-xl py-2 text-xs font-bold"
-                  style={{backgroundColor: tipoTrabajo === tipo ? '#9A2120' : 'white', color: tipoTrabajo === tipo ? 'white' : '#152337', borderColor: tipoTrabajo === tipo ? '#9A2120' : '#e5e7eb'}}>
+                  style={{backgroundColor: tipoTrabajo === tipo ? '#9A2120' : 'white', color: tipoTrabajo === tipo ? 'white' : '#575757', borderColor: tipoTrabajo === tipo ? '#9A2120' : '#e5e7eb'}}>
                   {tipo}
                 </button>
               ))}
@@ -207,12 +207,12 @@ export default function RegistroOperador() {
           </div>
 
           <div>
-            <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>¿Acepta cambio de ciudad?</label>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>¿Acepta cambio de ciudad?</label>
             <div className="grid grid-cols-2 gap-2">
               {['si', 'no'].map((op) => (
                 <button key={op} onClick={() => setCambioCiudad(op)}
                   className="border-2 rounded-xl py-2 text-xs font-bold"
-                  style={{backgroundColor: cambioCiudad === op ? '#9A2120' : 'white', color: cambioCiudad === op ? 'white' : '#152337', borderColor: cambioCiudad === op ? '#9A2120' : '#e5e7eb'}}>
+                  style={{backgroundColor: cambioCiudad === op ? '#9A2120' : 'white', color: cambioCiudad === op ? 'white' : '#575757', borderColor: cambioCiudad === op ? '#9A2120' : '#e5e7eb'}}>
                   {op === 'si' ? '✅ Sí' : '❌ No'}
                 </button>
               ))}
@@ -220,7 +220,7 @@ export default function RegistroOperador() {
           </div>
 
           <div>
-            <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Descripción breve</label>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Descripción breve</label>
             <textarea name="descripcion" placeholder="Cuéntanos sobre tu experiencia..." rows={3} onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none resize-none" />
           </div>
 

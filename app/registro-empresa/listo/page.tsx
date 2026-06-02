@@ -3,12 +3,12 @@ export default function RegistroEmpresaListo() {
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-6 text-center">
 
       {/* Ícono de éxito */}
-      <div className="h-24 w-24 rounded-full flex items-center justify-center mb-6 shadow-lg" style={{backgroundColor: '#152337'}}>
+      <div className="h-24 w-24 rounded-full flex items-center justify-center mb-6 shadow-lg" style={{backgroundColor: '#575757'}}>
         <span className="text-5xl">🏢</span>
       </div>
 
       {/* Título */}
-      <h1 className="text-2xl font-black mb-2" style={{color: '#152337'}}>
+      <h1 className="text-2xl font-black mb-2" style={{color: '#575757'}}>
         ¡Empresa registrada!
       </h1>
       <p className="text-sm text-gray-500 mb-6 max-w-xs">
@@ -17,7 +17,7 @@ export default function RegistroEmpresaListo() {
 
       {/* Pasos siguientes */}
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm p-4 mb-6 text-left">
-        <p className="text-xs font-bold mb-3" style={{color: '#152337'}}>¿Qué puedes hacer ahora?</p>
+        <p className="text-xs font-bold mb-3" style={{color: '#575757'}}>¿Qué puedes hacer ahora?</p>
         {[
           {emoji: '🔍', texto: 'Buscar operadores disponibles en tu ciudad'},
           {emoji: '📋', texto: 'Publicar una solicitud de trabajo'},

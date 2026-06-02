@@ -102,7 +102,7 @@ export default function RegistroDocumentos() {
 
       {/* Header */}
       <div className="bg-white px-4 py-4 border-b border-gray-100">
-        <h1 className="text-lg font-black" style={{color: '#152337'}}>Documentos</h1>
+        <h1 className="text-lg font-black" style={{color: '#575757'}}>Documentos</h1>
         <p className="text-xs text-gray-500 mt-1">Sube tus documentos para verificar tu perfil</p>
         <div className="flex gap-2 mt-3">
           {['Datos', 'Maquinaria', 'Documentos', 'Foto'].map((paso, i) => (
@@ -119,7 +119,7 @@ export default function RegistroDocumentos() {
 
           {/* Identificación oficial */}
           <div>
-            <label className="text-sm font-bold block mb-1" style={{color: '#152337'}}>
+            <label className="text-sm font-bold block mb-1" style={{color: '#575757'}}>
               🪪 Identificación oficial
             </label>
             <p className="text-xs text-gray-400 mb-2">INE, pasaporte o cédula profesional</p>
@@ -132,7 +132,7 @@ export default function RegistroDocumentos() {
 
           {/* Licencia */}
           <div>
-            <label className="text-sm font-bold block mb-1" style={{color: '#152337'}}>
+            <label className="text-sm font-bold block mb-1" style={{color: '#575757'}}>
               🚗 Licencia de conducir
             </label>
             <p className="text-xs text-gray-400 mb-2">Licencia de manejo vigente</p>
@@ -145,7 +145,7 @@ export default function RegistroDocumentos() {
 
           {/* Certificaciones */}
           <div>
-            <label className="text-sm font-bold block mb-1" style={{color: '#152337'}}>
+            <label className="text-sm font-bold block mb-1" style={{color: '#575757'}}>
               📜 Certificaciones (opcional)
             </label>
             <p className="text-xs text-gray-400 mb-2">Constancias, diplomas o certificados de operación</p>

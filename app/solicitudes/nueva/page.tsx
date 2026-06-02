@@ -4,7 +4,7 @@ export default function NuevaSolicitud() {
 
       {/* Header */}
       <div className="bg-white px-4 py-4 border-b border-gray-100">
-        <h1 className="text-lg font-black" style={{color: '#152337'}}>Nueva Solicitud</h1>
+        <h1 className="text-lg font-black" style={{color: '#575757'}}>Nueva Solicitud</h1>
         <p className="text-xs text-gray-500 mt-1">Publica lo que necesitas y encuentra al operador ideal</p>
       </div>
 
@@ -12,11 +12,11 @@ export default function NuevaSolicitud() {
       <div className="px-4 py-4">
         <div className="bg-white rounded-2xl shadow-sm p-4 flex flex-col gap-3">
 
-          <h2 className="text-sm font-bold" style={{color: '#152337'}}>Detalles de la solicitud</h2>
+          <h2 className="text-sm font-bold" style={{color: '#575757'}}>Detalles de la solicitud</h2>
 
           {/* Tipo de maquinaria */}
           <div>
-            <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Maquinaria o equipo requerido *</label>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Maquinaria o equipo requerido *</label>
             <select className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
               <option>Selecciona maquinaria</option>
               <option>Excavadora</option>
@@ -34,7 +34,7 @@ export default function NuevaSolicitud() {
 
           {/* Tipo de solicitud */}
           <div>
-            <label className="text-xs font-semibold block mb-2" style={{color: '#152337'}}>Tipo de solicitud *</label>
+            <label className="text-xs font-semibold block mb-2" style={{color: '#575757'}}>Tipo de solicitud *</label>
             <div className="flex flex-col gap-2">
               {[
                 {emoji: '👷', label: 'Solo Operador', desc: 'Necesito un operador para mi propio equipo'},
@@ -44,7 +44,7 @@ export default function NuevaSolicitud() {
                   style={{borderColor: i === 0 ? '#9A2120' : '#e5e7eb', backgroundColor: i === 0 ? '#fff5f5' : 'white'}}>
                   <span className="text-2xl">{tipo.emoji}</span>
                   <div>
-                    <p className="text-xs font-bold" style={{color: i === 0 ? '#9A2120' : '#152337'}}>{tipo.label}</p>
+                    <p className="text-xs font-bold" style={{color: i === 0 ? '#9A2120' : '#575757'}}>{tipo.label}</p>
                     <p className="text-[10px] text-gray-400">{tipo.desc}</p>
                   </div>
                   {i === 0 && <span className="ml-auto text-xs font-bold" style={{color: '#9A2120'}}>✓</span>}
@@ -56,11 +56,11 @@ export default function NuevaSolicitud() {
           {/* Ciudad */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Ciudad *</label>
+              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Ciudad *</label>
               <input type="text" placeholder="Ciudad" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm" />
             </div>
             <div>
-              <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Estado *</label>
+              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Estado *</label>
               <select className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
                 <option>Jalisco</option>
                 <option>Nuevo León</option>
@@ -77,11 +77,11 @@ export default function NuevaSolicitud() {
           {/* Fechas */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Fecha inicio *</label>
+              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Fecha inicio *</label>
               <input type="date" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm" />
             </div>
             <div>
-              <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Duración</label>
+              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Duración</label>
               <select className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
                 <option>1 día</option>
                 <option>1 semana</option>
@@ -95,23 +95,23 @@ export default function NuevaSolicitud() {
 
           {/* Presupuesto */}
           <div>
-            <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Presupuesto / Pago (MXN)</label>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Presupuesto / Pago (MXN)</label>
             <input type="number" placeholder="$ por hora, día o mes" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm" />
           </div>
 
           {/* Descripción */}
           <div>
-            <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Descripción del trabajo *</label>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Descripción del trabajo *</label>
             <textarea placeholder="Describe el trabajo, requisitos especiales, condiciones..." rows={4} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none resize-none" />
           </div>
 
           {/* Prioridad */}
           <div>
-            <label className="text-xs font-semibold block mb-2" style={{color: '#152337'}}>Prioridad</label>
+            <label className="text-xs font-semibold block mb-2" style={{color: '#575757'}}>Prioridad</label>
             <div className="flex gap-2">
-              <button className="flex-1 border-2 rounded-xl py-2 text-xs font-bold" style={{borderColor: '#e5e7eb', color: '#152337'}}>Baja</button>
+              <button className="flex-1 border-2 rounded-xl py-2 text-xs font-bold" style={{borderColor: '#e5e7eb', color: '#575757'}}>Baja</button>
               <button className="flex-1 border-2 rounded-xl py-2 text-xs font-bold text-white" style={{backgroundColor: '#ca8a04', borderColor: '#ca8a04'}}>Media</button>
-              <button className="flex-1 border-2 rounded-xl py-2 text-xs font-bold" style={{borderColor: '#e5e7eb', color: '#152337'}}>Alta</button>
+              <button className="flex-1 border-2 rounded-xl py-2 text-xs font-bold" style={{borderColor: '#e5e7eb', color: '#575757'}}>Alta</button>
             </div>
           </div>
 

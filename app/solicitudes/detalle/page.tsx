@@ -7,7 +7,7 @@ export default function DetalleSolicitud() {
         <div className="flex justify-between items-start">
           <div>
             <span className="text-[10px] text-gray-400 font-mono">OPL-20260523-0001</span>
-            <h1 className="text-lg font-black" style={{color: '#152337'}}>Tractocamión</h1>
+            <h1 className="text-lg font-black" style={{color: '#575757'}}>Tractocamión</h1>
             <p className="text-xs text-gray-500">Construcciones del Pacífico</p>
           </div>
           <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-green-100 text-green-700">
@@ -29,7 +29,7 @@ export default function DetalleSolicitud() {
           ].map((item, i) => (
             <div key={i} className="bg-gray-50 rounded-xl p-3">
               <p className="text-[10px] text-gray-400">{item.emoji} {item.label}</p>
-              <p className="text-xs font-bold mt-0.5" style={{color: '#152337'}}>{item.value}</p>
+              <p className="text-xs font-bold mt-0.5" style={{color: '#575757'}}>{item.value}</p>
             </div>
           ))}
         </div>
@@ -37,7 +37,7 @@ export default function DetalleSolicitud() {
 
       {/* Descripción */}
       <div className="px-4 py-4 bg-white mt-2 border-b border-gray-100">
-        <h2 className="text-sm font-bold mb-2" style={{color: '#152337'}}>Descripción del trabajo</h2>
+        <h2 className="text-sm font-bold mb-2" style={{color: '#575757'}}>Descripción del trabajo</h2>
         <p className="text-xs text-gray-500 leading-relaxed">
           Se requiere tractocamión con operador para traslado de materiales de construcción entre Guadalajara y Zapopan. 
           Trabajo de lunes a sábado, horario de 7am a 5pm. Experiencia mínima de 3 años en manejo de tractocamión. 
@@ -48,7 +48,7 @@ export default function DetalleSolicitud() {
       {/* Operadores que aplicaron */}
       <div className="px-4 py-4 bg-white mt-2 border-b border-gray-100">
         <div className="flex justify-between items-center mb-3">
-          <h2 className="text-sm font-bold" style={{color: '#152337'}}>Operadores que aplicaron</h2>
+          <h2 className="text-sm font-bold" style={{color: '#575757'}}>Operadores que aplicaron</h2>
           <span className="text-xs font-bold px-2 py-0.5 rounded-full text-white" style={{backgroundColor: '#9A2120'}}>3</span>
         </div>
 
@@ -61,7 +61,7 @@ export default function DetalleSolicitud() {
             <div key={i} className="flex items-center gap-3 border border-gray-100 rounded-xl p-3">
               <img src={op.img} alt="Operador" className="h-12 w-12 rounded-full object-cover object-top" />
               <div className="flex-1">
-                <p className="text-xs font-bold" style={{color: '#152337'}}>Operador disponible</p>
+                <p className="text-xs font-bold" style={{color: '#575757'}}>Operador disponible</p>
                 <p className="text-[10px] text-gray-400">📍 {op.ciudad} • {op.exp} exp.</p>
               </div>
               <div className="flex flex-col items-end gap-1">

@@ -4,7 +4,7 @@ export default function RegistroLogo() {
 
       {/* Header */}
       <div className="bg-white px-4 py-4 border-b border-gray-100">
-        <h1 className="text-lg font-black" style={{color: '#152337'}}>Logo de tu empresa</h1>
+        <h1 className="text-lg font-black" style={{color: '#575757'}}>Logo de tu empresa</h1>
         <p className="text-xs text-gray-500 mt-1">Opcional — puedes agregarlo después</p>
 
         {/* Progreso */}

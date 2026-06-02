@@ -30,7 +30,7 @@ export default function AdminEmpresas() {
 
       {/* Título */}
       <div className="px-4 pt-4 pb-2">
-        <h1 className="text-base font-black" style={{color: '#152337'}}>Empresas</h1>
+        <h1 className="text-base font-black" style={{color: '#575757'}}>Empresas</h1>
         <p className="text-xs text-gray-400 mt-0.5">{empresas.length} registradas</p>
       </div>
 
@@ -46,7 +46,7 @@ export default function AdminEmpresas() {
           <div key={emp.id} className="bg-white rounded-xl shadow-sm p-3 border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-bold" style={{color: '#152337'}}>
+                <p className="text-sm font-bold" style={{color: '#575757'}}>
                   {emp.nombre_empresa}
                 </p>
                 <p className="text-xs text-gray-400">{emp.industria}</p>

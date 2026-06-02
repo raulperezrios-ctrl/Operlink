@@ -37,7 +37,7 @@ export default function AdminUsuarios() {
 
       {/* Título */}
       <div className="px-4 pt-4 pb-2">
-        <h1 className="text-base font-black" style={{color: '#152337'}}>Usuarios</h1>
+        <h1 className="text-base font-black" style={{color: '#575757'}}>Usuarios</h1>
         <p className="text-xs text-gray-400 mt-0.5">{usuarios.length} registrados</p>
       </div>
 
@@ -55,7 +55,7 @@ export default function AdminUsuarios() {
             <div key={us.id} className="bg-white rounded-xl shadow-sm p-3 border border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-bold" style={{color: '#152337'}}>
+                  <p className="text-sm font-bold" style={{color: '#575757'}}>
                     {us.email}
                   </p>
                   <p className="text-xs text-gray-400 mt-0.5">

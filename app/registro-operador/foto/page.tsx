@@ -78,7 +78,7 @@ export default function RegistroFoto() {
 
       {/* Header */}
       <div className="bg-white px-4 py-4 border-b border-gray-100">
-        <h1 className="text-lg font-black" style={{color: '#152337'}}>Tu foto de perfil</h1>
+        <h1 className="text-lg font-black" style={{color: '#575757'}}>Tu foto de perfil</h1>
         <p className="text-xs text-gray-500 mt-1">Agrega una foto para que las empresas puedan reconocerte</p>
         <div className="flex gap-2 mt-3">
           {['Datos', 'Maquinaria', 'Documentos', 'Foto'].map((paso, i) => (

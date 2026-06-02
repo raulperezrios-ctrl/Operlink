@@ -110,7 +110,7 @@ export default function Operadores() {
           {['Todos', 'Construcción', 'Transporte', 'Almacén / Logística'].map((f, i) => (
             <button key={i} onClick={() => setFiltro(f)}
               className="whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold border"
-              style={filtro === f ? {backgroundColor: '#9A2120', color: 'white', borderColor: '#9A2120'} : {backgroundColor: 'white', color: '#152337', borderColor: '#e5e7eb'}}>
+              style={filtro === f ? {backgroundColor: '#9A2120', color: 'white', borderColor: '#9A2120'} : {backgroundColor: 'white', color: '#575757', borderColor: '#e5e7eb'}}>
               {f}
             </button>
           ))}
@@ -118,7 +118,7 @@ export default function Operadores() {
 
         <div className="mt-2 flex gap-2">
           <input type="text" placeholder="🔍 Buscar por ciudad o maquinaria..." className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-xs" />
-          <button className="border border-gray-200 rounded-lg px-3 py-2 text-xs font-semibold" style={{color: '#152337'}}>
+          <button className="border border-gray-200 rounded-lg px-3 py-2 text-xs font-semibold" style={{color: '#575757'}}>
             Filtros
           </button>
         </div>
@@ -160,7 +160,7 @@ export default function Operadores() {
                     {/* Info */}
                     <div className="p-2">
                       <div className="flex items-center justify-between mb-1">
-                        <p className="text-[10px] font-bold" style={{color: '#152337'}}>
+                        <p className="text-[10px] font-bold" style={{color: '#575757'}}>
                           📍 {op.ciudad}
                         </p>
                         <p className="text-[9px] text-gray-400">{op.experiencia_anos} años</p>

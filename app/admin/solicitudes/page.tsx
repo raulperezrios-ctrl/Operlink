@@ -36,7 +36,7 @@ export default function AdminSolicitudes() {
 
       {/* Título */}
       <div className="px-4 pt-4 pb-2">
-        <h1 className="text-base font-black" style={{color: '#152337'}}>Solicitudes</h1>
+        <h1 className="text-base font-black" style={{color: '#575757'}}>Solicitudes</h1>
         <p className="text-xs text-gray-400 mt-0.5">{solicitudes.length} registradas</p>
       </div>
 
@@ -57,7 +57,7 @@ export default function AdminSolicitudes() {
                   <p className="text-xs font-bold" style={{color: '#9A2120'}}>
                     #{sol.folio}
                   </p>
-                  <p className="text-sm font-bold" style={{color: '#152337'}}>
+                  <p className="text-sm font-bold" style={{color: '#575757'}}>
                     {sol.tipo_maquinaria}
                   </p>
                   <p className="text-xs text-gray-400">{sol.ciudad}, {sol.estado}</p>
@@ -72,7 +72,7 @@ export default function AdminSolicitudes() {
               </div>
               <div className="mt-2 pt-2 border-t border-gray-50 flex justify-between">
                 <p className="text-xs text-gray-400">Inicio: {sol.fecha_inicio || 'N/D'}</p>
-                <p className="text-xs font-semibold" style={{color: '#152337'}}>${sol.sueldo_pago}</p>
+                <p className="text-xs font-semibold" style={{color: '#575757'}}>${sol.sueldo_pago}</p>
               </div>
             </div>
           )

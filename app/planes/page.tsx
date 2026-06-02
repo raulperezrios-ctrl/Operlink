@@ -27,19 +27,19 @@ export default function Planes() {
 
       {/* Header */}
       <div className="px-4 py-6 text-center bg-white border-b border-gray-100">
-        <h1 className="text-xl font-black" style={{color: '#152337'}}>Planes OperLink</h1>
+        <h1 className="text-xl font-black" style={{color: '#575757'}}>Planes OperLink</h1>
         <p className="text-xs text-gray-400 mt-1">Conecta con los mejores operadores de México</p>
 
         {/* Selector */}
         <div className="flex rounded-xl overflow-hidden border border-gray-200 mt-4 mx-auto max-w-xs">
           <button onClick={() => setTipo('empresa')}
             className="flex-1 py-2 text-xs font-bold"
-            style={{backgroundColor: tipo === 'empresa' ? '#9A2120' : 'white', color: tipo === 'empresa' ? 'white' : '#152337'}}>
+            style={{backgroundColor: tipo === 'empresa' ? '#9A2120' : 'white', color: tipo === 'empresa' ? 'white' : '#575757'}}>
             🏢 Empresa
           </button>
           <button onClick={() => setTipo('operador')}
             className="flex-1 py-2 text-xs font-bold"
-            style={{backgroundColor: tipo === 'operador' ? '#9A2120' : 'white', color: tipo === 'operador' ? 'white' : '#152337'}}>
+            style={{backgroundColor: tipo === 'operador' ? '#9A2120' : 'white', color: tipo === 'operador' ? 'white' : '#575757'}}>
             👷 Operador
           </button>
         </div>
@@ -69,7 +69,7 @@ export default function Planes() {
                 )}
 
                 <div className="p-3 flex flex-col flex-1">
-                  <p className="text-xs font-black mb-1" style={{color: '#152337'}}>{plan.nombre}</p>
+                  <p className="text-xs font-black mb-1" style={{color: '#575757'}}>{plan.nombre}</p>
                   <p className="text-[10px] text-gray-400 mb-3">{plan.descripcion}</p>
 
                   <div className="mb-3">
@@ -116,7 +116,7 @@ export default function Planes() {
       {tipo === 'empresa' && (
         <div className="px-4 mt-2">
           <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-            <p className="text-xs font-black mb-3" style={{color: '#152337'}}>¿Por qué OperLink vs Indeed/OCC?</p>
+            <p className="text-xs font-black mb-3" style={{color: '#575757'}}>¿Por qué OperLink vs Indeed/OCC?</p>
             <div className="grid grid-cols-3 gap-1 text-center">
               <div className="text-[10px] text-gray-400"></div>
               <div className="text-[10px] font-bold" style={{color: '#9A2120'}}>OperLink</div>

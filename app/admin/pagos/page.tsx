@@ -40,7 +40,7 @@ export default function AdminPagos() {
 
       {/* Título */}
       <div className="px-4 pt-4 pb-2">
-        <h1 className="text-base font-black" style={{color: '#152337'}}>Pagos</h1>
+        <h1 className="text-base font-black" style={{color: '#575757'}}>Pagos</h1>
         <p className="text-xs text-gray-400 mt-0.5">{pagos.length} transacciones</p>
       </div>
 
@@ -68,7 +68,7 @@ export default function AdminPagos() {
             <div key={pago.id} className="bg-white rounded-xl shadow-sm p-3 border border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-bold" style={{color: '#152337'}}>
+                  <p className="text-sm font-bold" style={{color: '#575757'}}>
                     {pago.concepto}
                   </p>
                   <p className="text-xs text-gray-400">{pago.comprador_tipo}</p>

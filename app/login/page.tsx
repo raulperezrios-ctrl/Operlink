@@ -64,16 +64,16 @@ export default function Login() {
         </div>
 
         {/* Tipo de usuario */}
-        <p className="text-xs font-semibold mb-2" style={{color: '#152337'}}>¿Quién eres?</p>
+        <p className="text-xs font-semibold mb-2" style={{color: '#575757'}}>¿Quién eres?</p>
         <div className="flex gap-2 mb-4">
           <button onClick={() => setTipo('operador')}
             className="flex-1 border-2 rounded-xl py-2 text-xs font-bold"
-            style={{backgroundColor: tipo === 'operador' ? '#9A2120' : 'white', color: tipo === 'operador' ? 'white' : '#152337', borderColor: tipo === 'operador' ? '#9A2120' : '#e5e7eb'}}>
+            style={{backgroundColor: tipo === 'operador' ? '#9A2120' : 'white', color: tipo === 'operador' ? 'white' : '#575757', borderColor: tipo === 'operador' ? '#9A2120' : '#e5e7eb'}}>
             👷 Operador
           </button>
           <button onClick={() => setTipo('empresa')}
             className="flex-1 border-2 rounded-xl py-2 text-xs font-bold"
-            style={{backgroundColor: tipo === 'empresa' ? '#9A2120' : 'white', color: tipo === 'empresa' ? 'white' : '#152337', borderColor: tipo === 'empresa' ? '#9A2120' : '#e5e7eb'}}>
+            style={{backgroundColor: tipo === 'empresa' ? '#9A2120' : 'white', color: tipo === 'empresa' ? 'white' : '#575757', borderColor: tipo === 'empresa' ? '#9A2120' : '#e5e7eb'}}>
             🏢 Empresa
           </button>
         </div>
@@ -81,7 +81,7 @@ export default function Login() {
         {/* Formulario */}
         <div className="flex flex-col gap-3">
           <div>
-            <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Correo electrónico</label>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Correo electrónico</label>
             <input
               type="email"
               placeholder="tucorreo@ejemplo.com"
@@ -91,7 +91,7 @@ export default function Login() {
             />
           </div>
           <div>
-            <label className="text-xs font-semibold block mb-1" style={{color: '#152337'}}>Contraseña</label>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Contraseña</label>
             <input
               type="password"
               placeholder="••••••••"
@@ -131,12 +131,12 @@ export default function Login() {
 
       {/* Registro */}
       <div id="registro" className="w-full max-w-sm mt-4 bg-white rounded-2xl shadow-sm p-4">
-        <p className="text-xs font-bold text-center mb-3" style={{color: '#152337'}}>¿No tienes cuenta? Regístrate gratis</p>
+        <p className="text-xs font-bold text-center mb-3" style={{color: '#575757'}}>¿No tienes cuenta? Regístrate gratis</p>
         <div className="flex gap-2">
           <a href="/registro-operador" className="flex-1 border-2 rounded-xl py-2.5 text-xs font-bold text-center" style={{borderColor: '#9A2120', color: '#9A2120'}}>
             👷 Soy Operador
           </a>
-          <a href="/registro-empresa" className="flex-1 rounded-xl py-2.5 text-xs font-bold text-white text-center" style={{backgroundColor: '#152337'}}>
+          <a href="/registro-empresa" className="flex-1 rounded-xl py-2.5 text-xs font-bold text-white text-center" style={{backgroundColor: '#575757'}}>
             🏢 Soy Empresa
           </a>
         </div>

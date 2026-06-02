@@ -34,7 +34,7 @@ export default function RegistroListo() {
       <div className="px-4 py-8 flex flex-col items-center text-center">
 
         <div className="text-6xl mb-4">🎉</div>
-        <h1 className="text-xl font-black mb-2" style={{color: '#152337'}}>
+        <h1 className="text-xl font-black mb-2" style={{color: '#575757'}}>
           ¡Tu perfil está activo!
         </h1>
         <p className="text-sm text-gray-500 mb-6 leading-relaxed">
@@ -45,7 +45,7 @@ export default function RegistroListo() {
         {operador && (
           <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 w-full mb-6 text-left">
             <p className="text-xs text-gray-400 mb-1">Tu perfil</p>
-            <p className="text-base font-black" style={{color: '#152337'}}>{operador.nombre} {operador.apellido}</p>
+            <p className="text-base font-black" style={{color: '#575757'}}>{operador.nombre} {operador.apellido}</p>
             <p className="text-xs text-gray-500">{operador.tipo_operador} — {operador.ciudad}, {operador.estado}</p>
             <div className="mt-2 flex items-center gap-2">
               <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{backgroundColor: '#dcfce7', color: '#16a34a'}}>

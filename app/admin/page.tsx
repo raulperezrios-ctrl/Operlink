@@ -50,7 +50,7 @@ export default function AdminDashboard() {
 
       {/* Bienvenida */}
       <div className="px-4 pt-4 pb-2">
-        <h1 className="text-base font-black" style={{color: '#152337'}}>Panel de administración</h1>
+        <h1 className="text-base font-black" style={{color: '#575757'}}>Panel de administración</h1>
         <p className="text-xs text-gray-400 mt-0.5">Gestiona todo desde aquí</p>
       </div>
 
@@ -64,7 +64,7 @@ export default function AdminDashboard() {
                 {loading ? '...' : item.count}
               </p>
               <p className="text-xs text-gray-500">{item.label}</p>
-              <p className="text-xs font-semibold mt-1" style={{color: '#152337'}}>Ver todos →</p>
+              <p className="text-xs font-semibold mt-1" style={{color: '#575757'}}>Ver todos →</p>
             </div>
           </Link>
         ))}
