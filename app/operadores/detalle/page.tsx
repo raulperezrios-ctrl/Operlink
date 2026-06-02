@@ -4,12 +4,11 @@ import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 
-const fotosAleatorias = [
-  '/Operador_MAquinaria.png',
-  '/Operador_Montacargas1.png',
-  '/Operador_Tractocamion.png',
-  '/Operador_Montacargas2.png',
-]
+const fotaPorTipo: Record<string, string> = {
+  'Construcción': '/Operador_MAquinaria.png',
+  'Almacén / Logística': '/Operador_Montacargas1.png',
+  'Transporte': '/Operador_Tractocamion.png',
+}
 
 function DetalleOperadorContent() {
   const searchParams = useSearchParams()
@@ -28,7 +27,6 @@ function DetalleOperadorContent() {
     const cargar = async () => {
       if (!id) return
 
-      // Cargar operador
       const { data: operador } = await supabase
         .from('operadores')
         .select('*')
@@ -36,7 +34,6 @@ function DetalleOperadorContent() {
         .single()
       setOp(operador)
 
-      // Verificar sesión
       const { data: sessionData } = await supabase.auth.getSession()
       const userId = sessionData.session?.user?.id
 
@@ -46,7 +43,6 @@ function DetalleOperadorContent() {
         return
       }
 
-      // Verificar tipo de usuario
       const { data: usuario } = await supabase
         .from('usuarios')
         .select('tipo')
@@ -60,7 +56,6 @@ function DetalleOperadorContent() {
         return
       }
 
-      // Obtener datos de empresa
       const { data: empresa } = await supabase
         .from('empresas')
         .select('id, membresia_activa, contactos_disponibles')
@@ -73,7 +68,6 @@ function DetalleOperadorContent() {
         return
       }
 
-      // Verificar suscripción activa y fecha de vencimiento
       const { data: suscripcion } = await supabase
         .from('suscripciones')
         .select('*')
@@ -83,12 +77,10 @@ function DetalleOperadorContent() {
         .limit(1)
         .single()
 
-      // Verificar si el plan venció (mensual/anual)
       if (suscripcion?.fecha_fin) {
         const fechaFin = new Date(suscripcion.fecha_fin)
         const ahora = new Date()
         if (ahora > fechaFin) {
-          // Plan vencido — desactivar membresía
           await supabase
             .from('empresas')
             .update({ membresia_activa: false, contactos_disponibles: 0 })
@@ -105,7 +97,6 @@ function DetalleOperadorContent() {
 
       setContactosRestantes(empresa.contactos_disponibles)
 
-      // Verificar si ya desbloqueó este operador antes
       const { data: desbloqueoPrevio } = await supabase
         .from('contactos_desbloqueados')
         .select('id')
@@ -114,26 +105,21 @@ function DetalleOperadorContent() {
         .maybeSingle()
 
       if (desbloqueoPrevio) {
-        // Ya lo vio antes — mostrar sin descontar
         setContactoDesbloqueado(true)
         setLoading(false)
         return
       }
 
-      // Es nuevo — verificar si tiene contactos disponibles
-      // Para planes ilimitados (mensual/anual) contactos_disponibles = 9999
       if (empresa.contactos_disponibles <= 0) {
         setSinContactos(true)
         setLoading(false)
         return
       }
 
-      // Desbloquear y descontar
       await supabase
         .from('contactos_desbloqueados')
         .insert({ empresa_id: empresa.id, operador_id: id })
 
-      // Solo descontar si no es ilimitado
       if (empresa.contactos_disponibles < 9999) {
         await supabase
           .from('empresas')
@@ -151,7 +137,8 @@ function DetalleOperadorContent() {
   if (loading) return <div className="text-center py-20 text-sm text-gray-400">Cargando...</div>
   if (!op) return <div className="text-center py-20 text-sm text-gray-400">Operador no encontrado</div>
 
-  const foto = fotosAleatorias[Math.floor(Math.random() * fotosAleatorias.length)]
+  // Foto real si existe, sino genérica por tipo
+  const foto = op.foto_url || fotaPorTipo[op.tipo_operador] || '/Operador_MAquinaria.png'
   const iniciales = `${op.nombre?.charAt(0) || ''}. ${op.apellido?.charAt(0) || ''}.`
   const maquinarias: string[] = op.maquinaria || []
 
@@ -184,7 +171,6 @@ function DetalleOperadorContent() {
         </div>
         <p className="text-xs text-gray-500">📍 {op.ciudad}, {op.estado}</p>
 
-        {/* Contactos restantes */}
         {contactoDesbloqueado && contactosRestantes < 9999 && (
           <div className="mt-2 inline-flex items-center gap-1 bg-gray-100 rounded-full px-3 py-1">
             <span className="text-xs text-gray-500">Contactos restantes:</span>
@@ -195,7 +181,7 @@ function DetalleOperadorContent() {
         <div className="flex gap-4 mt-3">
           <div className="text-center">
             <p className="text-xl font-black" style={{color: '#9A2120'}}>{op.experiencia_anos || '0'}</p>
-            <p className="text-[10px] text-gray-500">Años exp.</p>
+            <p className="text-[10px] text-gray-500">Años de experiencia</p>
           </div>
           <div className="text-center">
             <p className="text-xl font-black" style={{color: '#9A2120'}}>⭐ {op.calificacion > 0 ? op.calificacion : 'N/A'}</p>
@@ -228,11 +214,32 @@ function DetalleOperadorContent() {
         </section>
       )}
 
-      {/* Sección de contacto — lógica completa */}
-      <section className="px-4 py-4 mt-2">
+      {/* Certificaciones */}
+      {op.licencia_url && (
+        <section className="px-4 py-4 bg-white mt-2 border-b border-gray-100">
+          <h2 className="text-sm font-bold mb-2" style={{color: '#152337'}}>📄 Documentos</h2>
+          <div className="flex flex-col gap-2">
+            {op.licencia_url && (
+              <a href={op.licencia_url} target="_blank"
+                className="text-xs px-3 py-2 rounded-xl border flex items-center gap-2"
+                style={{borderColor: '#9A2120', color: '#9A2120'}}>
+                🚗 Ver licencia de conducir
+              </a>
+            )}
+            {op.certificaciones?.map((cert: string, i: number) => (
+              <a key={i} href={cert} target="_blank"
+                className="text-xs px-3 py-2 rounded-xl border flex items-center gap-2"
+                style={{borderColor: '#9A2120', color: '#9A2120'}}>
+                📜 Ver certificación {i + 1}
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
 
+      {/* Contacto */}
+      <section className="px-4 py-4 mt-2">
         {contactoDesbloqueado ? (
-          // ✅ Tiene acceso — mostrar contacto
           <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
             <h2 className="text-sm font-bold mb-3" style={{color: '#152337'}}>📞 Información de contacto</h2>
             <div className="flex flex-col gap-2">
@@ -246,9 +253,7 @@ function DetalleOperadorContent() {
               </div>
             </div>
           </div>
-
         ) : sinContactos ? (
-          // 🔴 Se acabaron los contactos
           <div className="rounded-2xl border-2 border-dashed p-6 text-center" style={{borderColor: '#9A2120'}}>
             <div className="text-3xl mb-2">🔒</div>
             <h2 className="font-black text-base" style={{color: '#152337'}}>Sin contactos disponibles</h2>
@@ -259,9 +264,7 @@ function DetalleOperadorContent() {
               Ver planes
             </a>
           </div>
-
         ) : planVencido ? (
-          // 🔴 Plan vencido
           <div className="rounded-2xl border-2 border-dashed p-6 text-center" style={{borderColor: '#9A2120'}}>
             <div className="text-3xl mb-2">⏰</div>
             <h2 className="font-black text-base" style={{color: '#152337'}}>Tu plan venció</h2>
@@ -272,9 +275,7 @@ function DetalleOperadorContent() {
               Renovar plan
             </a>
           </div>
-
         ) : sinMembresia ? (
-          // 🔴 Sin membresía
           <div className="rounded-2xl border-2 border-dashed p-6 text-center" style={{borderColor: '#9A2120'}}>
             <div className="text-3xl mb-2">🔒</div>
             <h2 className="font-black text-base" style={{color: '#152337'}}>Activa tu plan</h2>
@@ -285,9 +286,7 @@ function DetalleOperadorContent() {
               Ver planes
             </a>
           </div>
-
         ) : (
-          // 🔴 Sin sesión
           <div className="rounded-2xl border-2 border-dashed p-6 text-center" style={{borderColor: '#9A2120'}}>
             <div className="text-3xl mb-2">🔒</div>
             <h2 className="font-black text-base" style={{color: '#152337'}}>Contacto protegido</h2>
@@ -299,7 +298,6 @@ function DetalleOperadorContent() {
             </a>
           </div>
         )}
-
       </section>
 
     </div>
