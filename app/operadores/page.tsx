@@ -70,7 +70,6 @@ export default function Operadores() {
       return
     }
 
-    // Verificar si ya desbloqueó este operador
     const { data: previo } = await supabase
       .from('contactos_desbloqueados')
       .select('id')
@@ -79,18 +78,15 @@ export default function Operadores() {
       .maybeSingle()
 
     if (previo) {
-      // Ya lo desbloqueó — ir directo al detalle
       window.location.href = `/operadores/detalle?id=${operadorId}`
       return
     }
 
-    // Verificar contactos disponibles
     if (empresa.contactos_disponibles <= 0 && empresa.contactos_disponibles !== 9999) {
       window.location.href = '/planes'
       return
     }
 
-    // Desbloquear
     await supabase
       .from('contactos_desbloqueados')
       .insert({ empresa_id: empresa.id, operador_id: operadorId })
@@ -141,46 +137,46 @@ export default function Operadores() {
         ) : (
           <>
             <p className="text-xs text-gray-400 mb-3">{operadoresFiltrados.length} operadores disponibles</p>
-            <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-2 gap-3">
               {operadoresFiltrados.map((op) => {
                 const foto = fotaPorTipo[op.tipo_operador] || '/Operador_MAquinaria.png'
                 const maquinarias: string[] = op.maquinaria || []
 
                 return (
                   <div key={op.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
-                    
+
                     {/* Foto */}
-                    <div className="relative h-40">
+                    <div className="relative h-32">
                       <img src={foto} alt="Operador" className="w-full h-full object-cover object-top" />
-                      <div className="absolute bottom-2 right-2 bg-black/70 rounded-full px-2 py-0.5 text-white text-[9px] flex items-center gap-1">
+                      <div className="absolute bottom-1 right-1 bg-black/70 rounded-full px-1.5 py-0.5 text-white text-[8px] flex items-center gap-1">
                         <span className="h-1.5 w-1.5 rounded-full bg-green-400 inline-block"></span>
                         Disponible
                       </div>
-                      <div className="absolute top-2 left-2 rounded-full px-2 py-0.5 text-[9px] font-bold text-white" style={{backgroundColor: '#9A2120'}}>
+                      <div className="absolute top-1 left-1 rounded-full px-1.5 py-0.5 text-[8px] font-bold text-white" style={{backgroundColor: '#9A2120'}}>
                         {op.tipo_operador}
                       </div>
                     </div>
 
                     {/* Info */}
-                    <div className="p-3">
+                    <div className="p-2">
                       <div className="flex items-center justify-between mb-1">
-                        <p className="text-xs font-bold" style={{color: '#152337'}}>
-                          {op.ciudad}, {op.estado}
+                        <p className="text-[10px] font-bold" style={{color: '#152337'}}>
+                          📍 {op.ciudad}
                         </p>
-                        <p className="text-[10px] text-gray-400">{op.experiencia_anos} años exp.</p>
+                        <p className="text-[9px] text-gray-400">{op.experiencia_anos} años</p>
                       </div>
 
                       {/* Maquinaria */}
                       {maquinarias.length > 0 && (
                         <div className="flex flex-wrap gap-1 mb-2">
-                          {maquinarias.slice(0, 3).map((m, i) => (
-                            <span key={i} className="text-[10px] px-2 py-0.5 rounded-full border" style={{borderColor: '#9A2120', color: '#9A2120'}}>
+                          {maquinarias.slice(0, 2).map((m, i) => (
+                            <span key={i} className="text-[9px] px-1.5 py-0.5 rounded-full border" style={{borderColor: '#9A2120', color: '#9A2120'}}>
                               {m}
                             </span>
                           ))}
-                          {maquinarias.length > 3 && (
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
-                              +{maquinarias.length - 3} más
+                          {maquinarias.length > 2 && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500">
+                              +{maquinarias.length - 2}
                             </span>
                           )}
                         </div>
@@ -189,9 +185,9 @@ export default function Operadores() {
                       {/* Botón */}
                       <button
                         onClick={() => handleDesbloquear(op.id)}
-                        className="w-full py-2 rounded-xl text-white text-xs font-bold mt-1"
+                        className="w-full py-1.5 rounded-xl text-white text-[10px] font-bold"
                         style={{backgroundColor: '#9A2120'}}>
-                        🔓 Desbloquear contacto
+                        🔓 Desbloquear
                       </button>
                     </div>
 
