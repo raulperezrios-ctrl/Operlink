@@ -16,46 +16,133 @@ function DetalleOperadorContent() {
   const id = searchParams.get('id')
   const [op, setOp] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [sesion, setSesion] = useState<any>(null)
   const [tipoUsuario, setTipoUsuario] = useState<string | null>(null)
-  const [membresiaActiva, setMembresiaActiva] = useState(false)
-  const [contactosDisponibles, setContactosDisponibles] = useState(0)
+  const [contactoDesbloqueado, setContactoDesbloqueado] = useState(false)
+  const [sinContactos, setSinContactos] = useState(false)
+  const [planVencido, setPlanVencido] = useState(false)
+  const [sinMembresia, setSinMembresia] = useState(false)
+  const [sinSesion, setSinSesion] = useState(false)
+  const [contactosRestantes, setContactosRestantes] = useState(0)
 
   useEffect(() => {
     const cargar = async () => {
       if (!id) return
 
-      const { data } = await supabase
+      // Cargar operador
+      const { data: operador } = await supabase
         .from('operadores')
         .select('*')
         .eq('id', id)
         .single()
-      setOp(data)
+      setOp(operador)
 
+      // Verificar sesión
       const { data: sessionData } = await supabase.auth.getSession()
       const userId = sessionData.session?.user?.id
 
-      if (userId) {
-        setSesion(sessionData.session)
+      if (!userId) {
+        setSinSesion(true)
+        setLoading(false)
+        return
+      }
 
-        const { data: usuario } = await supabase
-          .from('usuarios')
-          .select('tipo')
-          .eq('id', userId)
-          .single()
-        setTipoUsuario(usuario?.tipo || null)
+      // Verificar tipo de usuario
+      const { data: usuario } = await supabase
+        .from('usuarios')
+        .select('tipo')
+        .eq('id', userId)
+        .single()
 
-        if (usuario?.tipo === 'empresa') {
-          const { data: empresa } = await supabase
+      setTipoUsuario(usuario?.tipo || null)
+
+      if (usuario?.tipo !== 'empresa') {
+        setLoading(false)
+        return
+      }
+
+      // Obtener datos de empresa
+      const { data: empresa } = await supabase
+        .from('empresas')
+        .select('id, membresia_activa, contactos_disponibles')
+        .eq('user_id', userId)
+        .single()
+
+      if (!empresa?.membresia_activa) {
+        setSinMembresia(true)
+        setLoading(false)
+        return
+      }
+
+      // Verificar suscripción activa y fecha de vencimiento
+      const { data: suscripcion } = await supabase
+        .from('suscripciones')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('estatus', 'activa')
+        .order('fecha_inicio', { ascending: false })
+        .limit(1)
+        .single()
+
+      // Verificar si el plan venció (mensual/anual)
+      if (suscripcion?.fecha_fin) {
+        const fechaFin = new Date(suscripcion.fecha_fin)
+        const ahora = new Date()
+        if (ahora > fechaFin) {
+          // Plan vencido — desactivar membresía
+          await supabase
             .from('empresas')
-            .select('membresia_activa, contactos_disponibles')
-            .eq('user_id', userId)
-            .single()
-          setMembresiaActiva(empresa?.membresia_activa || false)
-          setContactosDisponibles(empresa?.contactos_disponibles || 0)
+            .update({ membresia_activa: false, contactos_disponibles: 0 })
+            .eq('id', empresa.id)
+          await supabase
+            .from('suscripciones')
+            .update({ estatus: 'expirada' })
+            .eq('id', suscripcion.id)
+          setPlanVencido(true)
+          setLoading(false)
+          return
         }
       }
 
+      setContactosRestantes(empresa.contactos_disponibles)
+
+      // Verificar si ya desbloqueó este operador antes
+      const { data: desbloqueoPrevio } = await supabase
+        .from('contactos_desbloqueados')
+        .select('id')
+        .eq('empresa_id', empresa.id)
+        .eq('operador_id', id)
+        .maybeSingle()
+
+      if (desbloqueoPrevio) {
+        // Ya lo vio antes — mostrar sin descontar
+        setContactoDesbloqueado(true)
+        setLoading(false)
+        return
+      }
+
+      // Es nuevo — verificar si tiene contactos disponibles
+      // Para planes ilimitados (mensual/anual) contactos_disponibles = 9999
+      if (empresa.contactos_disponibles <= 0) {
+        setSinContactos(true)
+        setLoading(false)
+        return
+      }
+
+      // Desbloquear y descontar
+      await supabase
+        .from('contactos_desbloqueados')
+        .insert({ empresa_id: empresa.id, operador_id: id })
+
+      // Solo descontar si no es ilimitado
+      if (empresa.contactos_disponibles < 9999) {
+        await supabase
+          .from('empresas')
+          .update({ contactos_disponibles: empresa.contactos_disponibles - 1 })
+          .eq('id', empresa.id)
+        setContactosRestantes(empresa.contactos_disponibles - 1)
+      }
+
+      setContactoDesbloqueado(true)
       setLoading(false)
     }
     cargar()
@@ -67,8 +154,6 @@ function DetalleOperadorContent() {
   const foto = fotosAleatorias[Math.floor(Math.random() * fotosAleatorias.length)]
   const iniciales = `${op.nombre?.charAt(0) || ''}. ${op.apellido?.charAt(0) || ''}.`
   const maquinarias: string[] = op.maquinaria || []
-  const esEmpresa = tipoUsuario === 'empresa'
-  const puedeVerContacto = esEmpresa && membresiaActiva
 
   return (
     <div className="bg-gray-50 pb-6">
@@ -91,13 +176,21 @@ function DetalleOperadorContent() {
       <section className="px-4 py-4 bg-white border-b border-gray-100">
         <div className="flex items-center gap-2 mb-1">
           <h1 className="text-lg font-black" style={{color: '#152337'}}>
-            {puedeVerContacto ? `${op.nombre} ${op.apellido}` : iniciales}
+            {contactoDesbloqueado ? `${op.nombre} ${op.apellido}` : iniciales}
           </h1>
           {op.verificado && (
             <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{backgroundColor: '#dbeafe', color: '#1d4ed8'}}>✔ Verificado</span>
           )}
         </div>
         <p className="text-xs text-gray-500">📍 {op.ciudad}, {op.estado}</p>
+
+        {/* Contactos restantes */}
+        {contactoDesbloqueado && contactosRestantes < 9999 && (
+          <div className="mt-2 inline-flex items-center gap-1 bg-gray-100 rounded-full px-3 py-1">
+            <span className="text-xs text-gray-500">Contactos restantes:</span>
+            <span className="text-xs font-bold" style={{color: '#9A2120'}}>{contactosRestantes}</span>
+          </div>
+        )}
 
         <div className="flex gap-4 mt-3">
           <div className="text-center">
@@ -135,10 +228,11 @@ function DetalleOperadorContent() {
         </section>
       )}
 
-      {/* Contacto */}
+      {/* Sección de contacto — lógica completa */}
       <section className="px-4 py-4 mt-2">
-        {puedeVerContacto ? (
-          // Empresa con membresía activa — ver contacto completo
+
+        {contactoDesbloqueado ? (
+          // ✅ Tiene acceso — mostrar contacto
           <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
             <h2 className="text-sm font-bold mb-3" style={{color: '#152337'}}>📞 Información de contacto</h2>
             <div className="flex flex-col gap-2">
@@ -152,31 +246,60 @@ function DetalleOperadorContent() {
               </div>
             </div>
           </div>
-        ) : esEmpresa && !membresiaActiva ? (
-          // Empresa sin membresía — invitar a comprar plan
+
+        ) : sinContactos ? (
+          // 🔴 Se acabaron los contactos
           <div className="rounded-2xl border-2 border-dashed p-6 text-center" style={{borderColor: '#9A2120'}}>
             <div className="text-3xl mb-2">🔒</div>
-            <h2 className="font-black text-base" style={{color: '#152337'}}>Activa tu plan</h2>
+            <h2 className="font-black text-base" style={{color: '#152337'}}>Sin contactos disponibles</h2>
             <p className="text-xs text-gray-500 mt-2 leading-relaxed">
-              Para ver el contacto completo de este operador necesitas activar un plan OperLink.
+              Usaste todos tus contactos. Adquiere más para seguir conectando.
             </p>
             <a href="/planes" className="mt-4 w-full py-3 rounded-xl text-white font-bold text-sm text-center block" style={{backgroundColor: '#9A2120'}}>
               Ver planes
             </a>
           </div>
+
+        ) : planVencido ? (
+          // 🔴 Plan vencido
+          <div className="rounded-2xl border-2 border-dashed p-6 text-center" style={{borderColor: '#9A2120'}}>
+            <div className="text-3xl mb-2">⏰</div>
+            <h2 className="font-black text-base" style={{color: '#152337'}}>Tu plan venció</h2>
+            <p className="text-xs text-gray-500 mt-2 leading-relaxed">
+              Tu membresía expiró. Renueva para seguir viendo contactos de operadores.
+            </p>
+            <a href="/planes" className="mt-4 w-full py-3 rounded-xl text-white font-bold text-sm text-center block" style={{backgroundColor: '#9A2120'}}>
+              Renovar plan
+            </a>
+          </div>
+
+        ) : sinMembresia ? (
+          // 🔴 Sin membresía
+          <div className="rounded-2xl border-2 border-dashed p-6 text-center" style={{borderColor: '#9A2120'}}>
+            <div className="text-3xl mb-2">🔒</div>
+            <h2 className="font-black text-base" style={{color: '#152337'}}>Activa tu plan</h2>
+            <p className="text-xs text-gray-500 mt-2 leading-relaxed">
+              Para ver el contacto de este operador necesitas activar un plan OperLink.
+            </p>
+            <a href="/planes" className="mt-4 w-full py-3 rounded-xl text-white font-bold text-sm text-center block" style={{backgroundColor: '#9A2120'}}>
+              Ver planes
+            </a>
+          </div>
+
         ) : (
-          // No autenticado
+          // 🔴 Sin sesión
           <div className="rounded-2xl border-2 border-dashed p-6 text-center" style={{borderColor: '#9A2120'}}>
             <div className="text-3xl mb-2">🔒</div>
             <h2 className="font-black text-base" style={{color: '#152337'}}>Contacto protegido</h2>
             <p className="text-xs text-gray-500 mt-2 leading-relaxed">
-              Desbloquea el nombre completo y contacto de este operador siendo parte de OperLink.
+              Inicia sesión como empresa para ver el contacto de este operador.
             </p>
             <a href="/login" className="mt-4 w-full py-3 rounded-xl text-white font-bold text-sm text-center block" style={{backgroundColor: '#9A2120'}}>
-              Iniciar sesión como empresa
+              Iniciar sesión
             </a>
           </div>
         )}
+
       </section>
 
     </div>
