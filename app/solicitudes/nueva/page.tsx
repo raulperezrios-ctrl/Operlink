@@ -1,11 +1,115 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { supabase } from '../../lib/supabase'
+
 export default function NuevaSolicitud() {
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [empresaId, setEmpresaId] = useState<string | null>(null)
+  const [tipoSolicitud, setTipoSolicitud] = useState('Solo Operador')
+  const [prioridad, setPrioridad] = useState('Media')
+
+  const [form, setForm] = useState({
+    tipo_maquinaria: '',
+    ciudad: '',
+    estado: 'Jalisco',
+    fecha_inicio: '',
+    duracion: '1 día',
+    sueldo_pago: '',
+    descripcion: '',
+  })
+
+  useEffect(() => {
+    const cargar = async () => {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const userId = sessionData.session?.user?.id
+      if (!userId) {
+        window.location.href = '/login'
+        return
+      }
+
+      const { data: emp } = await supabase
+        .from('empresas')
+        .select('id')
+        .eq('user_id', userId)
+        .single()
+
+      if (!emp) {
+        window.location.href = '/login'
+        return
+      }
+      setEmpresaId(emp.id)
+    }
+    cargar()
+  }, [])
+
+  const handleChange = (e: any) => {
+    setForm({ ...form, [e.target.name]: e.target.value })
+  }
+
+  const handlePublicar = async () => {
+    if (!form.tipo_maquinaria || !form.ciudad || !form.descripcion) {
+      setError('Por favor completa los campos obligatorios')
+      return
+    }
+    if (!empresaId) {
+      setError('No se encontró el perfil de empresa')
+      return
+    }
+
+    setLoading(true)
+    setError('')
+
+    const folio = 'SOL-' + Date.now().toString().slice(-6)
+
+    const { error: solError } = await supabase
+      .from('solicitudes')
+      .insert({
+        folio,
+        empresa_id: empresaId,
+        tipo_maquinaria: form.tipo_maquinaria,
+        tipo_solicitud: tipoSolicitud,
+        ciudad: form.ciudad,
+        estado: form.estado,
+        fecha_inicio: form.fecha_inicio || null,
+        duracion: form.duracion,
+        sueldo_pago: form.sueldo_pago ? parseFloat(form.sueldo_pago) : null,
+        descripcion: form.descripcion,
+        estatus: 'activa',
+      })
+
+    if (solError) {
+      setError('Error al publicar: ' + solError.message)
+      setLoading(false)
+      return
+    }
+
+    router.push('/mi-cuenta/empresa?tab=solicitudes')
+    setLoading(false)
+  }
+
+  const maquinarias = [
+    'Excavadora', 'Retroexcavadora', 'Motoniveladora', 'Compactadora',
+    'Grúa', 'Bulldozer', 'Cargador Frontal', 'Vibrocompactador',
+    'Montacargas Hombre Sentado', 'Montacargas Hombre Parado',
+    'Reach Truck', 'Reach Stacker', 'Transpaleta Eléctrica',
+    'Apilador', 'Orden Picker', 'Tractocamión', 'Camión de Volteo',
+    'Pipa', 'Rabón', 'Tortón', 'Camión Redilas', 'Camioneta de Carga',
+  ]
+
   return (
     <div className="bg-gray-50 pb-10">
 
       {/* Header */}
-      <div className="bg-white px-4 py-4 border-b border-gray-100">
-        <h1 className="text-lg font-black" style={{color: '#575757'}}>Nueva Solicitud</h1>
-        <p className="text-xs text-gray-500 mt-1">Publica lo que necesitas y encuentra al operador ideal</p>
+      <div className="bg-white px-4 py-4 border-b border-gray-100 flex items-center gap-3">
+        <a href="/mi-cuenta/empresa" className="text-gray-400 text-lg">←</a>
+        <div>
+          <h1 className="text-lg font-black" style={{color: '#575757'}}>Nueva Solicitud</h1>
+          <p className="text-xs text-gray-500">Publica lo que necesitas y encuentra al operador ideal</p>
+        </div>
       </div>
 
       {/* Formulario */}
@@ -17,18 +121,12 @@ export default function NuevaSolicitud() {
           {/* Tipo de maquinaria */}
           <div>
             <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Maquinaria o equipo requerido *</label>
-            <select className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
-              <option>Selecciona maquinaria</option>
-              <option>Excavadora</option>
-              <option>Retroexcavadora</option>
-              <option>Motoniveladora</option>
-              <option>Montacargas</option>
-              <option>Tractocamión</option>
-              <option>Camión de Volteo</option>
-              <option>Pipa</option>
-              <option>Grúa</option>
-              <option>Bulldozer</option>
-              <option>Cargador Frontal</option>
+            <select name="tipo_maquinaria" onChange={handleChange}
+              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
+              <option value="">Selecciona maquinaria</option>
+              {maquinarias.map((m, i) => (
+                <option key={i} value={m}>{m}</option>
+              ))}
             </select>
           </div>
 
@@ -40,28 +138,34 @@ export default function NuevaSolicitud() {
                 {emoji: '👷', label: 'Solo Operador', desc: 'Necesito un operador para mi propio equipo'},
                 {emoji: '🚜', label: 'Máquina con Operador', desc: 'Necesito equipo y operador incluido'},
               ].map((tipo, i) => (
-                <button key={i} className="flex items-center gap-3 border-2 rounded-xl p-3 text-left"
-                  style={{borderColor: i === 0 ? '#9A2120' : '#e5e7eb', backgroundColor: i === 0 ? '#fff5f5' : 'white'}}>
+                <button key={i} onClick={() => setTipoSolicitud(tipo.label)}
+                  className="flex items-center gap-3 border-2 rounded-xl p-3 text-left w-full"
+                  style={{
+                    borderColor: tipoSolicitud === tipo.label ? '#9A2120' : '#e5e7eb',
+                    backgroundColor: tipoSolicitud === tipo.label ? '#fff5f5' : 'white'
+                  }}>
                   <span className="text-2xl">{tipo.emoji}</span>
                   <div>
-                    <p className="text-xs font-bold" style={{color: i === 0 ? '#9A2120' : '#575757'}}>{tipo.label}</p>
+                    <p className="text-xs font-bold" style={{color: tipoSolicitud === tipo.label ? '#9A2120' : '#575757'}}>{tipo.label}</p>
                     <p className="text-[10px] text-gray-400">{tipo.desc}</p>
                   </div>
-                  {i === 0 && <span className="ml-auto text-xs font-bold" style={{color: '#9A2120'}}>✓</span>}
+                  {tipoSolicitud === tipo.label && <span className="ml-auto text-xs font-bold" style={{color: '#9A2120'}}>✓</span>}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Ciudad */}
+          {/* Ciudad y Estado */}
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Ciudad *</label>
-              <input type="text" placeholder="Ciudad" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm" />
+              <input name="ciudad" type="text" placeholder="Ciudad" onChange={handleChange}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm" />
             </div>
             <div>
               <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Estado *</label>
-              <select className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
+              <select name="estado" onChange={handleChange}
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
                 <option>Jalisco</option>
                 <option>Nuevo León</option>
                 <option>CDMX</option>
@@ -70,6 +174,10 @@ export default function NuevaSolicitud() {
                 <option>Sonora</option>
                 <option>Chihuahua</option>
                 <option>Veracruz</option>
+                <option>Coahuila</option>
+                <option>Tamaulipas</option>
+                <option>Sinaloa</option>
+                <option>Baja California</option>
               </select>
             </div>
           </div>
@@ -78,11 +186,13 @@ export default function NuevaSolicitud() {
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Fecha inicio *</label>
-              <input type="date" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm" />
+              <input name="fecha_inicio" type="date" onChange={handleChange}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm" />
             </div>
             <div>
               <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Duración</label>
-              <select className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
+              <select name="duracion" onChange={handleChange}
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
                 <option>1 día</option>
                 <option>1 semana</option>
                 <option>1 mes</option>
@@ -96,38 +206,55 @@ export default function NuevaSolicitud() {
           {/* Presupuesto */}
           <div>
             <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Presupuesto / Pago (MXN)</label>
-            <input type="number" placeholder="$ por hora, día o mes" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm" />
+            <input name="sueldo_pago" type="number" placeholder="$ por hora, día o mes" onChange={handleChange}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm" />
           </div>
 
           {/* Descripción */}
           <div>
             <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Descripción del trabajo *</label>
-            <textarea placeholder="Describe el trabajo, requisitos especiales, condiciones..." rows={4} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none resize-none" />
+            <textarea name="descripcion" placeholder="Describe el trabajo, requisitos especiales, condiciones..." rows={4}
+              onChange={handleChange}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none resize-none" />
           </div>
 
           {/* Prioridad */}
           <div>
             <label className="text-xs font-semibold block mb-2" style={{color: '#575757'}}>Prioridad</label>
             <div className="flex gap-2">
-              <button className="flex-1 border-2 rounded-xl py-2 text-xs font-bold" style={{borderColor: '#e5e7eb', color: '#575757'}}>Baja</button>
-              <button className="flex-1 border-2 rounded-xl py-2 text-xs font-bold text-white" style={{backgroundColor: '#ca8a04', borderColor: '#ca8a04'}}>Media</button>
-              <button className="flex-1 border-2 rounded-xl py-2 text-xs font-bold" style={{borderColor: '#e5e7eb', color: '#575757'}}>Alta</button>
+              {['Baja', 'Media', 'Alta'].map((p) => (
+                <button key={p} onClick={() => setPrioridad(p)}
+                  className="flex-1 border-2 rounded-xl py-2 text-xs font-bold"
+                  style={{
+                    backgroundColor: prioridad === p ? (p === 'Alta' ? '#dc2626' : p === 'Media' ? '#ca8a04' : '#6b7280') : 'white',
+                    borderColor: prioridad === p ? (p === 'Alta' ? '#dc2626' : p === 'Media' ? '#ca8a04' : '#6b7280') : '#e5e7eb',
+                    color: prioridad === p ? 'white' : '#575757'
+                  }}>
+                  {p}
+                </button>
+              ))}
             </div>
           </div>
 
+          {error && <p className="text-xs text-red-500 text-center">{error}</p>}
+
           {/* Botones */}
           <div className="flex gap-2 mt-2">
-            <a href="/solicitudes" className="flex-1 border-2 rounded-xl py-3 text-xs font-bold text-center" style={{borderColor: '#9A2120', color: '#9A2120'}}>
+            <a href="/mi-cuenta/empresa"
+              className="flex-1 border-2 rounded-xl py-3 text-xs font-bold text-center"
+              style={{borderColor: '#9A2120', color: '#9A2120'}}>
               Cancelar
             </a>
-            <a href="/solicitudes" className="flex-1 rounded-xl py-3 text-xs font-bold text-white text-center" style={{backgroundColor: '#9A2120'}}>
-              Publicar solicitud
-            </a>
+            <button onClick={handlePublicar} disabled={loading}
+              className="flex-1 rounded-xl py-3 text-xs font-bold text-white"
+              style={{backgroundColor: '#9A2120', opacity: loading ? 0.7 : 1}}>
+              {loading ? 'Publicando...' : 'Publicar solicitud'}
+            </button>
           </div>
 
         </div>
       </div>
 
     </div>
-  );
+  )
 }
