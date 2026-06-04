@@ -1,16 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 
-export default function PerfilEmpresa() {
+function PerfilEmpresaContent() {
+  const searchParams = useSearchParams()
   const [empresa, setEmpresa] = useState<any>(null)
   const [suscripcion, setSuscripcion] = useState<any>(null)
   const [pagos, setPagos] = useState<any[]>([])
   const [operadoresDesbloqueados, setOperadoresDesbloqueados] = useState<any[]>([])
   const [solicitudes, setSolicitudes] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [tab, setTab] = useState('perfil')
+  const [tab, setTab] = useState(searchParams.get('tab') || 'perfil')
 
   useEffect(() => {
     const cargar = async () => {
@@ -21,7 +23,6 @@ export default function PerfilEmpresa() {
         return
       }
 
-      // Datos de la empresa
       const { data: emp } = await supabase
         .from('empresas')
         .select('*')
@@ -30,7 +31,6 @@ export default function PerfilEmpresa() {
       setEmpresa(emp)
 
       if (emp) {
-        // Suscripción activa
         const { data: sus } = await supabase
           .from('suscripciones')
           .select('*, planes(nombre, precio, duracion)')
@@ -41,7 +41,6 @@ export default function PerfilEmpresa() {
           .single()
         setSuscripcion(sus)
 
-        // Historial de pagos
         const { data: pag } = await supabase
           .from('pagos')
           .select('*')
@@ -49,14 +48,12 @@ export default function PerfilEmpresa() {
           .order('id', { ascending: false })
         setPagos(pag || [])
 
-        // Operadores desbloqueados
         const { data: desb } = await supabase
           .from('contactos_desbloqueados')
-          .select('*, operadores(nombre, apellido, tipo_operador, ciudad, estado, foto_url)')
+          .select('*, operadores(id, nombre, apellido, tipo_operador, ciudad, estado, foto_url)')
           .eq('empresa_id', emp.id)
         setOperadoresDesbloqueados(desb || [])
 
-        // Solicitudes de la empresa
         const { data: sol } = await supabase
           .from('solicitudes')
           .select('*')
@@ -85,6 +82,12 @@ export default function PerfilEmpresa() {
     { id: 'solicitudes', label: '📋 Solicitudes' },
     { id: 'pagos', label: '💰 Pagos' },
   ]
+
+  const fotaPorTipo: Record<string, string> = {
+    'Construcción': '/Operador_MAquinaria.png',
+    'Almacén / Logística': '/Operador_Montacargas1.png',
+    'Transporte': '/Operador_Tractocamion.png',
+  }
 
   return (
     <div className="bg-gray-50 min-h-screen pb-24">
@@ -190,6 +193,11 @@ export default function PerfilEmpresa() {
                     </span>
                   </div>
                 )}
+                <a href="/planes"
+                  className="mt-4 w-full py-2.5 rounded-xl text-white text-xs font-bold text-center block"
+                  style={{backgroundColor: '#9A2120'}}>
+                  Mejorar plan
+                </a>
               </div>
             ) : (
               <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 text-center">
@@ -220,11 +228,6 @@ export default function PerfilEmpresa() {
             ) : (
               operadoresDesbloqueados.map((d, i) => {
                 const op = d.operadores
-                const fotaPorTipo: Record<string, string> = {
-                  'Construcción': '/Operador_MAquinaria.png',
-                  'Almacén / Logística': '/Operador_Montacargas1.png',
-                  'Transporte': '/Operador_Tractocamion.png',
-                }
                 const foto = op?.foto_url || fotaPorTipo[op?.tipo_operador] || '/Operador_MAquinaria.png'
                 return (
                   <div key={i} className="bg-white rounded-xl shadow-sm p-3 border border-gray-100 flex items-center gap-3">
@@ -234,7 +237,7 @@ export default function PerfilEmpresa() {
                       <p className="text-xs text-gray-400">{op?.tipo_operador}</p>
                       <p className="text-xs text-gray-400">📍 {op?.ciudad}, {op?.estado}</p>
                     </div>
-                    <a href={`/operadores/detalle?id=${d.operador_id}`}
+                    <a href={`/operadores/detalle?id=${d.operador_id}&volver=mi-cuenta`}
                       className="text-xs px-3 py-1.5 rounded-full font-semibold text-white"
                       style={{backgroundColor: '#9A2120'}}>
                       Ver
@@ -269,6 +272,7 @@ export default function PerfilEmpresa() {
                       <p className="text-xs font-bold" style={{color: '#9A2120'}}>#{sol.folio}</p>
                       <p className="text-sm font-bold" style={{color: '#575757'}}>{sol.tipo_maquinaria}</p>
                       <p className="text-xs text-gray-400">{sol.ciudad}, {sol.estado}</p>
+                      <p className="text-xs text-gray-400">{sol.tipo_solicitud}</p>
                     </div>
                     <span className="text-xs px-2 py-1 rounded-full font-semibold"
                       style={{backgroundColor: sol.estatus === 'activa' ? '#dcfce7' : '#fee2e2',
@@ -296,11 +300,19 @@ export default function PerfilEmpresa() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-bold" style={{color: '#575757'}}>{pago.concepto}</p>
-                      <p className="text-xs text-gray-400">{pago.estatus}</p>
+                      <p className="text-xs text-gray-400">
+                        {pago.created_at ? new Date(pago.created_at).toLocaleDateString('es-MX') : ''}
+                      </p>
                     </div>
-                    <p className="text-sm font-black" style={{color: '#9A2120'}}>
-                      ${pago.monto?.toLocaleString('es-MX')} MXN
-                    </p>
+                    <div className="text-right">
+                      <p className="text-sm font-black" style={{color: '#9A2120'}}>
+                        ${pago.monto?.toLocaleString('es-MX')} MXN
+                      </p>
+                      <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
+                        style={{backgroundColor: '#dcfce7', color: '#16a34a'}}>
+                        ✅ Pagado
+                      </span>
+                    </div>
                   </div>
                 </div>
               ))
@@ -310,5 +322,13 @@ export default function PerfilEmpresa() {
 
       </div>
     </div>
+  )
+}
+
+export default function PerfilEmpresa() {
+  return (
+    <Suspense fallback={<div className="text-center py-20 text-sm text-gray-400">Cargando...</div>}>
+      <PerfilEmpresaContent />
+    </Suspense>
   )
 }

@@ -149,7 +149,8 @@ function DetalleOperadorContent() {
       <section className="relative h-64 overflow-hidden">
         <img src={foto} alt="Operador" className="w-full h-full object-cover object-top" />
         <div className="absolute inset-0" style={{background: 'linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.7) 100%)'}}></div>
-        <a href="/operadores" className="absolute top-4 left-4 bg-black/40 rounded-full px-3 py-1 text-white text-xs">← Volver</a>
+        <a href={searchParams.get('volver') === 'mi-cuenta' ? '/mi-cuenta/empresa?tab=operadores' : '/operadores'} 
+          className="absolute top-4 left-4 bg-black/40 rounded-full px-3 py-1 text-white text-xs">← Volver</a>
         <div className="absolute bottom-4 left-4 text-white">
           <span className="text-xs font-bold px-2 py-1 rounded-full" style={{backgroundColor: '#9A2120'}}>{op.tipo_operador}</span>
           <div className="flex items-center gap-2 mt-2">
