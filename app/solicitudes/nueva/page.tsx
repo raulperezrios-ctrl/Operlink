@@ -17,7 +17,7 @@ export default function NuevaSolicitud() {
     ciudad: '',
     estado: 'Jalisco',
     fecha_inicio: '',
-    duracion: '1 día',
+    duracion: 'por hora',
     sueldo_pago: '',
     descripcion: '',
   })
@@ -100,12 +100,14 @@ export default function NuevaSolicitud() {
     'Pipa', 'Rabón', 'Tortón', 'Camión Redilas', 'Camioneta de Carga',
   ]
 
+  const duraciones = ['por hora', 'por día', 'por semana', 'por mes', 'por contrato']
+
   return (
     <div className="bg-gray-50 pb-10">
 
       {/* Header */}
       <div className="bg-white px-4 py-4 border-b border-gray-100 flex items-center gap-3">
-        <a href="/mi-cuenta/empresa" className="text-gray-400 text-lg">←</a>
+        <a href="/mi-cuenta/empresa?tab=solicitudes" className="text-gray-400 text-lg">←</a>
         <div>
           <h1 className="text-lg font-black" style={{color: '#575757'}}>Nueva Solicitud</h1>
           <p className="text-xs text-gray-500">Publica lo que necesitas y encuentra al operador ideal</p>
@@ -118,7 +120,44 @@ export default function NuevaSolicitud() {
 
           <h2 className="text-sm font-bold" style={{color: '#575757'}}>Detalles de la solicitud</h2>
 
-          {/* Tipo de maquinaria */}
+          {/* Tipo de solicitud */}
+          <div>
+            <label className="text-xs font-semibold block mb-2" style={{color: '#575757'}}>Tipo de solicitud *</label>
+            <div className="flex flex-col gap-2">
+              {[
+                {
+                  emoji: '👷',
+                  label: 'Solo Operador',
+                  desc: 'Necesito un operador para mi propio equipo'
+                },
+                {
+                  emoji: '🚜',
+                  label: 'Operador con Máquina',
+                  desc: 'Hombre-Máquina / Hombre-Camión — operador con su equipo incluido'
+                },
+              ].map((tipo) => (
+                <button key={tipo.label} onClick={() => setTipoSolicitud(tipo.label)}
+                  className="flex items-center gap-3 border-2 rounded-xl p-3 text-left w-full"
+                  style={{
+                    borderColor: tipoSolicitud === tipo.label ? '#9A2120' : '#e5e7eb',
+                    backgroundColor: tipoSolicitud === tipo.label ? '#fff5f5' : 'white'
+                  }}>
+                  <span className="text-2xl">{tipo.emoji}</span>
+                  <div className="flex-1">
+                    <p className="text-xs font-bold" style={{color: tipoSolicitud === tipo.label ? '#9A2120' : '#575757'}}>
+                      {tipo.label}
+                    </p>
+                    <p className="text-[10px] text-gray-400">{tipo.desc}</p>
+                  </div>
+                  {tipoSolicitud === tipo.label && (
+                    <span className="text-xs font-bold" style={{color: '#9A2120'}}>✓</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Maquinaria */}
           <div>
             <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Maquinaria o equipo requerido *</label>
             <select name="tipo_maquinaria" onChange={handleChange}
@@ -128,31 +167,6 @@ export default function NuevaSolicitud() {
                 <option key={i} value={m}>{m}</option>
               ))}
             </select>
-          </div>
-
-          {/* Tipo de solicitud */}
-          <div>
-            <label className="text-xs font-semibold block mb-2" style={{color: '#575757'}}>Tipo de solicitud *</label>
-            <div className="flex flex-col gap-2">
-              {[
-                {emoji: '👷', label: 'Solo Operador', desc: 'Necesito un operador para mi propio equipo'},
-                {emoji: '🚜', label: 'Máquina con Operador', desc: 'Necesito equipo y operador incluido'},
-              ].map((tipo, i) => (
-                <button key={i} onClick={() => setTipoSolicitud(tipo.label)}
-                  className="flex items-center gap-3 border-2 rounded-xl p-3 text-left w-full"
-                  style={{
-                    borderColor: tipoSolicitud === tipo.label ? '#9A2120' : '#e5e7eb',
-                    backgroundColor: tipoSolicitud === tipo.label ? '#fff5f5' : 'white'
-                  }}>
-                  <span className="text-2xl">{tipo.emoji}</span>
-                  <div>
-                    <p className="text-xs font-bold" style={{color: tipoSolicitud === tipo.label ? '#9A2120' : '#575757'}}>{tipo.label}</p>
-                    <p className="text-[10px] text-gray-400">{tipo.desc}</p>
-                  </div>
-                  {tipoSolicitud === tipo.label && <span className="ml-auto text-xs font-bold" style={{color: '#9A2120'}}>✓</span>}
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* Ciudad y Estado */}
@@ -182,7 +196,7 @@ export default function NuevaSolicitud() {
             </div>
           </div>
 
-          {/* Fechas */}
+          {/* Fecha y Duración */}
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Fecha inicio *</label>
@@ -190,7 +204,7 @@ export default function NuevaSolicitud() {
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm" />
             </div>
             <div>
-              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Duración</label>
+              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Duración estimada</label>
               <select name="duracion" onChange={handleChange}
                 className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
                 <option>1 día</option>
@@ -203,18 +217,30 @@ export default function NuevaSolicitud() {
             </div>
           </div>
 
-          {/* Presupuesto */}
+          {/* Presupuesto con unidad */}
           <div>
             <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Presupuesto / Pago (MXN)</label>
-            <input name="sueldo_pago" type="number" placeholder="$ por hora, día o mes" onChange={handleChange}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm" />
+            <div className="flex gap-2 items-center">
+              <div className="flex-1 flex items-center border border-gray-200 rounded-xl overflow-hidden">
+                <span className="px-3 text-sm text-gray-400">$</span>
+                <input name="sueldo_pago" type="number" placeholder="0.00" onChange={handleChange}
+                  className="flex-1 py-2.5 text-sm focus:outline-none" />
+                <span className="px-2 text-xs text-gray-400">MXN</span>
+              </div>
+              <select name="duracion" onChange={handleChange}
+                className="border border-gray-200 rounded-xl px-2 py-2.5 text-xs text-gray-600">
+                {duraciones.map((d, i) => (
+                  <option key={i} value={d}>{d}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Descripción */}
           <div>
             <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Descripción del trabajo *</label>
-            <textarea name="descripcion" placeholder="Describe el trabajo, requisitos especiales, condiciones..." rows={4}
-              onChange={handleChange}
+            <textarea name="descripcion" placeholder="Describe el trabajo, requisitos especiales, condiciones..."
+              rows={4} onChange={handleChange}
               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none resize-none" />
           </div>
 
@@ -240,7 +266,7 @@ export default function NuevaSolicitud() {
 
           {/* Botones */}
           <div className="flex gap-2 mt-2">
-            <a href="/mi-cuenta/empresa"
+            <a href="/mi-cuenta/empresa?tab=solicitudes"
               className="flex-1 border-2 rounded-xl py-3 text-xs font-bold text-center"
               style={{borderColor: '#9A2120', color: '#9A2120'}}>
               Cancelar
