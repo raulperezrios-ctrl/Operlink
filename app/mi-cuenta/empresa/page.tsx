@@ -267,7 +267,7 @@ function PerfilEmpresaContent() {
             ) : (
               solicitudes.map((sol, i) => (
                 <div key={i} className="bg-white rounded-xl shadow-sm p-3 border border-gray-100">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-2">
                     <div>
                       <p className="text-xs font-bold" style={{color: '#9A2120'}}>#{sol.folio}</p>
                       <p className="text-sm font-bold" style={{color: '#575757'}}>{sol.tipo_maquinaria}</p>
@@ -280,6 +280,11 @@ function PerfilEmpresaContent() {
                       {sol.estatus || 'pendiente'}
                     </span>
                   </div>
+                  <a href={`/mi-cuenta/empresa/solicitud?id=${sol.id}`}
+                    className="w-full py-2 rounded-xl text-white text-xs font-bold text-center block"
+                    style={{backgroundColor: '#9A2120'}}>
+                    Ver detalle y postulados
+                  </a>
                 </div>
               ))
             )}

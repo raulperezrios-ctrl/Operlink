@@ -12,7 +12,6 @@ export default function Solicitudes() {
 
   useEffect(() => {
     const cargar = async () => {
-      // Verificar sesión
       const { data: sessionData } = await supabase.auth.getSession()
       const userId = sessionData.session?.user?.id
       setSesion(sessionData.session)
@@ -26,7 +25,6 @@ export default function Solicitudes() {
         setTipoUsuario(usuario?.tipo || null)
       }
 
-      // Cargar solicitudes activas
       const { data } = await supabase
         .from('solicitudes')
         .select('*')
@@ -36,6 +34,29 @@ export default function Solicitudes() {
     }
     cargar()
   }, [])
+
+  // Si es empresa, mostrar redirección
+  if (!loading && tipoUsuario === 'empresa') {
+    return (
+      <div className="bg-gray-50 min-h-screen pb-24 flex flex-col items-center justify-center px-6 text-center">
+        <div className="text-5xl mb-4">📋</div>
+        <h1 className="text-lg font-black mb-2" style={{color: '#575757'}}>Tus solicitudes</h1>
+        <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+          Como empresa, gestiona tus solicitudes desde tu perfil — ahí puedes ver los operadores que se postularon.
+        </p>
+        <a href="/mi-cuenta/empresa?tab=solicitudes"
+          className="py-3 px-8 rounded-xl text-white font-bold text-sm"
+          style={{backgroundColor: '#9A2120'}}>
+          Ir a mis solicitudes
+        </a>
+        <a href="/solicitudes/nueva"
+          className="mt-3 py-3 px-8 rounded-xl font-bold text-sm border-2"
+          style={{borderColor: '#9A2120', color: '#9A2120'}}>
+          + Nueva solicitud
+        </a>
+      </div>
+    )
+  }
 
   const solicitudesFiltradas = filtro === 'Todas'
     ? solicitudes
@@ -47,17 +68,9 @@ export default function Solicitudes() {
     <div className="bg-gray-50 pb-6">
 
       {/* Header */}
-      <div className="bg-white px-4 py-3 border-b border-gray-100 flex justify-between items-center">
-        <div>
-          <h1 className="text-base font-black" style={{color: '#575757'}}>Solicitudes</h1>
-          <p className="text-xs text-gray-400">{activas} activas</p>
-        </div>
-        {tipoUsuario === 'empresa' && (
-          <a href="/solicitudes/nueva" className="px-3 py-2 rounded-xl text-white text-xs font-bold"
-            style={{backgroundColor: '#9A2120'}}>
-            + Nueva
-          </a>
-        )}
+      <div className="bg-white px-4 py-3 border-b border-gray-100">
+        <h1 className="text-base font-black" style={{color: '#575757'}}>Oportunidades de trabajo</h1>
+        <p className="text-xs text-gray-400">{activas} solicitudes activas</p>
       </div>
 
       {/* Banner para no registrados */}
@@ -120,7 +133,6 @@ export default function Solicitudes() {
               </p>
             )}
 
-            {/* Botón según tipo de usuario */}
             <div className="mt-3">
               {!sesion ? (
                 <a href="/registro-operador"
@@ -130,12 +142,6 @@ export default function Solicitudes() {
                 </a>
               ) : tipoUsuario === 'operador' ? (
                 <PostularseBoton solicitudId={sol.id} />
-              ) : tipoUsuario === 'empresa' ? (
-                <a href={`/mi-cuenta/empresa?tab=solicitudes`}
-                  className="w-full py-2 rounded-xl text-xs font-bold text-center block border"
-                  style={{borderColor: '#9A2120', color: '#9A2120'}}>
-                  Ver mis solicitudes
-                </a>
               ) : null}
             </div>
 
