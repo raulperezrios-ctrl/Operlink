@@ -1,0 +1,314 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { supabase } from '../../lib/supabase'
+
+export default function PerfilEmpresa() {
+  const [empresa, setEmpresa] = useState<any>(null)
+  const [suscripcion, setSuscripcion] = useState<any>(null)
+  const [pagos, setPagos] = useState<any[]>([])
+  const [operadoresDesbloqueados, setOperadoresDesbloqueados] = useState<any[]>([])
+  const [solicitudes, setSolicitudes] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [tab, setTab] = useState('perfil')
+
+  useEffect(() => {
+    const cargar = async () => {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const userId = sessionData.session?.user?.id
+      if (!userId) {
+        window.location.href = '/login'
+        return
+      }
+
+      // Datos de la empresa
+      const { data: emp } = await supabase
+        .from('empresas')
+        .select('*')
+        .eq('user_id', userId)
+        .single()
+      setEmpresa(emp)
+
+      if (emp) {
+        // Suscripción activa
+        const { data: sus } = await supabase
+          .from('suscripciones')
+          .select('*, planes(nombre, precio, duracion)')
+          .eq('user_id', userId)
+          .eq('estatus', 'activa')
+          .order('fecha_inicio', { ascending: false })
+          .limit(1)
+          .single()
+        setSuscripcion(sus)
+
+        // Historial de pagos
+        const { data: pag } = await supabase
+          .from('pagos')
+          .select('*')
+          .eq('comprador_id', userId)
+          .order('id', { ascending: false })
+        setPagos(pag || [])
+
+        // Operadores desbloqueados
+        const { data: desb } = await supabase
+          .from('contactos_desbloqueados')
+          .select('*, operadores(nombre, apellido, tipo_operador, ciudad, estado, foto_url)')
+          .eq('empresa_id', emp.id)
+        setOperadoresDesbloqueados(desb || [])
+
+        // Solicitudes de la empresa
+        const { data: sol } = await supabase
+          .from('solicitudes')
+          .select('*')
+          .eq('empresa_id', emp.id)
+          .order('id', { ascending: false })
+        setSolicitudes(sol || [])
+      }
+
+      setLoading(false)
+    }
+    cargar()
+  }, [])
+
+  const handleCerrarSesion = async () => {
+    await supabase.auth.signOut()
+    window.location.href = '/'
+  }
+
+  if (loading) return <div className="text-center py-20 text-sm text-gray-400">Cargando...</div>
+  if (!empresa) return <div className="text-center py-20 text-sm text-gray-400">No se encontró el perfil</div>
+
+  const tabs = [
+    { id: 'perfil', label: '🏢 Perfil' },
+    { id: 'plan', label: '💳 Plan' },
+    { id: 'operadores', label: '👷 Operadores' },
+    { id: 'solicitudes', label: '📋 Solicitudes' },
+    { id: 'pagos', label: '💰 Pagos' },
+  ]
+
+  return (
+    <div className="bg-gray-50 min-h-screen pb-24">
+
+      {/* Header */}
+      <div className="bg-white px-4 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-gray-400">Mi cuenta</p>
+            <h1 className="text-base font-black" style={{color: '#575757'}}>{empresa.nombre_empresa}</h1>
+          </div>
+          <button onClick={handleCerrarSesion}
+            className="text-xs px-3 py-1.5 rounded-full border border-gray-200 text-gray-500">
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="bg-white border-b border-gray-100 px-4 overflow-x-auto">
+        <div className="flex gap-1 py-2 min-w-max">
+          {tabs.map((t) => (
+            <button key={t.id} onClick={() => setTab(t.id)}
+              className="px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap"
+              style={{
+                backgroundColor: tab === t.id ? '#9A2120' : 'transparent',
+                color: tab === t.id ? 'white' : '#575757'
+              }}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="px-4 py-4">
+
+        {/* Tab Perfil */}
+        {tab === 'perfil' && (
+          <div className="flex flex-col gap-3">
+            <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
+              <h2 className="text-sm font-bold mb-3" style={{color: '#575757'}}>Datos de la empresa</h2>
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-between">
+                  <span className="text-xs text-gray-400">Empresa</span>
+                  <span className="text-xs font-semibold">{empresa.nombre_empresa}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-xs text-gray-400">Contacto</span>
+                  <span className="text-xs font-semibold">{empresa.nombre_contacto}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-xs text-gray-400">Teléfono</span>
+                  <span className="text-xs font-semibold">{empresa.telefono}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-xs text-gray-400">Correo</span>
+                  <span className="text-xs font-semibold">{empresa.correo}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-xs text-gray-400">Ciudad</span>
+                  <span className="text-xs font-semibold">{empresa.ciudad}, {empresa.estado}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-xs text-gray-400">Industria</span>
+                  <span className="text-xs font-semibold">{empresa.industria}</span>
+                </div>
+              </div>
+              <a href="/mi-cuenta/empresa/editar"
+                className="mt-4 w-full py-2.5 rounded-xl text-white text-xs font-bold text-center block"
+                style={{backgroundColor: '#9A2120'}}>
+                ✏️ Editar perfil
+              </a>
+            </div>
+          </div>
+        )}
+
+        {/* Tab Plan */}
+        {tab === 'plan' && (
+          <div className="flex flex-col gap-3">
+            {suscripcion ? (
+              <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
+                <h2 className="text-sm font-bold mb-3" style={{color: '#575757'}}>Plan activo</h2>
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <p className="text-base font-black" style={{color: '#9A2120'}}>{suscripcion.planes?.nombre}</p>
+                    <p className="text-xs text-gray-400">${suscripcion.planes?.precio?.toLocaleString('es-MX')} MXN</p>
+                  </div>
+                  <span className="text-xs px-2 py-1 rounded-full font-semibold" style={{backgroundColor: '#dcfce7', color: '#16a34a'}}>
+                    ✅ Activo
+                  </span>
+                </div>
+                <div className="flex justify-between py-2 border-t border-gray-100">
+                  <span className="text-xs text-gray-400">Contactos disponibles</span>
+                  <span className="text-xs font-bold" style={{color: '#9A2120'}}>
+                    {empresa.contactos_disponibles === 9999 ? 'Ilimitados' : empresa.contactos_disponibles}
+                  </span>
+                </div>
+                {suscripcion.fecha_fin && (
+                  <div className="flex justify-between py-2 border-t border-gray-100">
+                    <span className="text-xs text-gray-400">Vence</span>
+                    <span className="text-xs font-semibold">
+                      {new Date(suscripcion.fecha_fin).toLocaleDateString('es-MX')}
+                    </span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 text-center">
+                <div className="text-3xl mb-2">🔒</div>
+                <p className="text-sm font-bold mb-1" style={{color: '#575757'}}>Sin plan activo</p>
+                <p className="text-xs text-gray-400 mb-3">Adquiere un plan para ver contactos de operadores</p>
+                <a href="/planes" className="w-full py-2.5 rounded-xl text-white text-xs font-bold text-center block"
+                  style={{backgroundColor: '#9A2120'}}>
+                  Ver planes
+                </a>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tab Operadores */}
+        {tab === 'operadores' && (
+          <div className="flex flex-col gap-3">
+            <p className="text-xs text-gray-400">{operadoresDesbloqueados.length} operadores desbloqueados</p>
+            {operadoresDesbloqueados.length === 0 ? (
+              <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 text-center">
+                <p className="text-sm text-gray-400">No has desbloqueado ningún operador aún</p>
+                <a href="/operadores" className="mt-3 w-full py-2.5 rounded-xl text-white text-xs font-bold text-center block"
+                  style={{backgroundColor: '#9A2120'}}>
+                  Ver operadores
+                </a>
+              </div>
+            ) : (
+              operadoresDesbloqueados.map((d, i) => {
+                const op = d.operadores
+                const fotaPorTipo: Record<string, string> = {
+                  'Construcción': '/Operador_MAquinaria.png',
+                  'Almacén / Logística': '/Operador_Montacargas1.png',
+                  'Transporte': '/Operador_Tractocamion.png',
+                }
+                const foto = op?.foto_url || fotaPorTipo[op?.tipo_operador] || '/Operador_MAquinaria.png'
+                return (
+                  <div key={i} className="bg-white rounded-xl shadow-sm p-3 border border-gray-100 flex items-center gap-3">
+                    <img src={foto} alt="Operador" className="w-12 h-12 rounded-full object-cover" />
+                    <div className="flex-1">
+                      <p className="text-sm font-bold" style={{color: '#575757'}}>{op?.nombre} {op?.apellido}</p>
+                      <p className="text-xs text-gray-400">{op?.tipo_operador}</p>
+                      <p className="text-xs text-gray-400">📍 {op?.ciudad}, {op?.estado}</p>
+                    </div>
+                    <a href={`/operadores/detalle?id=${d.operador_id}`}
+                      className="text-xs px-3 py-1.5 rounded-full font-semibold text-white"
+                      style={{backgroundColor: '#9A2120'}}>
+                      Ver
+                    </a>
+                  </div>
+                )
+              })
+            )}
+          </div>
+        )}
+
+        {/* Tab Solicitudes */}
+        {tab === 'solicitudes' && (
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-gray-400">{solicitudes.length} solicitudes</p>
+              <a href="/solicitudes/nueva"
+                className="text-xs px-3 py-1.5 rounded-full font-semibold text-white"
+                style={{backgroundColor: '#9A2120'}}>
+                + Nueva
+              </a>
+            </div>
+            {solicitudes.length === 0 ? (
+              <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 text-center">
+                <p className="text-sm text-gray-400">No has publicado ninguna solicitud aún</p>
+              </div>
+            ) : (
+              solicitudes.map((sol, i) => (
+                <div key={i} className="bg-white rounded-xl shadow-sm p-3 border border-gray-100">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold" style={{color: '#9A2120'}}>#{sol.folio}</p>
+                      <p className="text-sm font-bold" style={{color: '#575757'}}>{sol.tipo_maquinaria}</p>
+                      <p className="text-xs text-gray-400">{sol.ciudad}, {sol.estado}</p>
+                    </div>
+                    <span className="text-xs px-2 py-1 rounded-full font-semibold"
+                      style={{backgroundColor: sol.estatus === 'activa' ? '#dcfce7' : '#fee2e2',
+                              color: sol.estatus === 'activa' ? '#16a34a' : '#dc2626'}}>
+                      {sol.estatus || 'pendiente'}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {/* Tab Pagos */}
+        {tab === 'pagos' && (
+          <div className="flex flex-col gap-3">
+            <p className="text-xs text-gray-400">{pagos.length} transacciones</p>
+            {pagos.length === 0 ? (
+              <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 text-center">
+                <p className="text-sm text-gray-400">No hay pagos registrados</p>
+              </div>
+            ) : (
+              pagos.map((pago, i) => (
+                <div key={i} className="bg-white rounded-xl shadow-sm p-3 border border-gray-100">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-bold" style={{color: '#575757'}}>{pago.concepto}</p>
+                      <p className="text-xs text-gray-400">{pago.estatus}</p>
+                    </div>
+                    <p className="text-sm font-black" style={{color: '#9A2120'}}>
+                      ${pago.monto?.toLocaleString('es-MX')} MXN
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
+      </div>
+    </div>
+  )
+}
