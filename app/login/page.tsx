@@ -32,7 +32,7 @@ export default function Login() {
       .single()
 
     if (usuario?.tipo === 'operador') {
-      router.push('/registro-operador/listo')
+      router.push('/registro-operador')
     } else if (usuario?.tipo === 'empresa') {
       router.push('/empresas')
     } else {
