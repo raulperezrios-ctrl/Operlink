@@ -339,7 +339,7 @@ function PerfilOperadorContent() {
               ) : (
                 <p className="text-xs text-gray-400">No has agregado maquinaria aún</p>
               )}
-              <a href="/registro-operador/maquinaria"
+              <a href="/mi-cuenta/operador/maquinaria"
                 className="mt-4 w-full py-2.5 rounded-xl text-white text-xs font-bold text-center block"
                 style={{backgroundColor: '#9A2120'}}>
                 ✏️ Actualizar maquinaria
