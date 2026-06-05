@@ -131,7 +131,7 @@ export default function EditarMaquinaria() {
             <h2 className="text-sm font-bold mb-2" style={{color: '#575757'}}>
               ¿En qué segmentos trabajas?
             </h2>
-            <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {Object.keys(maquinariasPorTipo).map((tipo) => (
                 <button key={tipo} onClick={() => toggleTipo(tipo)}
                   className="flex items-center gap-3 border-2 rounded-xl p-3 text-left w-full"
