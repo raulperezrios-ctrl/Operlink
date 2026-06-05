@@ -31,7 +31,10 @@ function PlanesContent() {
     <div className="bg-gray-50 min-h-screen pb-24">
 
       {/* Header */}
-      <div className="px-4 py-6 text-center bg-white border-b border-gray-100">
+      <div className="px-4 py-6 text-center bg-white border-b border-gray-100 relative">
+        {tipoParam === 'operador' && (
+        <a href="/mi-cuenta/operador" className="absolute left-4 top-6 text-gray-400 text-sm">← Volver</a>
+        )}
         <h1 className="text-xl font-black" style={{color: '#575757'}}>Planes OperLink</h1>
         <p className="text-xs text-gray-400 mt-1">Conecta con los mejores operadores de México</p>
 
