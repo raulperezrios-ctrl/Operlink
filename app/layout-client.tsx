@@ -9,40 +9,55 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   const [nombreUsuario, setNombreUsuario] = useState<string | null>(null)
   const [menuAbierto, setMenuAbierto] = useState(false)
 
+  const cargarUsuario = async (userId: string) => {
+    const { data: usuario } = await supabase
+      .from('usuarios')
+      .select('tipo')
+      .eq('id', userId)
+      .single()
+    setTipoUsuario(usuario?.tipo || null)
+
+    if (usuario?.tipo === 'operador') {
+      const { data: op } = await supabase
+        .from('operadores')
+        .select('nombre')
+        .eq('user_id', userId)
+        .single()
+      setNombreUsuario(op?.nombre || null)
+    } else if (usuario?.tipo === 'empresa') {
+      const { data: emp } = await supabase
+        .from('empresas')
+        .select('nombre_contacto')
+        .eq('user_id', userId)
+        .single()
+      setNombreUsuario(emp?.nombre_contacto?.split(' ')[0] || null)
+    } else if (usuario?.tipo === 'admin') {
+      setNombreUsuario('Admin')
+    }
+  }
+
   useEffect(() => {
     const cargar = async () => {
       const { data: sessionData } = await supabase.auth.getSession()
       const userId = sessionData.session?.user?.id
       setSesion(sessionData.session)
-
-      if (userId) {
-        const { data: usuario } = await supabase
-          .from('usuarios')
-          .select('tipo')
-          .eq('id', userId)
-          .single()
-        setTipoUsuario(usuario?.tipo || null)
-
-        if (usuario?.tipo === 'operador') {
-          const { data: op } = await supabase
-            .from('operadores')
-            .select('nombre')
-            .eq('user_id', userId)
-            .single()
-          setNombreUsuario(op?.nombre || null)
-        } else if (usuario?.tipo === 'empresa') {
-          const { data: emp } = await supabase
-            .from('empresas')
-            .select('nombre_contacto')
-            .eq('user_id', userId)
-            .single()
-          setNombreUsuario(emp?.nombre_contacto?.split(' ')[0] || null)
-        } else if (usuario?.tipo === 'admin') {
-          setNombreUsuario('Admin')
-        }
-      }
+      if (userId) await cargarUsuario(userId)
     }
+
     cargar()
+
+    // Escuchar cambios de sesión en tiempo real
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setSesion(session)
+      if (session?.user?.id) {
+        await cargarUsuario(session.user.id)
+      } else {
+        setTipoUsuario(null)
+        setNombreUsuario(null)
+      }
+    })
+
+    return () => subscription.unsubscribe()
   }, [])
 
   const cuentaUrl = () => {
@@ -84,10 +99,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
       {/* Menú hamburguesa */}
       {menuAbierto && (
         <div className="fixed inset-0 z-30 flex">
-          {/* Fondo oscuro */}
           <div className="flex-1 bg-black/40" onClick={() => setMenuAbierto(false)} />
-
-          {/* Panel */}
           <div className="w-72 bg-white h-full shadow-xl flex flex-col">
             <div className="px-4 py-5 border-b border-gray-100 flex items-center justify-between">
               <img src="/Logo_OperLink.png" alt="OperLink" className="h-7" />
@@ -114,7 +126,6 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
                     💳 Planes
                   </a>
-
                   <div className="border-t border-gray-100 my-2" />
                   <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">Únete a OperLink</p>
                   <a href="/registro-operador" onClick={() => setMenuAbierto(false)}
@@ -127,7 +138,6 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
                     style={{borderColor: '#9A2120', color: '#9A2120'}}>
                     🏢 Soy Empresa
                   </a>
-
                   <div className="border-t border-gray-100 my-2" />
                   <a href="/login" onClick={() => setMenuAbierto(false)}
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
@@ -223,8 +233,8 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         </a>
         <a href={cuentaUrl()} className="flex flex-col items-center text-[10px] gap-0.5"
           style={{color: sesion ? '#9A2120' : '#9ca3af'}}>
-          <span className="text-xl">{sesion ? '👤' : '👤'}</span>
-          <span>{sesion ? (nombreUsuario || 'Cuenta') : 'Cuenta'}</span>
+          <span className="text-xl">👤</span>
+          <span>{sesion && nombreUsuario ? nombreUsuario : 'Cuenta'}</span>
         </a>
       </nav>
     </>
