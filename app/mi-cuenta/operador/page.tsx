@@ -13,14 +13,12 @@ function PerfilOperadorContent() {
   const [tab, setTab] = useState(searchParams.get('tab') || 'perfil')
   const [userId, setUserId] = useState<string | null>(null)
 
-  // Estados para edición
   const [editandoPerfil, setEditandoPerfil] = useState(false)
   const [editandoExperiencia, setEditandoExperiencia] = useState(false)
   const [guardando, setGuardando] = useState(false)
   const [formPerfil, setFormPerfil] = useState<any>({})
   const [textoExperiencia, setTextoExperiencia] = useState('')
 
-  // Estados para documentos
   const [subiendo, setSubiendo] = useState(false)
   const [fotoFile, setFotoFile] = useState<File | null>(null)
   const [fotoPreview, setFotoPreview] = useState<string | null>(null)
@@ -58,15 +56,13 @@ function PerfilOperadorContent() {
         if (op.foto_url) setFotoPreview(op.foto_url)
       }
 
-      // Postulaciones
       const { data: posts } = await supabase
         .from('aplicaciones')
-        .select('*, solicitudes(folio, tipo_maquinaria, ciudad, estado, estatus, sueldo_pago, duracion)')
+        .select('*, solicitudes(id, folio, tipo_maquinaria, ciudad, estado, estatus, sueldo_pago, duracion, empresa_id, empresas(nombre_empresa))')
         .eq('operador_id', op?.id)
         .order('fecha', { ascending: false })
       setPostulaciones(posts || [])
 
-      // Suscripción
       const { data: sus } = await supabase
         .from('suscripciones')
         .select('*, planes(nombre, precio, duracion)')
@@ -82,13 +78,18 @@ function PerfilOperadorContent() {
     cargar()
   }, [])
 
+  const handleCancelarPostulacion = async (aplicacionId: string) => {
+    await supabase
+      .from('aplicaciones')
+      .delete()
+      .eq('id', aplicacionId)
+    setPostulaciones(postulaciones.filter(p => p.id !== aplicacionId))
+  }
+
   const handleGuardarPerfil = async () => {
     if (!operador) return
     setGuardando(true)
-    await supabase
-      .from('operadores')
-      .update(formPerfil)
-      .eq('id', operador.id)
+    await supabase.from('operadores').update(formPerfil).eq('id', operador.id)
     setOperador({ ...operador, ...formPerfil })
     setEditandoPerfil(false)
     setGuardando(false)
@@ -97,10 +98,7 @@ function PerfilOperadorContent() {
   const handleGuardarExperiencia = async () => {
     if (!operador) return
     setGuardando(true)
-    await supabase
-      .from('operadores')
-      .update({ experiencia_texto: textoExperiencia })
-      .eq('id', operador.id)
+    await supabase.from('operadores').update({ experiencia_texto: textoExperiencia }).eq('id', operador.id)
     setOperador({ ...operador, experiencia_texto: textoExperiencia })
     setEditandoExperiencia(false)
     setGuardando(false)
@@ -128,7 +126,6 @@ function PerfilOperadorContent() {
   const handleSubirDocumentos = async () => {
     if (!operador) return
     setSubiendo(true)
-
     let licenciaUrl = operador.licencia_url
     let certUrls: string[] = operador.certificaciones || []
 
@@ -149,11 +146,7 @@ function PerfilOperadorContent() {
       certUrls.push(pub.publicUrl)
     }
 
-    await supabase.from('operadores').update({
-      licencia_url: licenciaUrl,
-      certificaciones: certUrls,
-    }).eq('id', operador.id)
-
+    await supabase.from('operadores').update({ licencia_url: licenciaUrl, certificaciones: certUrls }).eq('id', operador.id)
     setOperador({ ...operador, licencia_url: licenciaUrl, certificaciones: certUrls })
     setLicenciaFile(null)
     setCertFiles([])
@@ -225,7 +218,6 @@ function PerfilOperadorContent() {
                   {editandoPerfil ? 'Cancelar' : '✏️ Editar'}
                 </button>
               </div>
-
               {editandoPerfil ? (
                 <div className="flex flex-col gap-2">
                   {[
@@ -296,7 +288,6 @@ function PerfilOperadorContent() {
           <div className="flex flex-col gap-3">
             <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 flex flex-col items-center gap-4">
               <h2 className="text-sm font-bold self-start" style={{color: '#575757'}}>Foto de perfil</h2>
-
               {fotoPreview ? (
                 <img src={fotoPreview} alt="Foto" className="w-32 h-32 rounded-full object-cover border-4" style={{borderColor: '#9A2120'}} />
               ) : (
@@ -304,13 +295,11 @@ function PerfilOperadorContent() {
                   <span className="text-4xl">📷</span>
                 </div>
               )}
-
               <label className="w-full py-2.5 rounded-xl text-center text-xs font-bold border-2 cursor-pointer block"
                 style={{borderColor: '#9A2120', color: '#9A2120'}}>
                 {fotoFile ? '📷 Cambiar foto' : '📷 Seleccionar foto'}
                 <input type="file" accept="image/*" onChange={handleFoto} className="hidden" />
               </label>
-
               {fotoFile && (
                 <button onClick={handleSubirFoto} disabled={subiendo}
                   className="w-full py-2.5 rounded-xl text-white text-xs font-bold"
@@ -353,17 +342,12 @@ function PerfilOperadorContent() {
           <div className="flex flex-col gap-3">
             <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
               <h2 className="text-sm font-bold mb-3" style={{color: '#575757'}}>Documentos</h2>
-
-              {/* Licencia actual */}
               {operador.licencia_url && (
                 <div className="mb-3 p-2 bg-green-50 rounded-xl flex items-center justify-between">
                   <span className="text-xs font-semibold text-green-700">✅ Licencia subida</span>
-                  <a href={operador.licencia_url} target="_blank"
-                    className="text-xs text-green-700 underline">Ver</a>
+                  <a href={operador.licencia_url} target="_blank" className="text-xs text-green-700 underline">Ver</a>
                 </div>
               )}
-
-              {/* Certificaciones actuales */}
               {operador.certificaciones?.length > 0 && (
                 <div className="mb-3">
                   <p className="text-xs font-semibold mb-2" style={{color: '#575757'}}>Certificaciones ({operador.certificaciones.length})</p>
@@ -375,8 +359,6 @@ function PerfilOperadorContent() {
                   ))}
                 </div>
               )}
-
-              {/* Subir nueva licencia */}
               <div className="mb-3">
                 <label className="text-xs font-bold block mb-1" style={{color: '#575757'}}>
                   🚗 {operador.licencia_url ? 'Reemplazar licencia' : 'Subir licencia'}
@@ -387,20 +369,14 @@ function PerfilOperadorContent() {
                   <input type="file" accept="image/*,.pdf" onChange={(e) => setLicenciaFile(e.target.files?.[0] || null)} className="hidden" />
                 </label>
               </div>
-
-              {/* Subir certificaciones */}
               <div className="mb-3">
-                <label className="text-xs font-bold block mb-1" style={{color: '#575757'}}>
-                  📜 Agregar certificaciones
-                </label>
+                <label className="text-xs font-bold block mb-1" style={{color: '#575757'}}>📜 Agregar certificaciones</label>
                 <label className="w-full py-2.5 rounded-xl text-center text-xs font-bold border-2 cursor-pointer block"
                   style={{borderColor: certFiles.length > 0 ? '#9A2120' : '#e5e7eb', color: certFiles.length > 0 ? '#9A2120' : '#6b7280'}}>
                   {certFiles.length > 0 ? `✅ ${certFiles.length} archivo(s)` : '📎 Seleccionar archivos'}
-                  <input type="file" accept="image/*,.pdf" multiple
-                    onChange={(e) => setCertFiles(Array.from(e.target.files || []))} className="hidden" />
+                  <input type="file" accept="image/*,.pdf" multiple onChange={(e) => setCertFiles(Array.from(e.target.files || []))} className="hidden" />
                 </label>
               </div>
-
               {(licenciaFile || certFiles.length > 0) && (
                 <button onClick={handleSubirDocumentos} disabled={subiendo}
                   className="w-full py-2.5 rounded-xl text-white text-xs font-bold"
@@ -424,13 +400,11 @@ function PerfilOperadorContent() {
                   {editandoExperiencia ? 'Cancelar' : '✏️ Editar'}
                 </button>
               </div>
-
               {editandoExperiencia ? (
                 <div className="flex flex-col gap-2">
                   <p className="text-xs text-gray-400">Describe tu experiencia laboral — empresas donde trabajaste, proyectos, logros. En tus propias palabras.</p>
-                  <textarea value={textoExperiencia}
-                    onChange={(e) => setTextoExperiencia(e.target.value)}
-                    rows={8} placeholder="Ejemplo: Trabajé 3 años en Construcciones del Norte operando excavadora Caterpillar 320. Participé en proyectos de carreteras en Sonora y Chihuahua..."
+                  <textarea value={textoExperiencia} onChange={(e) => setTextoExperiencia(e.target.value)}
+                    rows={8} placeholder="Ejemplo: Trabajé 3 años en Construcciones del Norte operando excavadora Caterpillar 320..."
                     className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none resize-none" />
                   <button onClick={handleGuardarExperiencia} disabled={guardando}
                     className="w-full py-2.5 rounded-xl text-white text-xs font-bold"
@@ -459,7 +433,15 @@ function PerfilOperadorContent() {
         {/* Tab Postulaciones */}
         {tab === 'postulaciones' && (
           <div className="flex flex-col gap-3">
-            <p className="text-xs text-gray-400">{postulaciones.length} postulaciones</p>
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-gray-400">{postulaciones.length} postulaciones</p>
+              <a href="/solicitudes"
+                className="text-xs px-3 py-1.5 rounded-full font-semibold text-white"
+                style={{backgroundColor: '#9A2120'}}>
+                + Ver oportunidades
+              </a>
+            </div>
+
             {postulaciones.length === 0 ? (
               <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 text-center">
                 <div className="text-3xl mb-2">📋</div>
@@ -473,9 +455,13 @@ function PerfilOperadorContent() {
             ) : (
               postulaciones.map((post, i) => {
                 const sol = post.solicitudes
+                const empresa = sol?.empresas
+                const tieneplan = !!suscripcion
+
                 return (
                   <div key={i} className="bg-white rounded-xl shadow-sm p-3 border border-gray-100">
-                    <div className="flex items-center justify-between mb-1">
+                    {/* Estatus */}
+                    <div className="flex items-center justify-between mb-2">
                       <p className="text-xs font-bold" style={{color: '#9A2120'}}>#{sol?.folio}</p>
                       <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
                         style={{
@@ -485,6 +471,8 @@ function PerfilOperadorContent() {
                         {post.estatus === 'aceptado' ? '✅ Aceptado' : post.estatus === 'rechazado' ? '❌ Rechazado' : '⏳ Pendiente'}
                       </span>
                     </div>
+
+                    {/* Info solicitud */}
                     <p className="text-sm font-bold" style={{color: '#575757'}}>{sol?.tipo_maquinaria}</p>
                     <p className="text-xs text-gray-400">📍 {sol?.ciudad}, {sol?.estado}</p>
                     <p className="text-xs text-gray-400">⏱ {sol?.duracion}</p>
@@ -492,6 +480,38 @@ function PerfilOperadorContent() {
                       <p className="text-xs font-bold mt-1" style={{color: '#9A2120'}}>
                         💰 ${sol?.sueldo_pago?.toLocaleString('es-MX')} MXN
                       </p>
+                    )}
+
+                    {/* Empresa — bloqueada o visible según plan */}
+                    <div className="mt-2 pt-2 border-t border-gray-100">
+                      {tieneplan ? (
+                        <p className="text-xs font-semibold" style={{color: '#575757'}}>
+                          🏢 {empresa?.nombre_empresa || 'Empresa'}
+                        </p>
+                      ) : (
+                        <div className="rounded-xl p-2 flex items-center justify-between"
+                          style={{backgroundColor: '#fff5f5', border: '1px dashed #9A2120'}}>
+                          <div>
+                            <p className="text-xs font-bold" style={{color: '#9A2120'}}>🔒 Empresa bloqueada</p>
+                            <p className="text-[10px] text-gray-400">Activa un plan para ver quién te contrataría</p>
+                          </div>
+                          <a href="/planes"
+                            className="text-[10px] px-2 py-1 rounded-full text-white font-bold"
+                            style={{backgroundColor: '#9A2120'}}>
+                            Ver planes
+                          </a>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Cancelar postulación */}
+                    {post.estatus === 'pendiente' && (
+                      <button
+                        onClick={() => handleCancelarPostulacion(post.id)}
+                        className="mt-2 w-full py-1.5 rounded-xl text-xs font-bold border-2"
+                        style={{borderColor: '#e5e7eb', color: '#6b7280'}}>
+                        Cancelar postulación
+                      </button>
                     )}
                   </div>
                 )
