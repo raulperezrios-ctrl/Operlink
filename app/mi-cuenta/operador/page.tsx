@@ -495,7 +495,7 @@ function PerfilOperadorContent() {
                             <p className="text-xs font-bold" style={{color: '#9A2120'}}>🔒 Empresa bloqueada</p>
                             <p className="text-[10px] text-gray-400">Activa un plan para ver quién te contrataría</p>
                           </div>
-                          <a href="/planes"
+                          <a href="/planes?tipo=operador"
                             className="text-[10px] px-2 py-1 rounded-full text-white font-bold"
                             style={{backgroundColor: '#9A2120'}}>
                             Ver planes
@@ -541,7 +541,7 @@ function PerfilOperadorContent() {
                 <p className="text-xs text-gray-400 mb-3 leading-relaxed">
                   Con un plan puedes ver qué empresas buscan operadores como tú y contactarlas directamente.
                 </p>
-                <a href="/planes"
+                <a href="/planes?tipo=operador"
                   className="w-full py-2.5 rounded-xl text-white text-xs font-bold text-center block"
                   style={{backgroundColor: '#9A2120'}}>
                   Ver planes desde $99 MXN

@@ -1,10 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { supabase } from '../lib/supabase'
 
-export default function Planes() {
-  const [tipo, setTipo] = useState<'empresa' | 'operador'>('empresa')
+function PlanesContent() {
+  const searchParams = useSearchParams()
+  const tipoParam = searchParams.get('tipo')
+  const [tipo, setTipo] = useState<'empresa' | 'operador'>(
+    tipoParam === 'operador' ? 'operador' : 'empresa'
+  )
   const [planes, setPlanes] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [sesion, setSesion] = useState<any>(null)
@@ -79,7 +84,6 @@ export default function Planes() {
                     {plan.duracion === 'anual' && <p className="text-[10px] text-gray-400">por año</p>}
                   </div>
 
-                  {/* Features */}
                   <div className="flex flex-col gap-1 mb-4 flex-1">
                     {plan.duracion === 'por_contacto' && <p className="text-[10px] text-gray-500">✅ {plan.contactos} contacto</p>}
                     {plan.duracion === 'paquete' && <p className="text-[10px] text-gray-500">✅ {plan.contactos} contactos</p>}
@@ -143,5 +147,13 @@ export default function Planes() {
       )}
 
     </div>
+  )
+}
+
+export default function Planes() {
+  return (
+    <Suspense fallback={<div className="text-center py-20 text-sm text-gray-400">Cargando...</div>}>
+      <PlanesContent />
+    </Suspense>
   )
 }
