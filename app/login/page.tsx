@@ -116,7 +116,7 @@ export default function Login() {
 
           {error && <p className="text-xs text-red-500 text-center">{error}</p>}
 
-          <a href="#" className="text-xs text-right" style={{color: '#9A2120'}}>¿Olvidaste tu contraseña?</a>
+          <a href="/recuperar-password" className="text-xs text-right" style={{color: '#9A2120'}}>¿Olvidaste tu contraseña?</a>
 
           <button
             onClick={handleLogin}
