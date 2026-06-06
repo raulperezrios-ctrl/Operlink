@@ -23,7 +23,7 @@ export default function AdminOperadores() {
   const operadoresFiltrados = operadores.filter(op => {
     if (filtro === 'todos') return true
     if (filtro === 'verificados') return op.verificado === true
-    if (filtro === 'sin_verificar') return !op.verificado
+    if (filtro === 'sin_verificar') return !op.verificado || op.verificado === false || op.verificado === null
     if (filtro === 'activos') return op.disponibilidad === 'disponible'
     if (filtro === 'desactivados') return op.disponibilidad === 'desactivado'
     return true
@@ -31,18 +31,18 @@ export default function AdminOperadores() {
 
   const conteos = {
     todos: operadores.length,
-    verificados: operadores.filter(o => o.verificado).length,
-    sin_verificar: operadores.filter(o => !o.verificado).length,
+    verificados: operadores.filter(o => o.verificado === true).length,
+    sin_verificar: operadores.filter(o => !o.verificado || o.verificado === null).length,
     activos: operadores.filter(o => o.disponibilidad === 'disponible').length,
     desactivados: operadores.filter(o => o.disponibilidad === 'desactivado').length,
   }
 
   const filtros = [
     { id: 'todos', label: 'Todos', count: conteos.todos },
-    { id: 'sin_verificar', label: 'Sin verificar', count: conteos.sin_verificar, color: '#ca8a04' },
-    { id: 'verificados', label: 'Verificados', count: conteos.verificados, color: '#1d4ed8' },
-    { id: 'activos', label: 'Activos', count: conteos.activos, color: '#16a34a' },
-    { id: 'desactivados', label: 'Desactivados', count: conteos.desactivados, color: '#dc2626' },
+    { id: 'sin_verificar', label: '⏳ Sin verificar', count: conteos.sin_verificar, color: '#ca8a04' },
+    { id: 'verificados', label: '✔ Verificados', count: conteos.verificados, color: '#1d4ed8' },
+    { id: 'activos', label: '✅ Activos', count: conteos.activos, color: '#16a34a' },
+    { id: 'desactivados', label: '🚫 Desactivados', count: conteos.desactivados, color: '#dc2626' },
   ]
 
   return (
@@ -97,10 +97,9 @@ export default function AdminOperadores() {
                   <p className="text-sm font-bold" style={{color: '#575757'}}>
                     {op.nombre} {op.apellido}
                   </p>
-                  {op.verificado && (
+                  {op.verificado ? (
                     <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold" style={{backgroundColor: '#dbeafe', color: '#1d4ed8'}}>✔ Verificado</span>
-                  )}
-                  {!op.verificado && (
+                  ) : (
                     <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold" style={{backgroundColor: '#fef9c3', color: '#ca8a04'}}>⏳ Sin verificar</span>
                   )}
                 </div>
@@ -114,7 +113,7 @@ export default function AdminOperadores() {
                     backgroundColor: op.disponibilidad === 'disponible' ? '#dcfce7' : op.disponibilidad === 'desactivado' ? '#fee2e2' : '#f3f4f6',
                     color: op.disponibilidad === 'disponible' ? '#16a34a' : op.disponibilidad === 'desactivado' ? '#dc2626' : '#6b7280'
                   }}>
-                  {op.disponibilidad === 'disponible' ? '✅ Activo' : op.disponibilidad === 'desactivado' ? '🚫 Desactivado' : op.disponibilidad || 'N/D'}
+                  {op.disponibilidad === 'disponible' ? '✅ Activo' : op.disponibilidad === 'desactivado' ? '🚫 Desactivado' : '⏸ ' + (op.disponibilidad || 'N/D')}
                 </span>
                 <p className="text-[10px] text-gray-400">{op.experiencia_anos} años exp.</p>
               </div>
