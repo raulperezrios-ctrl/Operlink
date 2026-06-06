@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useRouter } from 'next/navigation'
+import { estadosMunicipios, estados } from '../lib/mexico'
 
 export default function RegistroOperador() {
   const router = useRouter()
@@ -19,6 +20,7 @@ export default function RegistroOperador() {
     telefono: '',
     ciudad: '',
     estado: 'Jalisco',
+    municipio: 'Guadalajara',
     experiencia_anos: '',
     descripcion: '',
     email: '',
@@ -26,7 +28,13 @@ export default function RegistroOperador() {
   })
 
   const handleChange = (e: any) => {
-    setForm({...form, [e.target.name]: e.target.value})
+    const { name, value } = e.target
+    if (name === 'estado') {
+      const municipios = estadosMunicipios[value] || []
+      setForm({...form, estado: value, municipio: municipios[0] || ''})
+    } else {
+      setForm({...form, [name]: value})
+    }
   }
 
   const handleRegistro = async () => {
@@ -69,6 +77,7 @@ export default function RegistroOperador() {
       telefono: form.telefono,
       ciudad: form.ciudad,
       estado: form.estado,
+      municipio: form.municipio,
       tipo_operador: tipoOperador,
       experiencia_anos: parseInt(form.experiencia_anos),
       disponibilidad: disponibilidad,
@@ -85,6 +94,8 @@ export default function RegistroOperador() {
     {emoji: '📦', label: 'Almacén / Logística', desc: 'Montacargas, reach truck...'},
     {emoji: '🚛', label: 'Transporte', desc: 'Tractocamión, volteo, pipa...'},
   ]
+
+  const municipios = estadosMunicipios[form.estado] || []
 
   return (
     <div className="bg-gray-50 pb-10">
@@ -136,22 +147,28 @@ export default function RegistroOperador() {
             <input name="telefono" type="tel" placeholder="33 1234 5678" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
           </div>
 
+          <div>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Ciudad *</label>
+            <input name="ciudad" type="text" placeholder="Ej. Guadalajara" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
+          </div>
+
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Ciudad *</label>
-              <input name="ciudad" type="text" placeholder="Ciudad" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
+              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Estado *</label>
+              <select name="estado" value={form.estado} onChange={handleChange}
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
+                {estados.map((e) => (
+                  <option key={e} value={e}>{e}</option>
+                ))}
+              </select>
             </div>
             <div>
-              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Estado *</label>
-              <select name="estado" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
-                <option>Jalisco</option>
-                <option>Nuevo León</option>
-                <option>CDMX</option>
-                <option>Puebla</option>
-                <option>Guanajuato</option>
-                <option>Sonora</option>
-                <option>Chihuahua</option>
-                <option>Veracruz</option>
+              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Municipio *</label>
+              <select name="municipio" value={form.municipio} onChange={handleChange}
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
+                {municipios.map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -236,5 +253,5 @@ export default function RegistroOperador() {
       </div>
 
     </div>
-  );
+  )
 }
