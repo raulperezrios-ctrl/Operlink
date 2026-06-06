@@ -10,56 +10,50 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   const [menuAbierto, setMenuAbierto] = useState(false)
   const [cargando, setCargando] = useState(true)
 
-  const cargarUsuario = async (userId: string) => {
-    const { data: usuario } = await supabase
-      .from('usuarios')
-      .select('tipo')
-      .eq('id', userId)
-      .single()
-    setTipoUsuario(usuario?.tipo || null)
-
-    if (usuario?.tipo === 'operador') {
-      const { data: op } = await supabase
-        .from('operadores')
-        .select('nombre')
-        .eq('user_id', userId)
-        .single()
-      setNombreUsuario(op?.nombre || null)
-    } else if (usuario?.tipo === 'empresa') {
-      const { data: emp } = await supabase
-        .from('empresas')
-        .select('nombre_contacto')
-        .eq('user_id', userId)
-        .single()
-      setNombreUsuario(emp?.nombre_contacto?.split(' ')[0] || null)
-    } else if (usuario?.tipo === 'admin') {
-      setNombreUsuario('Admin')
-    }
-  }
-
   useEffect(() => {
     const cargar = async () => {
-      const { data: sessionData } = await supabase.auth.getSession()
-      const userId = sessionData.session?.user?.id
-      setSesion(sessionData.session)
-      if (userId) await cargarUsuario(userId)
-      setCargando(false)
+      try {
+        const { data: sessionData } = await supabase.auth.getSession()
+        const session = sessionData.session
+        const userId = session?.user?.id
+        setSesion(session)
+
+        if (userId) {
+          const { data: usuario } = await supabase
+            .from('usuarios')
+            .select('tipo')
+            .eq('id', userId)
+            .single()
+
+          const tipo = usuario?.tipo || null
+          setTipoUsuario(tipo)
+
+          if (tipo === 'operador') {
+            const { data: op } = await supabase
+              .from('operadores')
+              .select('nombre')
+              .eq('user_id', userId)
+              .single()
+            setNombreUsuario(op?.nombre || null)
+          } else if (tipo === 'empresa') {
+            const { data: emp } = await supabase
+              .from('empresas')
+              .select('nombre_contacto')
+              .eq('user_id', userId)
+              .single()
+            setNombreUsuario(emp?.nombre_contacto?.split(' ')[0] || null)
+          } else if (tipo === 'admin') {
+            setNombreUsuario('Admin')
+          }
+        }
+      } catch (e) {
+        console.error('Error cargando sesión:', e)
+      } finally {
+        setCargando(false)
+      }
     }
 
     cargar()
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setSesion(session)
-      if (session?.user?.id) {
-        await cargarUsuario(session.user.id)
-      } else {
-        setTipoUsuario(null)
-        setNombreUsuario(null)
-      }
-      setCargando(false)
-    })
-
-    return () => subscription.unsubscribe()
   }, [])
 
   const cuentaUrl = () => {
@@ -185,7 +179,6 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
       </>
     )
 
-    // Sesión activa pero tipo desconocido
     return (
       <>
         <button onClick={handleCerrarSesion}
@@ -204,7 +197,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           <img src="/Logo_OperLink.png" alt="OperLink" className="h-8 object-contain" />
         </a>
         <div className="flex items-center gap-2">
-          {sesion && nombreUsuario && (
+          {!cargando && sesion && nombreUsuario && (
             <a href={cuentaUrl()}
               className="text-xs font-semibold px-3 py-1 rounded-full"
               style={{backgroundColor: '#fff5f5', color: '#9A2120'}}>
@@ -259,9 +252,9 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           <span>Solicitudes</span>
         </a>
         <a href={cuentaUrl()} className="flex flex-col items-center text-[10px] gap-0.5"
-          style={{color: sesion ? '#9A2120' : '#9ca3af'}}>
+          style={{color: !cargando && sesion ? '#9A2120' : '#9ca3af'}}>
           <span className="text-xl">👤</span>
-          <span>{sesion && nombreUsuario ? nombreUsuario : 'Cuenta'}</span>
+          <span>{!cargando && sesion && nombreUsuario ? nombreUsuario : 'Cuenta'}</span>
         </a>
       </nav>
     </>
