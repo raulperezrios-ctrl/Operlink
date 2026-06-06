@@ -10,7 +10,7 @@ export default function AdminOperadores() {
 
   useEffect(() => {
     const fetchOperadores = async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('operadores')
         .select('*')
       setOperadores(data || [])
@@ -55,16 +55,26 @@ export default function AdminOperadores() {
               <div className="text-right">
                 <span className="text-xs font-semibold px-2 py-1 rounded-full"
                   style={{
-                    backgroundColor: op.disponibilidad === 'Disponible' ? '#dcfce7' : '#fee2e2',
-                    color: op.disponibilidad === 'Disponible' ? '#16a34a' : '#dc2626'
+                    backgroundColor: op.disponibilidad === 'disponible' ? '#dcfce7' : '#fee2e2',
+                    color: op.disponibilidad === 'disponible' ? '#16a34a' : '#dc2626'
                   }}>
-                  {op.disponibilidad || 'N/D'}
+                  {op.disponibilidad === 'desactivado' ? '🚫 Desactivado' : op.disponibilidad || 'N/D'}
                 </span>
                 <p className="text-xs text-gray-400 mt-1">{op.experiencia_anos} años exp.</p>
               </div>
             </div>
-            <div className="mt-2 pt-2 border-t border-gray-50">
+            <div className="mt-2 pt-2 border-t border-gray-50 flex items-center justify-between">
               <p className="text-xs text-gray-400">{op.correo}</p>
+              <div className="flex items-center gap-2">
+                {op.verificado && (
+                  <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{backgroundColor: '#dbeafe', color: '#1d4ed8'}}>✔ Verificado</span>
+                )}
+                <a href={`/admin/operadores/detalle?id=${op.id}`}
+                  className="text-xs px-3 py-1.5 rounded-full font-semibold text-white"
+                  style={{backgroundColor: '#9A2120'}}>
+                  Ver detalle
+                </a>
+              </div>
             </div>
           </div>
         ))}
