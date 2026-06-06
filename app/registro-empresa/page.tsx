@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useRouter } from 'next/navigation'
+import { estadosMunicipios, estados } from '../lib/mexico'
 
 export default function RegistroEmpresa() {
   const router = useRouter()
@@ -16,6 +17,7 @@ export default function RegistroEmpresa() {
     telefono: '',
     ciudad: '',
     estado: 'Jalisco',
+    municipio: 'Guadalajara',
     sitio_web: '',
     descripcion: '',
     email: '',
@@ -23,14 +25,19 @@ export default function RegistroEmpresa() {
   })
 
   const handleChange = (e: any) => {
-    setForm({...form, [e.target.name]: e.target.value})
+    const { name, value } = e.target
+    if (name === 'estado') {
+      const municipios = estadosMunicipios[value] || []
+      setForm({...form, estado: value, municipio: municipios[0] || ''})
+    } else {
+      setForm({...form, [name]: value})
+    }
   }
 
   const handleRegistro = async () => {
     setLoading(true)
     setError('')
 
-    // 1. Crear usuario en Supabase Auth
     const { data, error: authError } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
@@ -42,9 +49,7 @@ export default function RegistroEmpresa() {
       return
     }
 
-    // 2. Obtener el user_id — primero de signUp, si no, del session activo
     let userId = data.user?.id
-
     if (!userId) {
       const { data: sessionData } = await supabase.auth.getSession()
       userId = sessionData.session?.user?.id
@@ -56,14 +61,12 @@ export default function RegistroEmpresa() {
       return
     }
 
-    // 3. Guardar en tabla usuarios
     await supabase.from('usuarios').insert({
       id: userId,
       email: form.email,
       tipo: 'empresa',
     })
 
-    // 4. Guardar en tabla empresas
     const { error: empresaError } = await supabase.from('empresas').insert({
       user_id: userId,
       nombre_empresa: form.nombre_empresa,
@@ -71,6 +74,7 @@ export default function RegistroEmpresa() {
       telefono: form.telefono,
       ciudad: form.ciudad,
       estado: form.estado,
+      municipio: form.municipio,
       industria: industria,
       sitio_web: form.sitio_web,
       descripcion: form.descripcion,
@@ -95,6 +99,8 @@ export default function RegistroEmpresa() {
     {emoji: '🌾', label: 'Agricultura'},
     {emoji: '🔧', label: 'Otra'},
   ]
+
+  const municipios = estadosMunicipios[form.estado] || []
 
   return (
     <div className="bg-gray-50 pb-10">
@@ -146,22 +152,28 @@ export default function RegistroEmpresa() {
             <input name="telefono" type="tel" placeholder="33 1234 5678" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
           </div>
 
+          <div>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Ciudad *</label>
+            <input name="ciudad" type="text" placeholder="Ej. Guadalajara" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
+          </div>
+
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Ciudad *</label>
-              <input name="ciudad" type="text" placeholder="Ciudad" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
+              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Estado *</label>
+              <select name="estado" value={form.estado} onChange={handleChange}
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
+                {estados.map((e) => (
+                  <option key={e} value={e}>{e}</option>
+                ))}
+              </select>
             </div>
             <div>
-              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Estado *</label>
-              <select name="estado" onChange={handleChange} className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
-                <option>Jalisco</option>
-                <option>Nuevo León</option>
-                <option>CDMX</option>
-                <option>Puebla</option>
-                <option>Guanajuato</option>
-                <option>Sonora</option>
-                <option>Chihuahua</option>
-                <option>Veracruz</option>
+              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Municipio *</label>
+              <select name="municipio" value={form.municipio} onChange={handleChange}
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
+                {municipios.map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -203,5 +215,5 @@ export default function RegistroEmpresa() {
       </div>
 
     </div>
-  );
+  )
 }
