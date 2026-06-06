@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
+import { estadosMunicipios, estados } from '../../lib/mexico'
 
 export default function NuevaSolicitud() {
   const router = useRouter()
@@ -16,9 +17,11 @@ export default function NuevaSolicitud() {
     tipo_maquinaria: '',
     ciudad: '',
     estado: 'Jalisco',
+    municipio: 'Guadalajara',
     fecha_inicio: '',
-    duracion: 'por hora',
+    duracion: '1 día',
     sueldo_pago: '',
+    pago_periodo: 'por día',
     descripcion: '',
   })
 
@@ -26,32 +29,26 @@ export default function NuevaSolicitud() {
     const cargar = async () => {
       const { data: sessionData } = await supabase.auth.getSession()
       const userId = sessionData.session?.user?.id
-      if (!userId) {
-        window.location.href = '/login'
-        return
-      }
-
-      const { data: emp } = await supabase
-        .from('empresas')
-        .select('id')
-        .eq('user_id', userId)
-        .single()
-
-      if (!emp) {
-        window.location.href = '/login'
-        return
-      }
+      if (!userId) { window.location.href = '/login'; return }
+      const { data: emp } = await supabase.from('empresas').select('id').eq('user_id', userId).single()
+      if (!emp) { window.location.href = '/login'; return }
       setEmpresaId(emp.id)
     }
     cargar()
   }, [])
 
   const handleChange = (e: any) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
+    const { name, value } = e.target
+    if (name === 'estado') {
+      const municipios = estadosMunicipios[value] || []
+      setForm({ ...form, estado: value, municipio: municipios[0] || '' })
+    } else {
+      setForm({ ...form, [name]: value })
+    }
   }
 
   const handlePublicar = async () => {
-    if (!form.tipo_maquinaria || !form.ciudad || !form.descripcion) {
+    if (!form.tipo_maquinaria || !form.descripcion) {
       setError('Por favor completa los campos obligatorios')
       return
     }
@@ -74,6 +71,7 @@ export default function NuevaSolicitud() {
         tipo_solicitud: tipoSolicitud,
         ciudad: form.ciudad,
         estado: form.estado,
+        municipio: form.municipio,
         fecha_inicio: form.fecha_inicio || null,
         duracion: form.duracion,
         sueldo_pago: form.sueldo_pago ? parseFloat(form.sueldo_pago) : null,
@@ -101,6 +99,7 @@ export default function NuevaSolicitud() {
   ]
 
   const duraciones = ['por hora', 'por día', 'por semana', 'por mes', 'por contrato']
+  const municipios = estadosMunicipios[form.estado] || []
 
   return (
     <div className="bg-gray-50 pb-10">
@@ -125,16 +124,8 @@ export default function NuevaSolicitud() {
             <label className="text-xs font-semibold block mb-2" style={{color: '#575757'}}>Tipo de solicitud *</label>
             <div className="flex flex-col gap-2">
               {[
-                {
-                  emoji: '👷',
-                  label: 'Solo Operador',
-                  desc: 'Necesito un operador para mi propio equipo'
-                },
-                {
-                  emoji: '🚜',
-                  label: 'Operador con Máquina',
-                  desc: 'Hombre-Máquina / Hombre-Camión — operador con su equipo incluido'
-                },
+                { emoji: '👷', label: 'Solo Operador', desc: 'Necesito un operador para mi propio equipo' },
+                { emoji: '🚜', label: 'Operador con Máquina', desc: 'Hombre-Máquina / Hombre-Camión — operador con su equipo incluido' },
               ].map((tipo) => (
                 <button key={tipo.label} onClick={() => setTipoSolicitud(tipo.label)}
                   className="flex items-center gap-3 border-2 rounded-xl p-3 text-left w-full"
@@ -169,29 +160,31 @@ export default function NuevaSolicitud() {
             </select>
           </div>
 
-          {/* Ciudad y Estado */}
+          {/* Ciudad */}
+          <div>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Ciudad</label>
+            <input name="ciudad" type="text" placeholder="Ej. Guadalajara" onChange={handleChange}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm" />
+          </div>
+
+          {/* Estado y Municipio */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Ciudad *</label>
-              <input name="ciudad" type="text" placeholder="Ciudad" onChange={handleChange}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm" />
+              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Estado *</label>
+              <select name="estado" value={form.estado} onChange={handleChange}
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
+                {estados.map((e) => (
+                  <option key={e} value={e}>{e}</option>
+                ))}
+              </select>
             </div>
             <div>
-              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Estado *</label>
-              <select name="estado" onChange={handleChange}
+              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Municipio *</label>
+              <select name="municipio" value={form.municipio} onChange={handleChange}
                 className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
-                <option>Jalisco</option>
-                <option>Nuevo León</option>
-                <option>CDMX</option>
-                <option>Puebla</option>
-                <option>Guanajuato</option>
-                <option>Sonora</option>
-                <option>Chihuahua</option>
-                <option>Veracruz</option>
-                <option>Coahuila</option>
-                <option>Tamaulipas</option>
-                <option>Sinaloa</option>
-                <option>Baja California</option>
+                {municipios.map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -199,7 +192,7 @@ export default function NuevaSolicitud() {
           {/* Fecha y Duración */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Fecha inicio *</label>
+              <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Fecha inicio</label>
               <input name="fecha_inicio" type="date" onChange={handleChange}
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm" />
             </div>
@@ -217,7 +210,7 @@ export default function NuevaSolicitud() {
             </div>
           </div>
 
-          {/* Presupuesto con unidad */}
+          {/* Presupuesto */}
           <div>
             <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Presupuesto / Pago (MXN)</label>
             <div className="flex gap-2 items-center">
@@ -227,7 +220,7 @@ export default function NuevaSolicitud() {
                   className="flex-1 py-2.5 text-sm focus:outline-none" />
                 <span className="px-2 text-xs text-gray-400">MXN</span>
               </div>
-              <select name="duracion" onChange={handleChange}
+              <select name="pago_periodo" onChange={handleChange}
                 className="border border-gray-200 rounded-xl px-2 py-2.5 text-xs text-gray-600">
                 {duraciones.map((d, i) => (
                   <option key={i} value={d}>{d}</option>
