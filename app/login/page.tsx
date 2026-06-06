@@ -24,7 +24,6 @@ export default function Login() {
       return
     }
 
-    // Verificar el tipo de usuario en la tabla usuarios
     const { data: usuario } = await supabase
       .from('usuarios')
       .select('tipo')
@@ -32,9 +31,11 @@ export default function Login() {
       .single()
 
     if (usuario?.tipo === 'operador') {
-      router.push('/registro-operador')
+      router.push('/mi-cuenta/operador')
     } else if (usuario?.tipo === 'empresa') {
-      router.push('/empresas')
+      router.push('/mi-cuenta/empresa')
+    } else if (usuario?.tipo === 'admin') {
+      router.push('/admin')
     } else {
       router.push('/')
     }
@@ -143,5 +144,5 @@ export default function Login() {
       </div>
 
     </div>
-  );
+  )
 }
