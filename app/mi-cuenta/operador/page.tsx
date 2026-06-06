@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
+import { estadosMunicipios, estados } from '../../lib/mexico'
 
 function PerfilOperadorContent() {
   const searchParams = useSearchParams()
@@ -29,17 +30,11 @@ function PerfilOperadorContent() {
     const cargar = async () => {
       const { data: sessionData } = await supabase.auth.getSession()
       const uid = sessionData.session?.user?.id
-      if (!uid) {
-        window.location.href = '/login'
-        return
-      }
+      if (!uid) { window.location.href = '/login'; return }
       setUserId(uid)
 
       const { data: op } = await supabase
-        .from('operadores')
-        .select('*')
-        .eq('user_id', uid)
-        .single()
+        .from('operadores').select('*').eq('user_id', uid).single()
       setOperador(op)
       if (op) {
         setFormPerfil({
@@ -47,7 +42,8 @@ function PerfilOperadorContent() {
           apellido: op.apellido || '',
           telefono: op.telefono || '',
           ciudad: op.ciudad || '',
-          estado: op.estado || '',
+          estado: op.estado || 'Jalisco',
+          municipio: op.municipio || '',
           experiencia_anos: op.experiencia_anos || '',
           descripcion: op.descripcion || '',
           disponibilidad: op.disponibilidad || 'disponible',
@@ -66,11 +62,9 @@ function PerfilOperadorContent() {
       const { data: sus } = await supabase
         .from('suscripciones')
         .select('*, planes(nombre, precio, duracion)')
-        .eq('user_id', uid)
-        .eq('estatus', 'activa')
+        .eq('user_id', uid).eq('estatus', 'activa')
         .order('fecha_inicio', { ascending: false })
-        .limit(1)
-        .single()
+        .limit(1).single()
       setSuscripcion(sus)
 
       setLoading(false)
@@ -78,11 +72,18 @@ function PerfilOperadorContent() {
     cargar()
   }, [])
 
+  const handleFormChange = (e: any) => {
+    const { name, value } = e.target
+    if (name === 'estado') {
+      const municipios = estadosMunicipios[value] || []
+      setFormPerfil({...formPerfil, estado: value, municipio: municipios[0] || ''})
+    } else {
+      setFormPerfil({...formPerfil, [name]: value})
+    }
+  }
+
   const handleCancelarPostulacion = async (aplicacionId: string) => {
-    await supabase
-      .from('aplicaciones')
-      .delete()
-      .eq('id', aplicacionId)
+    await supabase.from('aplicaciones').delete().eq('id', aplicacionId)
     setPostulaciones(postulaciones.filter(p => p.id !== aplicacionId))
   }
 
@@ -171,6 +172,8 @@ function PerfilOperadorContent() {
     { id: 'plan', label: '💳 Plan' },
   ]
 
+  const municipios = estadosMunicipios[formPerfil.estado] || []
+
   return (
     <div className="bg-gray-50 min-h-screen pb-24">
 
@@ -228,18 +231,40 @@ function PerfilOperadorContent() {
                   ].map((field) => (
                     <div key={field.name}>
                       <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>{field.label}</label>
-                      <input value={formPerfil[field.name] || ''} onChange={(e) => setFormPerfil({...formPerfil, [field.name]: e.target.value})}
+                      <input name={field.name} value={formPerfil[field.name] || ''}
+                        onChange={handleFormChange}
                         className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none" />
                     </div>
                   ))}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Estado</label>
+                      <select name="estado" value={formPerfil.estado} onChange={handleFormChange}
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm">
+                        {estados.map((e) => (
+                          <option key={e} value={e}>{e}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Municipio</label>
+                      <select name="municipio" value={formPerfil.municipio} onChange={handleFormChange}
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm">
+                        {municipios.map((m) => (
+                          <option key={m} value={m}>{m}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
                   <div>
                     <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Años de experiencia</label>
-                    <input type="number" value={formPerfil.experiencia_anos || ''} onChange={(e) => setFormPerfil({...formPerfil, experiencia_anos: e.target.value})}
+                    <input name="experiencia_anos" type="number" value={formPerfil.experiencia_anos || ''}
+                      onChange={handleFormChange}
                       className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none" />
                   </div>
                   <div>
                     <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Disponibilidad</label>
-                    <select value={formPerfil.disponibilidad} onChange={(e) => setFormPerfil({...formPerfil, disponibilidad: e.target.value})}
+                    <select name="disponibilidad" value={formPerfil.disponibilidad} onChange={handleFormChange}
                       className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm">
                       <option value="disponible">Disponible</option>
                       <option value="no_disponible">No disponible</option>
@@ -247,7 +272,7 @@ function PerfilOperadorContent() {
                   </div>
                   <div>
                     <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Descripción breve</label>
-                    <textarea value={formPerfil.descripcion || ''} onChange={(e) => setFormPerfil({...formPerfil, descripcion: e.target.value})}
+                    <textarea name="descripcion" value={formPerfil.descripcion || ''} onChange={handleFormChange}
                       rows={3} className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none resize-none" />
                   </div>
                   <button onClick={handleGuardarPerfil} disabled={guardando}
@@ -261,7 +286,9 @@ function PerfilOperadorContent() {
                   {[
                     {label: 'Nombre', value: `${operador.nombre} ${operador.apellido}`},
                     {label: 'Teléfono', value: operador.telefono},
-                    {label: 'Ciudad', value: `${operador.ciudad}, ${operador.estado}`},
+                    {label: 'Ciudad', value: operador.ciudad},
+                    {label: 'Estado', value: operador.estado},
+                    {label: 'Municipio', value: operador.municipio || 'No especificado'},
                     {label: 'Tipo', value: operador.tipo_operador},
                     {label: 'Experiencia', value: `${operador.experiencia_anos} años`},
                     {label: 'Disponibilidad', value: operador.disponibilidad === 'disponible' ? '✅ Disponible' : '❌ No disponible'},
@@ -441,7 +468,6 @@ function PerfilOperadorContent() {
                 + Ver oportunidades
               </a>
             </div>
-
             {postulaciones.length === 0 ? (
               <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 text-center">
                 <div className="text-3xl mb-2">📋</div>
@@ -457,10 +483,8 @@ function PerfilOperadorContent() {
                 const sol = post.solicitudes
                 const empresa = sol?.empresas
                 const tieneplan = !!suscripcion
-
                 return (
                   <div key={i} className="bg-white rounded-xl shadow-sm p-3 border border-gray-100">
-                    {/* Estatus */}
                     <div className="flex items-center justify-between mb-2">
                       <p className="text-xs font-bold" style={{color: '#9A2120'}}>#{sol?.folio}</p>
                       <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
@@ -471,8 +495,6 @@ function PerfilOperadorContent() {
                         {post.estatus === 'aceptado' ? '✅ Aceptado' : post.estatus === 'rechazado' ? '❌ Rechazado' : '⏳ Pendiente'}
                       </span>
                     </div>
-
-                    {/* Info solicitud */}
                     <p className="text-sm font-bold" style={{color: '#575757'}}>{sol?.tipo_maquinaria}</p>
                     <p className="text-xs text-gray-400">📍 {sol?.ciudad}, {sol?.estado}</p>
                     <p className="text-xs text-gray-400">⏱ {sol?.duracion}</p>
@@ -481,8 +503,6 @@ function PerfilOperadorContent() {
                         💰 ${sol?.sueldo_pago?.toLocaleString('es-MX')} MXN
                       </p>
                     )}
-
-                    {/* Empresa — bloqueada o visible según plan */}
                     <div className="mt-2 pt-2 border-t border-gray-100">
                       {tieneplan ? (
                         <p className="text-xs font-semibold" style={{color: '#575757'}}>
@@ -503,11 +523,8 @@ function PerfilOperadorContent() {
                         </div>
                       )}
                     </div>
-
-                    {/* Cancelar postulación */}
                     {post.estatus === 'pendiente' && (
-                      <button
-                        onClick={() => handleCancelarPostulacion(post.id)}
+                      <button onClick={() => handleCancelarPostulacion(post.id)}
                         className="mt-2 w-full py-1.5 rounded-xl text-xs font-bold border-2"
                         style={{borderColor: '#e5e7eb', color: '#6b7280'}}>
                         Cancelar postulación
