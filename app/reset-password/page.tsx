@@ -11,12 +11,27 @@ export default function ResetPassword() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [listo, setListo] = useState(false)
-  const [sesionActiva, setSesionActiva] = useState(false)
+  const [verificando, setVerificando] = useState(true)
 
   useEffect(() => {
     const verificar = async () => {
-      const { data } = await supabase.auth.getSession()
-      if (data.session) setSesionActiva(true)
+      // Supabase maneja el token del hash automáticamente
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        // Intentar obtener sesión del hash de la URL
+        const hashParams = new URLSearchParams(window.location.hash.substring(1))
+        const accessToken = hashParams.get('access_token')
+        const refreshToken = hashParams.get('refresh_token')
+        
+        if (accessToken && refreshToken) {
+          await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          })
+        }
+      }
+      setVerificando(false)
     }
     verificar()
   }, [])
@@ -41,7 +56,7 @@ export default function ResetPassword() {
     const { error: err } = await supabase.auth.updateUser({ password })
 
     if (err) {
-      setError('Error al actualizar la contraseña. El link puede haber expirado.')
+      setError('Error: ' + err.message)
       setLoading(false)
       return
     }
@@ -53,6 +68,12 @@ export default function ResetPassword() {
       router.push('/login')
     }, 3000)
   }
+
+  if (verificando) return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <p className="text-sm text-gray-400">Verificando...</p>
+    </div>
+  )
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-6">
