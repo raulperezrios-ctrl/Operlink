@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { estadosMunicipios, estados } from '../lib/mexico'
 
 const fotaPorTipo: Record<string, string> = {
   'Construcción': '/Operador_MAquinaria.png',
@@ -12,7 +13,11 @@ const fotaPorTipo: Record<string, string> = {
 export default function Operadores() {
   const [operadores, setOperadores] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [filtro, setFiltro] = useState('Todos')
+  const [filtroTipo, setFiltroTipo] = useState('Todos')
+  const [filtroEstado, setFiltroEstado] = useState('')
+  const [filtroMunicipio, setFiltroMunicipio] = useState('')
+  const [filtroMaquinaria, setFiltroMaquinaria] = useState('')
+  const [mostrarFiltros, setMostrarFiltros] = useState(false)
   const [sesion, setSesion] = useState<any>(null)
   const [tipoUsuario, setTipoUsuario] = useState<string | null>(null)
   const [empresa, setEmpresa] = useState<any>(null)
@@ -31,18 +36,14 @@ export default function Operadores() {
 
       if (userId) {
         const { data: usuario } = await supabase
-          .from('usuarios')
-          .select('tipo')
-          .eq('id', userId)
-          .single()
+          .from('usuarios').select('tipo').eq('id', userId).single()
         setTipoUsuario(usuario?.tipo || null)
 
         if (usuario?.tipo === 'empresa') {
           const { data: emp } = await supabase
             .from('empresas')
             .select('id, membresia_activa, contactos_disponibles')
-            .eq('user_id', userId)
-            .single()
+            .eq('user_id', userId).single()
           setEmpresa(emp)
         }
       }
@@ -52,30 +53,25 @@ export default function Operadores() {
     cargar()
   }, [])
 
-  const operadoresFiltrados = filtro === 'Todos'
-    ? operadores
-    : operadores.filter(op => op.tipo_operador === filtro)
+  const municipios = filtroEstado ? estadosMunicipios[filtroEstado] || [] : []
+
+  const operadoresFiltrados = operadores.filter(op => {
+    if (filtroTipo !== 'Todos' && op.tipo_operador !== filtroTipo) return false
+    if (filtroEstado && op.estado !== filtroEstado) return false
+    if (filtroMunicipio && op.municipio !== filtroMunicipio) return false
+    if (filtroMaquinaria && !op.maquinaria?.some((m: string) =>
+      m.toLowerCase().includes(filtroMaquinaria.toLowerCase()))) return false
+    return true
+  })
 
   const handleDesbloquear = async (operadorId: string) => {
-    if (!sesion) {
-      window.location.href = '/login'
-      return
-    }
-    if (tipoUsuario !== 'empresa') {
-      window.location.href = '/login'
-      return
-    }
-    if (!empresa?.membresia_activa) {
-      window.location.href = '/planes'
-      return
-    }
+    if (!sesion) { window.location.href = '/login'; return }
+    if (tipoUsuario !== 'empresa') { window.location.href = '/login'; return }
+    if (!empresa?.membresia_activa) { window.location.href = '/planes'; return }
 
     const { data: previo } = await supabase
       .from('contactos_desbloqueados')
-      .select('id')
-      .eq('empresa_id', empresa.id)
-      .eq('operador_id', operadorId)
-      .maybeSingle()
+      .select('id').eq('empresa_id', empresa.id).eq('operador_id', operadorId).maybeSingle()
 
     if (previo) {
       window.location.href = `/operadores/detalle?id=${operadorId}`
@@ -87,13 +83,11 @@ export default function Operadores() {
       return
     }
 
-    await supabase
-      .from('contactos_desbloqueados')
+    await supabase.from('contactos_desbloqueados')
       .insert({ empresa_id: empresa.id, operador_id: operadorId })
 
     if (empresa.contactos_disponibles < 9999) {
-      await supabase
-        .from('empresas')
+      await supabase.from('empresas')
         .update({ contactos_disponibles: empresa.contactos_disponibles - 1 })
         .eq('id', empresa.id)
     }
@@ -101,27 +95,92 @@ export default function Operadores() {
     window.location.href = `/operadores/detalle?id=${operadorId}`
   }
 
+  const limpiarFiltros = () => {
+    setFiltroEstado('')
+    setFiltroMunicipio('')
+    setFiltroMaquinaria('')
+    setFiltroTipo('Todos')
+  }
+
+  const hayFiltrosActivos = filtroEstado || filtroMunicipio || filtroMaquinaria || filtroTipo !== 'Todos'
+
   return (
     <div className="bg-gray-50 pb-6">
 
-      {/* Filtros */}
+      {/* Filtros tipo */}
       <section className="px-4 py-3 bg-white border-b border-gray-100">
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="flex gap-2 overflow-x-auto pb-2">
           {['Todos', 'Construcción', 'Transporte', 'Almacén / Logística'].map((f, i) => (
-            <button key={i} onClick={() => setFiltro(f)}
+            <button key={i} onClick={() => setFiltroTipo(f)}
               className="whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold border"
-              style={filtro === f ? {backgroundColor: '#9A2120', color: 'white', borderColor: '#9A2120'} : {backgroundColor: 'white', color: '#575757', borderColor: '#e5e7eb'}}>
+              style={filtroTipo === f
+                ? {backgroundColor: '#9A2120', color: 'white', borderColor: '#9A2120'}
+                : {backgroundColor: 'white', color: '#575757', borderColor: '#e5e7eb'}}>
               {f}
             </button>
           ))}
         </div>
 
+        {/* Buscador y botón filtros */}
         <div className="mt-2 flex gap-2">
-          <input type="text" placeholder="🔍 Buscar por ciudad o maquinaria..." className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-xs" />
-          <button className="border border-gray-200 rounded-lg px-3 py-2 text-xs font-semibold" style={{color: '#575757'}}>
-            Filtros
+          <input
+            type="text"
+            placeholder="🔍 Buscar por maquinaria..."
+            value={filtroMaquinaria}
+            onChange={(e) => setFiltroMaquinaria(e.target.value)}
+            className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none"
+          />
+          <button
+            onClick={() => setMostrarFiltros(!mostrarFiltros)}
+            className="border rounded-xl px-3 py-2 text-xs font-semibold flex items-center gap-1"
+            style={{
+              borderColor: hayFiltrosActivos ? '#9A2120' : '#e5e7eb',
+              color: hayFiltrosActivos ? '#9A2120' : '#575757',
+              backgroundColor: hayFiltrosActivos ? '#fff5f5' : 'white'
+            }}>
+            🗺 {hayFiltrosActivos ? 'Filtros ●' : 'Filtros'}
           </button>
         </div>
+
+        {/* Panel de filtros expandible */}
+        {mostrarFiltros && (
+          <div className="mt-3 flex flex-col gap-2 pt-3 border-t border-gray-100">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[10px] font-bold block mb-1" style={{color: '#575757'}}>Estado</label>
+                <select
+                  value={filtroEstado}
+                  onChange={(e) => { setFiltroEstado(e.target.value); setFiltroMunicipio('') }}
+                  className="w-full border border-gray-200 rounded-xl px-2 py-2 text-xs">
+                  <option value="">Todos los estados</option>
+                  {estados.map((e) => (
+                    <option key={e} value={e}>{e}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] font-bold block mb-1" style={{color: '#575757'}}>Municipio</label>
+                <select
+                  value={filtroMunicipio}
+                  onChange={(e) => setFiltroMunicipio(e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl px-2 py-2 text-xs"
+                  disabled={!filtroEstado}>
+                  <option value="">Todos</option>
+                  {municipios.map((m) => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            {hayFiltrosActivos && (
+              <button onClick={limpiarFiltros}
+                className="text-xs text-center py-1.5 rounded-xl border"
+                style={{borderColor: '#9A2120', color: '#9A2120'}}>
+                ✕ Limpiar filtros
+              </button>
+            )}
+          </div>
+        )}
       </section>
 
       {/* Lista de operadores */}
@@ -132,7 +191,12 @@ export default function Operadores() {
           </div>
         ) : operadoresFiltrados.length === 0 ? (
           <div className="text-center py-10">
-            <p className="text-sm text-gray-400">No hay operadores disponibles.</p>
+            <p className="text-sm text-gray-400">No hay operadores con estos filtros.</p>
+            <button onClick={limpiarFiltros}
+              className="mt-3 text-xs px-4 py-2 rounded-xl text-white font-bold"
+              style={{backgroundColor: '#9A2120'}}>
+              Limpiar filtros
+            </button>
           </div>
         ) : (
           <>
@@ -161,10 +225,13 @@ export default function Operadores() {
                     <div className="p-2">
                       <div className="flex items-center justify-between mb-1">
                         <p className="text-[10px] font-bold" style={{color: '#575757'}}>
-                          📍 {op.ciudad}
+                          📍 {op.municipio || op.ciudad}
                         </p>
                         <p className="text-[9px] text-gray-400">{op.experiencia_anos} años</p>
                       </div>
+                      {op.estado && (
+                        <p className="text-[9px] text-gray-400 mb-1">{op.estado}</p>
+                      )}
 
                       {/* Maquinaria */}
                       {maquinarias.length > 0 && (
