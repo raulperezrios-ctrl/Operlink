@@ -3,7 +3,7 @@ export default function Home() {
     <div className="min-h-screen bg-gray-100" style={{fontFamily: 'sans-serif'}}>
       
       {/* Fondo superior */}
-      <div className="relative bg-white px-6 pt-3 pb-4 text-center">
+      <div className="relative bg-white px-6 pt-1 pb-2 text-center">
         
         {/* Logo */}
         <div className="flex justify-center mb-4">

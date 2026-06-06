@@ -8,6 +8,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   const [tipoUsuario, setTipoUsuario] = useState<string | null>(null)
   const [nombreUsuario, setNombreUsuario] = useState<string | null>(null)
   const [menuAbierto, setMenuAbierto] = useState(false)
+  const [cargando, setCargando] = useState(true)
 
   const cargarUsuario = async (userId: string) => {
     const { data: usuario } = await supabase
@@ -42,11 +43,11 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
       const userId = sessionData.session?.user?.id
       setSesion(sessionData.session)
       if (userId) await cargarUsuario(userId)
+      setCargando(false)
     }
 
     cargar()
 
-    // Escuchar cambios de sesión en tiempo real
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSesion(session)
       if (session?.user?.id) {
@@ -55,6 +56,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         setTipoUsuario(null)
         setNombreUsuario(null)
       }
+      setCargando(false)
     })
 
     return () => subscription.unsubscribe()
@@ -71,6 +73,127 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   const handleCerrarSesion = async () => {
     await supabase.auth.signOut()
     window.location.href = '/'
+  }
+
+  const menuContenido = () => {
+    if (cargando) return (
+      <div className="flex items-center justify-center py-10">
+        <p className="text-xs text-gray-400">Cargando...</p>
+      </div>
+    )
+
+    if (!sesion) return (
+      <>
+        <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">Navegación</p>
+        <a href="/" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
+          🏠 Inicio
+        </a>
+        <a href="/operadores" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
+          👷 Ver operadores
+        </a>
+        <a href="/solicitudes" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
+          📋 Solicitudes
+        </a>
+        <a href="/planes" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
+          💳 Planes
+        </a>
+        <div className="border-t border-gray-100 my-2" />
+        <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">Únete a OperLink</p>
+        <a href="/registro-operador" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-white"
+          style={{backgroundColor: '#9A2120'}}>
+          👷 Soy Operador
+        </a>
+        <a href="/registro-empresa" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold border-2 mt-1"
+          style={{borderColor: '#9A2120', color: '#9A2120'}}>
+          🏢 Soy Empresa
+        </a>
+        <div className="border-t border-gray-100 my-2" />
+        <a href="/login" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
+          🔑 Iniciar sesión
+        </a>
+      </>
+    )
+
+    if (tipoUsuario === 'operador') return (
+      <>
+        <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">Mi cuenta — Operador</p>
+        <a href="/mi-cuenta/operador" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
+          👷 Mi perfil
+        </a>
+        <a href="/solicitudes" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
+          📋 Oportunidades
+        </a>
+        <a href="/planes?tipo=operador" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
+          💳 Planes
+        </a>
+        <div className="border-t border-gray-100 my-2" />
+        <button onClick={handleCerrarSesion}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 w-full text-left">
+          🚪 Cerrar sesión
+        </button>
+      </>
+    )
+
+    if (tipoUsuario === 'empresa') return (
+      <>
+        <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">Mi cuenta — Empresa</p>
+        <a href="/mi-cuenta/empresa" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
+          🏢 Mi perfil
+        </a>
+        <a href="/operadores" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
+          👷 Buscar operadores
+        </a>
+        <a href="/mi-cuenta/empresa?tab=solicitudes" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
+          📋 Mis solicitudes
+        </a>
+        <a href="/planes" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
+          💳 Planes
+        </a>
+        <div className="border-t border-gray-100 my-2" />
+        <button onClick={handleCerrarSesion}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 w-full text-left">
+          🚪 Cerrar sesión
+        </button>
+      </>
+    )
+
+    if (tipoUsuario === 'admin') return (
+      <>
+        <a href="/admin" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
+          ⚙️ Panel Admin
+        </a>
+        <div className="border-t border-gray-100 my-2" />
+        <button onClick={handleCerrarSesion}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 w-full text-left">
+          🚪 Cerrar sesión
+        </button>
+      </>
+    )
+
+    // Sesión activa pero tipo desconocido
+    return (
+      <>
+        <button onClick={handleCerrarSesion}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 w-full text-left">
+          🚪 Cerrar sesión
+        </button>
+      </>
+    )
   }
 
   return (
@@ -105,104 +228,8 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
               <img src="/Logo_OperLink.png" alt="OperLink" className="h-7" />
               <button onClick={() => setMenuAbierto(false)} className="text-gray-400 text-lg">✕</button>
             </div>
-
             <div className="flex-1 px-4 py-4 flex flex-col gap-1 overflow-y-auto">
-              {!sesion ? (
-                <>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">Navegación</p>
-                  <a href="/" onClick={() => setMenuAbierto(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
-                    🏠 Inicio
-                  </a>
-                  <a href="/operadores" onClick={() => setMenuAbierto(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
-                    👷 Ver operadores
-                  </a>
-                  <a href="/solicitudes" onClick={() => setMenuAbierto(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
-                    📋 Solicitudes
-                  </a>
-                  <a href="/planes" onClick={() => setMenuAbierto(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
-                    💳 Planes
-                  </a>
-                  <div className="border-t border-gray-100 my-2" />
-                  <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">Únete a OperLink</p>
-                  <a href="/registro-operador" onClick={() => setMenuAbierto(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-white"
-                    style={{backgroundColor: '#9A2120'}}>
-                    👷 Soy Operador
-                  </a>
-                  <a href="/registro-empresa" onClick={() => setMenuAbierto(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold border-2 mt-1"
-                    style={{borderColor: '#9A2120', color: '#9A2120'}}>
-                    🏢 Soy Empresa
-                  </a>
-                  <div className="border-t border-gray-100 my-2" />
-                  <a href="/login" onClick={() => setMenuAbierto(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
-                    🔑 Iniciar sesión
-                  </a>
-                </>
-              ) : tipoUsuario === 'operador' ? (
-                <>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">Mi cuenta</p>
-                  <a href="/mi-cuenta/operador" onClick={() => setMenuAbierto(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
-                    👷 Mi perfil
-                  </a>
-                  <a href="/solicitudes" onClick={() => setMenuAbierto(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
-                    📋 Oportunidades
-                  </a>
-                  <a href="/planes?tipo=operador" onClick={() => setMenuAbierto(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
-                    💳 Planes
-                  </a>
-                  <div className="border-t border-gray-100 my-2" />
-                  <button onClick={handleCerrarSesion}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 w-full text-left">
-                    🚪 Cerrar sesión
-                  </button>
-                </>
-              ) : tipoUsuario === 'empresa' ? (
-                <>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">Mi cuenta</p>
-                  <a href="/mi-cuenta/empresa" onClick={() => setMenuAbierto(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
-                    🏢 Mi perfil
-                  </a>
-                  <a href="/operadores" onClick={() => setMenuAbierto(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
-                    👷 Buscar operadores
-                  </a>
-                  <a href="/mi-cuenta/empresa?tab=solicitudes" onClick={() => setMenuAbierto(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
-                    📋 Mis solicitudes
-                  </a>
-                  <a href="/planes" onClick={() => setMenuAbierto(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
-                    💳 Planes
-                  </a>
-                  <div className="border-t border-gray-100 my-2" />
-                  <button onClick={handleCerrarSesion}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 w-full text-left">
-                    🚪 Cerrar sesión
-                  </button>
-                </>
-              ) : tipoUsuario === 'admin' ? (
-                <>
-                  <a href="/admin" onClick={() => setMenuAbierto(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
-                    ⚙️ Panel Admin
-                  </a>
-                  <div className="border-t border-gray-100 my-2" />
-                  <button onClick={handleCerrarSesion}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 w-full text-left">
-                    🚪 Cerrar sesión
-                  </button>
-                </>
-              ) : null}
+              {menuContenido()}
             </div>
           </div>
         </div>
