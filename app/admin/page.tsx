@@ -12,9 +12,31 @@ export default function AdminDashboard() {
     usuarios: 0,
   })
   const [loading, setLoading] = useState(true)
+  const [autorizado, setAutorizado] = useState(false)
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const verificar = async () => {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const userId = sessionData.session?.user?.id
+
+      if (!userId) {
+        window.location.href = '/login'
+        return
+      }
+
+      const { data: usuario } = await supabase
+        .from('usuarios')
+        .select('tipo')
+        .eq('id', userId)
+        .single()
+
+      if (usuario?.tipo !== 'admin') {
+        window.location.href = '/'
+        return
+      }
+
+      setAutorizado(true)
+
       const [op, em, sol, us] = await Promise.all([
         supabase.from('operadores').select('id', { count: 'exact', head: true }),
         supabase.from('empresas').select('id', { count: 'exact', head: true }),
@@ -29,8 +51,14 @@ export default function AdminDashboard() {
       })
       setLoading(false)
     }
-    fetchStats()
+    verificar()
   }, [])
+
+  if (!autorizado) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <p className="text-sm text-gray-400">Verificando acceso...</p>
+    </div>
+  )
 
   const menu = [
     { href: '/admin/operadores', emoji: '👷', label: 'Operadores', count: stats.operadores },
@@ -44,8 +72,11 @@ export default function AdminDashboard() {
     <div className="bg-gray-50 min-h-screen pb-10">
 
       {/* Header */}
-      <div className="bg-white px-4 py-3 border-b border-gray-100">
+      <div className="bg-white px-4 py-3 border-b border-gray-100 flex items-center justify-between">
         <img src="/Logo_OperLink.png" alt="OperLink" className="h-6" />
+        <span className="text-xs font-bold px-3 py-1 rounded-full text-white" style={{backgroundColor: '#9A2120'}}>
+          Admin
+        </span>
       </div>
 
       {/* Bienvenida */}
