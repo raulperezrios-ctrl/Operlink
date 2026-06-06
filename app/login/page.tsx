@@ -30,8 +30,14 @@ export default function Login() {
       .eq('id', data.user.id)
       .single()
 
+    // Admin siempre pasa sin importar el botón seleccionado
+    if (usuario?.tipo === 'admin') {
+      router.push('/admin')
+      return
+    }
+
     // Validar que el tipo seleccionado coincida con el tipo de cuenta
-    if (usuario?.tipo !== tipo && usuario?.tipo !== 'admin') {
+    if (usuario?.tipo !== tipo) {
       setError(`Esta cuenta es de ${usuario?.tipo === 'operador' ? 'operador 👷' : 'empresa 🏢'}. Selecciona el tipo correcto.`)
       await supabase.auth.signOut()
       setLoading(false)
@@ -42,8 +48,6 @@ export default function Login() {
       router.push('/mi-cuenta/operador')
     } else if (usuario?.tipo === 'empresa') {
       router.push('/mi-cuenta/empresa')
-    } else if (usuario?.tipo === 'admin') {
-      router.push('/admin')
     } else {
       router.push('/')
     }
