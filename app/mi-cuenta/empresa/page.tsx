@@ -57,12 +57,13 @@ function CalificarBoton({ empresaId, operadorId }: { empresaId: string, operador
     setGuardando(false)
   }
 
-  if (calificado) return (
-    <div className="flex items-center justify-center gap-0.5">
+  if (calificado && !mostrar) return (
+    <button onClick={() => { setCalificado(false); setMostrar(true) }}
+      className="flex items-center justify-center gap-0.5">
       {[1,2,3,4,5].map((s) => (
         <span key={s} className="text-sm" style={{color: s <= calificacion ? '#f59e0b' : '#e5e7eb'}}>★</span>
       ))}
-    </div>
+    </button>
   )
 
   if (mostrar) return (
@@ -84,7 +85,10 @@ function CalificarBoton({ empresaId, operadorId }: { empresaId: string, operador
           </button>
         ))}
       </div>
-      <button onClick={() => setMostrar(false)} className="text-[10px] text-gray-400">Cancelar</button>
+      <button onClick={() => { setMostrar(false); setCalificado(calificacion > 0) }}
+        className="text-[10px] text-gray-400">
+        Cancelar
+      </button>
     </div>
   )
 
