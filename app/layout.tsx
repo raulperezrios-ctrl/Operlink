@@ -3,12 +3,11 @@ import "./globals.css";
 import LayoutClient from "./layout-client";
 
 export const metadata: Metadata = {
+  title: "OperLink",
+  description: "Conectamos talento con oportunidades",
   icons: {
     icon: '/favicon.png',
   },
-}
-  title: "OperLink",
-  description: "Conectamos talento con oportunidades",
 };
 
 export default function RootLayout({
