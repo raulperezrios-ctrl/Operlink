@@ -3,6 +3,10 @@ import "./globals.css";
 import LayoutClient from "./layout-client";
 
 export const metadata: Metadata = {
+  icons: {
+    icon: '/favicon.png',
+  },
+}
   title: "OperLink",
   description: "Conectamos talento con oportunidades",
 };
