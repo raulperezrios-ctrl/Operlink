@@ -1,4 +1,23 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
+
 export default function Home() {
+  const [planes, setPlanes] = useState<any[]>([])
+
+  useEffect(() => {
+    const cargar = async () => {
+      const { data } = await supabase
+        .from('planes')
+        .select('*')
+        .eq('tipo', 'empresa')
+        .order('precio')
+      setPlanes(data || [])
+    }
+    cargar()
+  }, [])
+
   return (
     <div className="min-h-screen bg-gray-100" style={{fontFamily: 'sans-serif'}}>
 
@@ -71,13 +90,13 @@ export default function Home() {
         <h2 className="text-sm font-black mb-4 text-center" style={{color: '#575757'}}>¿Cómo funciona?</h2>
         <div className="flex flex-col gap-3">
           {[
-            { num: '1', titulo: 'Crea tu perfil', desc: 'Regístrate gratis como operador o empresa en menos de 5 minutos.', color: '#9A2120' },
-            { num: '2', titulo: 'Conecta', desc: 'Las empresas encuentran operadores por tipo de maquinaria, ubicación y experiencia.', color: '#9A2120' },
-            { num: '3', titulo: 'Trabaja', desc: 'Desbloquea contactos y contrata directamente sin intermediarios.', color: '#9A2120' },
+            { num: '1', titulo: 'Crea tu perfil', desc: 'Regístrate gratis como operador o empresa en menos de 5 minutos.' },
+            { num: '2', titulo: 'Conecta', desc: 'Las empresas encuentran operadores por tipo de maquinaria, ubicación y experiencia.' },
+            { num: '3', titulo: 'Trabaja', desc: 'Desbloquea contactos y contrata directamente sin intermediarios.' },
           ].map((paso, i) => (
             <div key={i} className="flex items-start gap-3">
               <div className="h-8 w-8 rounded-full flex items-center justify-center text-white text-sm font-black flex-shrink-0"
-                style={{backgroundColor: paso.color}}>
+                style={{backgroundColor: '#9A2120'}}>
                 {paso.num}
               </div>
               <div>
@@ -123,34 +142,44 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Planes resumen */}
+      {/* Planes reales desde Supabase */}
       <div className="mx-4 mt-4 rounded-2xl bg-white shadow p-4">
         <h2 className="text-sm font-black mb-1 text-center" style={{color: '#575757'}}>Planes para empresas</h2>
         <p className="text-xs text-gray-400 text-center mb-4">Sin contratos. Sin letra chica.</p>
-        <div className="flex flex-col gap-3">
-          {[
-            { nombre: 'Starter', precio: '$499', desc: 'Hasta 5 contactos de operadores', popular: false },
-            { nombre: 'Pro', precio: '$999', desc: 'Hasta 20 contactos + solicitudes ilimitadas', popular: true },
-            { nombre: 'Enterprise', precio: '$1,999', desc: 'Contactos ilimitados + soporte prioritario', popular: false },
-          ].map((plan, i) => (
-            <div key={i} className="border-2 rounded-xl p-3 relative"
-              style={{borderColor: plan.popular ? '#9A2120' : '#e5e7eb', backgroundColor: plan.popular ? '#fff5f5' : 'white'}}>
-              {plan.popular && (
-                <span className="absolute -top-2.5 left-3 text-[10px] font-bold px-2 py-0.5 rounded-full text-white"
-                  style={{backgroundColor: '#9A2120'}}>
-                  Más popular
-                </span>
-              )}
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-black" style={{color: plan.popular ? '#9A2120' : '#575757'}}>{plan.nombre}</p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">{plan.desc}</p>
+        {planes.length === 0 ? (
+          <p className="text-xs text-gray-400 text-center py-4">Cargando planes...</p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {planes.map((plan, i) => {
+              const esPopular = plan.nombre === 'Membresía Mensual'
+              return (
+                <div key={i} className="border-2 rounded-xl p-3 relative"
+                  style={{borderColor: esPopular ? '#9A2120' : '#e5e7eb', backgroundColor: esPopular ? '#fff5f5' : 'white'}}>
+                  {esPopular && (
+                    <span className="absolute -top-2.5 left-3 text-[10px] font-bold px-2 py-0.5 rounded-full text-white"
+                      style={{backgroundColor: '#9A2120'}}>
+                      Más popular
+                    </span>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-black" style={{color: esPopular ? '#9A2120' : '#575757'}}>{plan.nombre}</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">{plan.descripcion}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-base font-black" style={{color: '#9A2120'}}>
+                        ${plan.precio.toLocaleString('es-MX')}
+                      </p>
+                      <p className="text-[10px] text-gray-400">
+                        {plan.duracion === 'mensual' ? '/mes' : plan.duracion === 'anual' ? '/año' : 'MXN'}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-base font-black" style={{color: '#9A2120'}}>{plan.precio}<span className="text-[10px] font-normal text-gray-400">/mes</span></p>
-              </div>
-            </div>
-          ))}
-        </div>
+              )
+            })}
+          </div>
+        )}
         <a href="/planes"
           className="mt-4 w-full py-2.5 rounded-xl text-white text-sm font-bold text-center block"
           style={{backgroundColor: '#9A2120'}}>
