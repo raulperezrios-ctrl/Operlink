@@ -33,10 +33,11 @@ export default function Operadores() {
         .lte('fecha_disponibilidad', hoy)
         .not('fecha_disponibilidad', 'is', null)
 
+      // Cargar todos excepto desactivados por admin
       const { data } = await supabase
         .from('operadores')
         .select('*')
-        .eq('disponibilidad', 'disponible')
+        .neq('disponibilidad', 'desactivado')
       if (data) setOperadores(data)
 
       const { data: sessionData } = await supabase.auth.getSession()
@@ -112,6 +113,15 @@ export default function Operadores() {
   }
 
   const hayFiltrosActivos = filtroEstado || filtroMunicipio || filtroMaquinaria || filtroTipo !== 'Todos'
+
+  const badgeDisponibilidad = (op: any) => {
+    if (op.disponibilidad === 'disponible') return { color: 'bg-green-400', texto: 'Disponible' }
+    if (op.fecha_disponibilidad) return {
+      color: 'bg-yellow-400',
+      texto: `Desde ${new Date(op.fecha_disponibilidad).toLocaleDateString('es-MX')}`
+    }
+    return { color: 'bg-red-400', texto: 'No disponible' }
+  }
 
   return (
     <div className="bg-gray-50 pb-6">
@@ -207,11 +217,12 @@ export default function Operadores() {
           </div>
         ) : (
           <>
-            <p className="text-xs text-gray-400 mb-3">{operadoresFiltrados.length} operadores disponibles</p>
+            <p className="text-xs text-gray-400 mb-3">{operadoresFiltrados.length} operadores</p>
             <div className="grid grid-cols-2 gap-3">
               {operadoresFiltrados.map((op) => {
                 const foto = fotaPorTipo[op.tipo_operador] || '/Operador_MAquinaria.png'
                 const maquinarias: string[] = op.maquinaria || []
+                const badge = badgeDisponibilidad(op)
 
                 return (
                   <div key={op.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
@@ -220,8 +231,8 @@ export default function Operadores() {
                     <div className="relative h-32">
                       <img src={foto} alt="Operador" className="w-full h-full object-cover object-top" />
                       <div className="absolute bottom-1 right-1 bg-black/70 rounded-full px-1.5 py-0.5 text-white text-[8px] flex items-center gap-1">
-                        <span className="h-1.5 w-1.5 rounded-full bg-green-400 inline-block"></span>
-                        Disponible
+                        <span className={`h-1.5 w-1.5 rounded-full inline-block ${badge.color}`}></span>
+                        {badge.texto}
                       </div>
                       <div className="absolute top-1 left-1 rounded-full px-1.5 py-0.5 text-[8px] font-bold text-white" style={{backgroundColor: '#9A2120'}}>
                         {op.tipo_operador}
