@@ -1,4 +1,52 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
+import { estadosMunicipios, estados } from '../lib/mexico'
+
+const fotaPorTipo: Record<string, string> = {
+  'Construcción': '/Operador_MAquinaria.png',
+  'Almacén / Logística': '/Operador_Montacargas1.png',
+  'Transporte': '/Operador_Tractocamion.png',
+}
+
 export default function Empresas() {
+  const [destacados, setDestacados] = useState<any[]>([])
+  const [estadoBusqueda, setEstadoBusqueda] = useState('Jalisco')
+  const [municipioBusqueda, setMunicipioBusqueda] = useState('')
+  const [maquinariaBusqueda, setMaquinariaBusqueda] = useState('')
+
+  const municipios = estadosMunicipios[estadoBusqueda] || []
+
+  useEffect(() => {
+    const cargarDestacados = async () => {
+      const segmentos = ['Construcción', 'Almacén / Logística', 'Transporte']
+      const resultados: any[] = []
+
+      for (const segmento of segmentos) {
+        const { data } = await supabase
+          .from('operadores')
+          .select('*')
+          .eq('tipo_operador', segmento)
+          .eq('disponibilidad', 'disponible')
+          .order('calificacion_promedio', { ascending: false })
+          .limit(1)
+        if (data && data.length > 0) resultados.push(data[0])
+      }
+
+      setDestacados(resultados)
+    }
+    cargarDestacados()
+  }, [])
+
+  const handleBuscar = () => {
+    const params = new URLSearchParams()
+    if (maquinariaBusqueda) params.set('maquinaria', maquinariaBusqueda)
+    if (estadoBusqueda) params.set('estado', estadoBusqueda)
+    if (municipioBusqueda) params.set('municipio', municipioBusqueda)
+    window.location.href = `/operadores?${params.toString()}`
+  }
+
   return (
     <div className="bg-white pb-6" style={{fontFamily: 'sans-serif'}}>
 
@@ -18,29 +66,57 @@ export default function Empresas() {
       <section className="px-4 -mt-2">
         <div className="bg-white rounded-2xl shadow-lg p-4 border border-gray-100">
           <h2 className="font-bold text-sm mb-3" style={{color: '#575757'}}>¿Qué operador o maquinaria necesitas?</h2>
-          
+
           <div className="flex flex-col gap-2">
             <div>
               <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Maquinaria requerida</label>
-              <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs">
-                <option>Selecciona maquinaria</option>
+              <select
+                value={maquinariaBusqueda}
+                onChange={(e) => setMaquinariaBusqueda(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs">
+                <option value="">Selecciona maquinaria</option>
                 <option>Excavadora</option>
                 <option>Retroexcavadora</option>
                 <option>Motoniveladora</option>
-                <option>Montacargas</option>
+                <option>Compactadora</option>
+                <option>Grúa</option>
+                <option>Bulldozer</option>
+                <option>Cargador Frontal</option>
+                <option>Montacargas Hombre Sentado</option>
+                <option>Montacargas Hombre Parado</option>
+                <option>Reach Truck</option>
+                <option>Transpaleta Eléctrica</option>
                 <option>Tractocamión</option>
-                <option>Camión / Volteo</option>
+                <option>Camión de Volteo</option>
+                <option>Pipa</option>
+                <option>Rabón</option>
+                <option>Tortón</option>
               </select>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Ciudad</label>
-                <input type="text" placeholder="Ingresa ciudad" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs" />
+                <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Estado</label>
+                <select
+                  value={estadoBusqueda}
+                  onChange={(e) => { setEstadoBusqueda(e.target.value); setMunicipioBusqueda('') }}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs">
+                  {estados.map((e) => (
+                    <option key={e} value={e}>{e}</option>
+                  ))}
+                </select>
               </div>
               <div>
-                <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Fecha inicio</label>
-                <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs" />
+                <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Municipio</label>
+                <select
+                  value={municipioBusqueda}
+                  onChange={(e) => setMunicipioBusqueda(e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs">
+                  <option value="">Todos</option>
+                  {municipios.map((m) => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -49,13 +125,16 @@ export default function Empresas() {
               <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs">
                 <option>Selecciona tipo de solicitud</option>
                 <option>Solo Operador</option>
-                <option>Máquina/Camión con Operador</option>
+                <option>Operador con Máquina</option>
               </select>
             </div>
 
-            <a href="/operadores" className="w-full py-2 rounded-xl text-white text-sm font-bold mt-1 text-center block" style={{backgroundColor: '#9A2120'}}>
+            <button
+              onClick={handleBuscar}
+              className="w-full py-2 rounded-xl text-white text-sm font-bold mt-1 text-center block"
+              style={{backgroundColor: '#9A2120'}}>
               🔍 Buscar operadores
-            </a>
+            </button>
           </div>
         </div>
       </section>
@@ -68,33 +147,49 @@ export default function Empresas() {
         </div>
 
         <div className="grid grid-cols-3 gap-2">
-          {[
-            {img: '/Operador_MAquinaria.png', maquina: 'Retroexcavadora', ciudad: 'Guadalajara, JAL', exp: '8 años'},
-            {img: '/Operador_Montacargas1.png', maquina: 'Montacargas', ciudad: 'Monterrey, NL', exp: '3.5 años'},
-            {img: '/Operador_Tractocamion.png', maquina: 'Tractocamión', ciudad: 'San Luis Potosí', exp: '6 años'},
-          ].map((op, i) => (
-            <div key={i} className="rounded-xl overflow-hidden border border-gray-100 shadow-sm">
-              <div className="relative h-24">
-                <img src={op.img} alt={op.maquina} className="w-full h-full object-cover object-top" />
-                <div className="absolute bottom-1 right-1 bg-black/70 rounded-full px-1.5 py-0.5 text-white text-[9px] flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-green-400 inline-block"></span>
-                  Disponible
+          {destacados.length === 0 ? (
+            // Placeholders mientras carga
+            ['/Operador_MAquinaria.png', '/Operador_Montacargas1.png', '/Operador_Tractocamion.png'].map((img, i) => (
+              <div key={i} className="rounded-xl overflow-hidden border border-gray-100 shadow-sm animate-pulse">
+                <div className="h-24 bg-gray-200" />
+                <div className="p-2">
+                  <div className="h-2 bg-gray-200 rounded mb-1" />
+                  <div className="h-2 bg-gray-100 rounded" />
                 </div>
               </div>
-              <div className="p-2">
-                <span className="text-[10px] font-bold" style={{color: '#9A2120'}}>{op.maquina}</span>
-                <p className="text-[11px] font-semibold mt-0.5">Operador disponible</p>
-                <p className="text-[10px] text-gray-500">📍 {op.ciudad}</p>
-                <p className="text-[10px] text-gray-500">📅 {op.exp} exp.</p>
-                <a href="/operadores/detalle" className="mt-1.5 w-full border rounded-lg py-1 text-[10px] font-semibold text-center block" style={{borderColor: '#9A2120', color: '#9A2120'}}>
-                  Ver perfil
-                </a>
-              </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            destacados.map((op, i) => {
+              const foto = op.foto_url || fotaPorTipo[op.tipo_operador] || '/Operador_MAquinaria.png'
+              return (
+                <div key={i} className="rounded-xl overflow-hidden border border-gray-100 shadow-sm">
+                  <div className="relative h-24">
+                    <img src={foto} alt={op.tipo_operador} className="w-full h-full object-cover object-top" />
+                    <div className="absolute bottom-1 right-1 bg-black/70 rounded-full px-1.5 py-0.5 text-white text-[9px] flex items-center gap-1">
+                      <span className="h-1.5 w-1.5 rounded-full bg-green-400 inline-block"></span>
+                      Disponible
+                    </div>
+                  </div>
+                  <div className="p-2">
+                    <span className="text-[10px] font-bold" style={{color: '#9A2120'}}>{op.tipo_operador}</span>
+                    <p className="text-[10px] text-gray-500 mt-0.5">📍 {op.municipio || op.ciudad}</p>
+                    <p className="text-[10px] text-gray-500">{op.experiencia_anos} años exp.</p>
+                    {op.calificacion_promedio > 0 && (
+                      <p className="text-[10px] text-yellow-500">★ {Number(op.calificacion_promedio).toFixed(1)}</p>
+                    )}
+                    <a href={`/operadores/detalle?id=${op.id}`}
+                      className="mt-1.5 w-full border rounded-lg py-1 text-[10px] font-semibold text-center block"
+                      style={{borderColor: '#9A2120', color: '#9A2120'}}>
+                      Ver perfil
+                    </a>
+                  </div>
+                </div>
+              )
+            })
+          )}
         </div>
       </section>
 
     </div>
-  );
+  )
 }
