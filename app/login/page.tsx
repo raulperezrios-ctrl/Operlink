@@ -11,6 +11,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [tipo, setTipo] = useState('empresa')
+  const [verPassword, setVerPassword] = useState(false)
 
   const handleLogin = async () => {
     setLoading(true)
@@ -30,13 +31,11 @@ export default function Login() {
       .eq('id', data.user.id)
       .single()
 
-    // Admin siempre pasa sin importar el botón seleccionado
     if (usuario?.tipo === 'admin') {
       router.push('/admin')
       return
     }
 
-    // Validar que el tipo seleccionado coincida con el tipo de cuenta
     if (usuario?.tipo !== tipo) {
       setError(`Esta cuenta es de ${usuario?.tipo === 'operador' ? 'operador 👷' : 'empresa 🏢'}. Selecciona el tipo correcto.`)
       await supabase.auth.signOut()
@@ -58,15 +57,12 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-6">
 
-      {/* Logo */}
       <div className="mb-6">
         <img src="/Logo_OperLink.png" alt="OperLink" className="h-10 object-contain" />
       </div>
 
-      {/* Card */}
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-lg p-6">
         
-        {/* Tabs */}
         <div className="flex rounded-xl overflow-hidden border border-gray-200 mb-6">
           <button className="flex-1 py-2 text-sm font-bold text-white" style={{backgroundColor: '#9A2120'}}>
             Entrar
@@ -76,7 +72,6 @@ export default function Login() {
           </a>
         </div>
 
-        {/* Tipo de usuario */}
         <p className="text-xs font-semibold mb-2" style={{color: '#575757'}}>¿Quién eres?</p>
         <div className="flex gap-2 mb-4">
           <button onClick={() => setTipo('operador')}
@@ -91,7 +86,6 @@ export default function Login() {
           </button>
         </div>
 
-        {/* Formulario */}
         <div className="flex flex-col gap-3">
           <div>
             <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Correo electrónico</label>
@@ -105,13 +99,21 @@ export default function Login() {
           </div>
           <div>
             <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Contraseña</label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400"
-            />
+            <div className="relative">
+              <input
+                type={verPassword ? 'text' : 'password'}
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-red-400 pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setVerPassword(!verPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
+                {verPassword ? '🙈' : '👁️'}
+              </button>
+            </div>
           </div>
 
           {error && <p className="text-xs text-red-500 text-center">{error}</p>}
@@ -122,27 +124,23 @@ export default function Login() {
             onClick={handleLogin}
             disabled={loading}
             className="w-full py-3 rounded-xl text-white font-bold text-sm mt-1"
-            style={{backgroundColor: '#9A2120', opacity: loading ? 0.7 : 1}}
-          >
+            style={{backgroundColor: '#9A2120', opacity: loading ? 0.7 : 1}}>
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
         </div>
 
-        {/* Divider */}
         <div className="flex items-center gap-3 my-4">
           <div className="flex-1 h-px bg-gray-200"></div>
           <span className="text-xs text-gray-400">o continúa con</span>
           <div className="flex-1 h-px bg-gray-200"></div>
         </div>
 
-        {/* Google */}
         <button className="w-full border border-gray-200 rounded-xl py-2.5 text-sm font-semibold text-gray-700 flex items-center justify-center gap-2">
           <span>🌐</span> Google
         </button>
 
       </div>
 
-      {/* Registro */}
       <div id="registro" className="w-full max-w-sm mt-4 bg-white rounded-2xl shadow-sm p-4">
         <p className="text-xs font-bold text-center mb-3" style={{color: '#575757'}}>¿No tienes cuenta? Regístrate gratis</p>
         <div className="flex gap-2">
