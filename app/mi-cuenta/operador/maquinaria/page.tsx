@@ -20,12 +20,6 @@ const maquinariasPorTipo: Record<string, string[]> = {
   ],
 }
 
-const emojisPorTipo: Record<string, string> = {
-  'Construcción': '🏗️',
-  'Almacén / Logística': '📦',
-  'Transporte': '🚛',
-}
-
 export default function EditarMaquinaria() {
   const router = useRouter()
   const [seleccionadas, setSeleccionadas] = useState<string[]>([])
@@ -52,9 +46,8 @@ export default function EditarMaquinaria() {
 
       if (op) {
         setOperadorId(op.id)
-        // Usar tipos_operador si existe, sino usar tipo_operador como array
-        const tipos = op.tipos_operador?.length > 0 
-          ? op.tipos_operador 
+        const tipos = op.tipos_operador?.length > 0
+          ? op.tipos_operador
           : op.tipo_operador ? [op.tipo_operador] : ['Construcción']
         setTiposSeleccionados(tipos)
         setSeleccionadas(op.maquinaria || [])
@@ -66,9 +59,8 @@ export default function EditarMaquinaria() {
 
   const toggleTipo = (tipo: string) => {
     if (tiposSeleccionados.includes(tipo)) {
-      if (tiposSeleccionados.length === 1) return // mínimo 1 tipo
+      if (tiposSeleccionados.length === 1) return
       setTiposSeleccionados(tiposSeleccionados.filter(t => t !== tipo))
-      // Quitar maquinaria de ese tipo
       const maqDelTipo = maquinariasPorTipo[tipo] || []
       setSeleccionadas(seleccionadas.filter(m => !maqDelTipo.includes(m)))
     } else {
@@ -99,7 +91,7 @@ export default function EditarMaquinaria() {
       .update({
         maquinaria: seleccionadas,
         tipos_operador: tiposSeleccionados,
-        tipo_operador: tiposSeleccionados[0], // mantener el principal
+        tipo_operador: tiposSeleccionados[0],
       })
       .eq('id', operadorId)
 
@@ -107,9 +99,6 @@ export default function EditarMaquinaria() {
   }
 
   if (loading) return <div className="text-center py-20 text-sm text-gray-400">Cargando...</div>
-
-  // Lista de maquinaria de todos los tipos seleccionados
-  const listaCompleta = tiposSeleccionados.flatMap(t => maquinariasPorTipo[t] || [])
 
   return (
     <div className="bg-gray-50 pb-10">
@@ -134,17 +123,16 @@ export default function EditarMaquinaria() {
             <div className="grid grid-cols-3 gap-2">
               {Object.keys(maquinariasPorTipo).map((tipo) => (
                 <button key={tipo} onClick={() => toggleTipo(tipo)}
-                  className="flex items-center gap-3 border-2 rounded-xl p-3 text-left w-full"
+                  className="flex flex-col items-center justify-center border-2 rounded-xl p-3 text-center"
                   style={{
                     borderColor: tiposSeleccionados.includes(tipo) ? '#9A2120' : '#e5e7eb',
                     backgroundColor: tiposSeleccionados.includes(tipo) ? '#fff5f5' : 'white'
                   }}>
-                  <span className="text-xl">{emojisPorTipo[tipo]}</span>
-                  <p className="text-xs font-bold flex-1" style={{color: tiposSeleccionados.includes(tipo) ? '#9A2120' : '#575757'}}>
+                  <p className="text-xs font-bold leading-tight" style={{color: tiposSeleccionados.includes(tipo) ? '#9A2120' : '#575757'}}>
                     {tipo}
                   </p>
                   {tiposSeleccionados.includes(tipo) && (
-                    <span className="text-xs font-bold" style={{color: '#9A2120'}}>✓</span>
+                    <span className="text-xs font-bold mt-1" style={{color: '#9A2120'}}>✓</span>
                   )}
                 </button>
               ))}
@@ -160,9 +148,7 @@ export default function EditarMaquinaria() {
 
             {tiposSeleccionados.map((tipo) => (
               <div key={tipo} className="mb-4">
-                <p className="text-xs font-bold mb-2 flex items-center gap-1" style={{color: '#9A2120'}}>
-                  {emojisPorTipo[tipo]} {tipo}
-                </p>
+                <p className="text-xs font-bold mb-2" style={{color: '#9A2120'}}>{tipo}</p>
                 <div className="grid grid-cols-2 gap-2">
                   {(maquinariasPorTipo[tipo] || []).map((m, i) => (
                     <button key={i} onClick={() => toggleMaquinaria(m)}
