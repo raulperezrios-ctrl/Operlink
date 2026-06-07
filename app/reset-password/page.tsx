@@ -2,10 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { useRouter } from 'next/navigation'
 
 export default function ResetPassword() {
-  const router = useRouter()
   const [password, setPassword] = useState('')
   const [confirmar, setConfirmar] = useState('')
   const [loading, setLoading] = useState(false)
@@ -15,15 +13,13 @@ export default function ResetPassword() {
 
   useEffect(() => {
     const verificar = async () => {
-      // Supabase maneja el token del hash automáticamente
       const { data: { session } } = await supabase.auth.getSession()
-      
+
       if (!session) {
-        // Intentar obtener sesión del hash de la URL
         const hashParams = new URLSearchParams(window.location.hash.substring(1))
         const accessToken = hashParams.get('access_token')
         const refreshToken = hashParams.get('refresh_token')
-        
+
         if (accessToken && refreshToken) {
           await supabase.auth.setSession({
             access_token: accessToken,
@@ -64,9 +60,11 @@ export default function ResetPassword() {
     setListo(true)
     setLoading(false)
 
+    await supabase.auth.signOut()
+
     setTimeout(() => {
-      router.push('/login')
-    }, 3000)
+      window.location.href = '/login'
+    }, 2000)
   }
 
   if (verificando) return (
@@ -86,7 +84,7 @@ export default function ResetPassword() {
           <div className="text-center">
             <div className="text-5xl mb-4">✅</div>
             <h1 className="text-base font-black mb-2" style={{color: '#575757'}}>¡Contraseña actualizada!</h1>
-            <p className="text-xs text-gray-400 mb-4">Te redirigiremos al login en unos segundos...</p>
+            <p className="text-xs text-gray-400 mb-4">Redirigiendo al login...</p>
             <a href="/login"
               className="w-full py-3 rounded-xl text-white font-bold text-sm block text-center"
               style={{backgroundColor: '#9A2120'}}>
