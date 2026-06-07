@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase'
 
 function CalificarBoton({ empresaId, operadorId }: { empresaId: string, operadorId: string }) {
   const [calificacion, setCalificacion] = useState(0)
+  const [hover, setHover] = useState(0)
   const [calificado, setCalificado] = useState(false)
   const [mostrar, setMostrar] = useState(false)
   const [guardando, setGuardando] = useState(false)
@@ -36,7 +37,6 @@ function CalificarBoton({ empresaId, operadorId }: { empresaId: string, operador
       calificacion: stars,
     }, { onConflict: 'empresa_id,operador_id' })
 
-    // Actualizar promedio en operadores
     const { data: todas } = await supabase
       .from('calificaciones')
       .select('calificacion')
@@ -70,9 +70,14 @@ function CalificarBoton({ empresaId, operadorId }: { empresaId: string, operador
     <div className="flex flex-col items-center gap-1">
       <div className="flex gap-1">
         {[1,2,3,4,5].map((s) => (
-          <button key={s} onClick={() => handleCalificar(s)} disabled={guardando}
-            className="text-xl"
-            style={{color: s <= calificacion ? '#f59e0b' : '#d1d5db'}}>
+          <button
+            key={s}
+            onClick={() => handleCalificar(s)}
+            onMouseEnter={() => setHover(s)}
+            onMouseLeave={() => setHover(0)}
+            disabled={guardando}
+            className="text-2xl leading-none"
+            style={{color: s <= (hover || calificacion) ? '#f59e0b' : '#d1d5db'}}>
             ★
           </button>
         ))}
