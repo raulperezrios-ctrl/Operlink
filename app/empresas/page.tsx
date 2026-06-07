@@ -160,7 +160,7 @@ export default function Empresas() {
             ))
           ) : (
             destacados.map((op, i) => {
-              const foto = op.foto_url || fotaPorTipo[op.tipo_operador] || '/Operador_MAquinaria.png'
+              const foto = fotaPorTipo[op.tipo_operador] || '/Operador_MAquinaria.png'
               return (
                 <div key={i} className="rounded-xl overflow-hidden border border-gray-100 shadow-sm">
                   <div className="relative h-24">
