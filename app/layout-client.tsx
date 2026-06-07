@@ -78,6 +78,14 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
 
     if (!sesion) return (
       <>
+        {/* Iniciar sesión — botón principal */}
+        <a href="/login" onClick={() => setMenuAbierto(false)}
+          className="w-full py-3 rounded-xl text-white text-sm font-bold text-center block mb-4"
+          style={{backgroundColor: '#9A2120'}}>
+          Iniciar sesión
+        </a>
+
+        {/* Navegación */}
         <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">Navegación</p>
         <a href="/" onClick={() => setMenuAbierto(false)}
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
@@ -95,22 +103,17 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
           💳 Planes
         </a>
-        <div className="border-t border-gray-100 my-2" />
+
+        {/* Únete */}
+        <div className="border-t border-gray-100 my-3" />
         <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">Únete a OperLink</p>
         <a href="/registro-operador" onClick={() => setMenuAbierto(false)}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-white"
-          style={{backgroundColor: '#9A2120'}}>
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
           👷 Soy Operador
         </a>
         <a href="/registro-empresa" onClick={() => setMenuAbierto(false)}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold border-2 mt-1"
-          style={{borderColor: '#9A2120', color: '#9A2120'}}>
-          🏢 Soy Empresa
-        </a>
-        <div className="border-t border-gray-100 my-2" />
-        <a href="/login" onClick={() => setMenuAbierto(false)}
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
-          🔑 Iniciar sesión
+          🏢 Soy Empresa
         </a>
       </>
     )
@@ -188,8 +191,6 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
       </>
     )
   }
-
-  const rutaActual = typeof window !== 'undefined' ? window.location.pathname : ''
 
   return (
     <>
