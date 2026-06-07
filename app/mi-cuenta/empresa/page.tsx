@@ -4,6 +4,92 @@ import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 
+function CalificarBoton({ empresaId, operadorId }: { empresaId: string, operadorId: string }) {
+  const [calificacion, setCalificacion] = useState(0)
+  const [calificado, setCalificado] = useState(false)
+  const [mostrar, setMostrar] = useState(false)
+  const [guardando, setGuardando] = useState(false)
+
+  useEffect(() => {
+    const verificar = async () => {
+      const { data } = await supabase
+        .from('calificaciones')
+        .select('calificacion')
+        .eq('empresa_id', empresaId)
+        .eq('operador_id', operadorId)
+        .maybeSingle()
+      if (data) {
+        setCalificacion(data.calificacion)
+        setCalificado(true)
+      }
+    }
+    verificar()
+  }, [empresaId, operadorId])
+
+  const handleCalificar = async (stars: number) => {
+    setGuardando(true)
+    setCalificacion(stars)
+
+    await supabase.from('calificaciones').upsert({
+      empresa_id: empresaId,
+      operador_id: operadorId,
+      calificacion: stars,
+    }, { onConflict: 'empresa_id,operador_id' })
+
+    // Actualizar promedio en operadores
+    const { data: todas } = await supabase
+      .from('calificaciones')
+      .select('calificacion')
+      .eq('operador_id', operadorId)
+
+    if (todas && todas.length > 0) {
+      const promedio = todas.reduce((acc, c) => acc + c.calificacion, 0) / todas.length
+      await supabase
+        .from('operadores')
+        .update({
+          calificacion_promedio: Math.round(promedio * 10) / 10,
+          total_calificaciones: todas.length
+        })
+        .eq('id', operadorId)
+    }
+
+    setCalificado(true)
+    setMostrar(false)
+    setGuardando(false)
+  }
+
+  if (calificado) return (
+    <div className="flex items-center justify-center gap-0.5">
+      {[1,2,3,4,5].map((s) => (
+        <span key={s} className="text-sm" style={{color: s <= calificacion ? '#f59e0b' : '#e5e7eb'}}>★</span>
+      ))}
+    </div>
+  )
+
+  if (mostrar) return (
+    <div className="flex flex-col items-center gap-1">
+      <div className="flex gap-1">
+        {[1,2,3,4,5].map((s) => (
+          <button key={s} onClick={() => handleCalificar(s)} disabled={guardando}
+            className="text-xl"
+            style={{color: s <= calificacion ? '#f59e0b' : '#d1d5db'}}>
+            ★
+          </button>
+        ))}
+      </div>
+      <button onClick={() => setMostrar(false)} className="text-[10px] text-gray-400">Cancelar</button>
+    </div>
+  )
+
+  return (
+    <button onClick={() => setMostrar(true)}
+      className="text-[10px] px-2 py-1 rounded-full border text-center"
+      style={{borderColor: '#f59e0b', color: '#f59e0b'}}>
+      ⭐ Calificar
+    </button>
+  )
+}
+
 function PerfilEmpresaContent() {
   const searchParams = useSearchParams()
   const [empresa, setEmpresa] = useState<any>(null)
@@ -50,7 +136,7 @@ function PerfilEmpresaContent() {
 
         const { data: desb } = await supabase
           .from('contactos_desbloqueados')
-          .select('*, operadores(id, nombre, apellido, tipo_operador, ciudad, estado, foto_url)')
+          .select('*, operadores(id, nombre, apellido, tipo_operador, ciudad, estado, foto_url, calificacion_promedio, total_calificaciones)')
           .eq('empresa_id', emp.id)
         setOperadoresDesbloqueados(desb || [])
 
@@ -230,18 +316,30 @@ function PerfilEmpresaContent() {
                 const op = d.operadores
                 const foto = op?.foto_url || fotaPorTipo[op?.tipo_operador] || '/Operador_MAquinaria.png'
                 return (
-                  <div key={i} className="bg-white rounded-xl shadow-sm p-3 border border-gray-100 flex items-center gap-3">
-                    <img src={foto} alt="Operador" className="w-12 h-12 rounded-full object-cover" />
-                    <div className="flex-1">
-                      <p className="text-sm font-bold" style={{color: '#575757'}}>{op?.nombre} {op?.apellido}</p>
-                      <p className="text-xs text-gray-400">{op?.tipo_operador}</p>
-                      <p className="text-xs text-gray-400">📍 {op?.ciudad}, {op?.estado}</p>
+                  <div key={i} className="bg-white rounded-xl shadow-sm p-3 border border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <img src={foto} alt="Operador" className="w-12 h-12 rounded-full object-cover" />
+                      <div className="flex-1">
+                        <p className="text-sm font-bold" style={{color: '#575757'}}>{op?.nombre} {op?.apellido}</p>
+                        <p className="text-xs text-gray-400">{op?.tipo_operador}</p>
+                        <p className="text-xs text-gray-400">📍 {op?.ciudad}, {op?.estado}</p>
+                        {op?.calificacion_promedio > 0 && (
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <span className="text-xs text-yellow-500">★</span>
+                            <span className="text-xs font-semibold">{op.calificacion_promedio}</span>
+                            <span className="text-[10px] text-gray-400">({op.total_calificaciones})</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-1 items-end">
+                        <a href={`/operadores/detalle?id=${d.operador_id}&volver=mi-cuenta`}
+                          className="text-xs px-3 py-1.5 rounded-full font-semibold text-white"
+                          style={{backgroundColor: '#9A2120'}}>
+                          Ver
+                        </a>
+                        <CalificarBoton empresaId={empresa.id} operadorId={d.operador_id} />
+                      </div>
                     </div>
-                    <a href={`/operadores/detalle?id=${d.operador_id}&volver=mi-cuenta`}
-                      className="text-xs px-3 py-1.5 rounded-full font-semibold text-white"
-                      style={{backgroundColor: '#9A2120'}}>
-                      Ver
-                    </a>
                   </div>
                 )
               })
