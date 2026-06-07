@@ -75,6 +75,7 @@ function CalificarBoton({ empresaId, operadorId }: { empresaId: string, operador
             onClick={() => handleCalificar(s)}
             onMouseEnter={() => setHover(s)}
             onMouseLeave={() => setHover(0)}
+            onTouchStart={() => setHover(s)}
             disabled={guardando}
             className="text-2xl leading-none"
             style={{color: s <= (hover || calificacion) ? '#f59e0b' : '#d1d5db'}}>
