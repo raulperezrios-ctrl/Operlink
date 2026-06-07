@@ -121,7 +121,6 @@ export default function Operadores() {
           ))}
         </div>
 
-        {/* Buscador y botón filtros */}
         <div className="mt-2 flex gap-2">
           <input
             type="text"
@@ -142,7 +141,6 @@ export default function Operadores() {
           </button>
         </div>
 
-        {/* Panel de filtros expandible */}
         {mostrarFiltros && (
           <div className="mt-3 flex flex-col gap-2 pt-3 border-t border-gray-100">
             <div className="grid grid-cols-2 gap-2">
@@ -231,6 +229,15 @@ export default function Operadores() {
                       </div>
                       {op.estado && (
                         <p className="text-[9px] text-gray-400 mb-1">{op.estado}</p>
+                      )}
+
+                      {/* Calificación */}
+                      {op.calificacion_promedio > 0 && (
+                        <div className="flex items-center gap-1 mb-1">
+                          <span className="text-[10px] text-yellow-500">★</span>
+                          <span className="text-[10px] font-semibold">{op.calificacion_promedio}</span>
+                          <span className="text-[9px] text-gray-400">({op.total_calificaciones})</span>
+                        </div>
                       )}
 
                       {/* Maquinaria */}
