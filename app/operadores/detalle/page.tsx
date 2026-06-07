@@ -175,7 +175,7 @@ function DetalleOperadorContent() {
           <div className="text-center">
             {op.calificacion_promedio > 0 ? (
               <>
-                <p className="text-xl font-black" style={{color: '#9A2120'}}>⭐ {op.calificacion_promedio}</p>
+                <p className="text-xl font-black" style={{color: '#9A2120'}}>⭐ {Number(op.calificacion_promedio).toFixed(1)}</p>
                 <p className="text-[10px] text-gray-500">{op.total_calificaciones} reseña(s)</p>
               </>
             ) : (

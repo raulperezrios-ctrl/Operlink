@@ -235,7 +235,7 @@ export default function Operadores() {
                       {op.calificacion_promedio > 0 && (
                         <div className="flex items-center gap-1 mb-1">
                           <span className="text-[10px] text-yellow-500">★</span>
-                          <span className="text-[10px] font-semibold">{op.calificacion_promedio}</span>
+                          <span className="text-[10px] font-semibold">{Number(op.calificacion_promedio).toFixed(1)}</span>
                           <span className="text-[9px] text-gray-400">({op.total_calificaciones})</span>
                         </div>
                       )}
