@@ -28,10 +28,7 @@ function DetalleOperadorContent() {
       if (!id) return
 
       const { data: operador } = await supabase
-        .from('operadores')
-        .select('*')
-        .eq('id', id)
-        .single()
+        .from('operadores').select('*').eq('id', id).single()
       setOp(operador)
 
       const { data: sessionData } = await supabase.auth.getSession()
@@ -44,11 +41,7 @@ function DetalleOperadorContent() {
       }
 
       const { data: usuario } = await supabase
-        .from('usuarios')
-        .select('tipo')
-        .eq('id', userId)
-        .single()
-
+        .from('usuarios').select('tipo').eq('id', userId).single()
       setTipoUsuario(usuario?.tipo || null)
 
       if (usuario?.tipo !== 'empresa') {
@@ -59,8 +52,7 @@ function DetalleOperadorContent() {
       const { data: empresa } = await supabase
         .from('empresas')
         .select('id, membresia_activa, contactos_disponibles')
-        .eq('user_id', userId)
-        .single()
+        .eq('user_id', userId).single()
 
       if (!empresa?.membresia_activa) {
         setSinMembresia(true)
@@ -69,13 +61,10 @@ function DetalleOperadorContent() {
       }
 
       const { data: suscripcion } = await supabase
-        .from('suscripciones')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('estatus', 'activa')
+        .from('suscripciones').select('*')
+        .eq('user_id', userId).eq('estatus', 'activa')
         .order('fecha_inicio', { ascending: false })
-        .limit(1)
-        .single()
+        .limit(1).single()
 
       if (suscripcion?.fecha_fin) {
         const fechaFin = new Date(suscripcion.fecha_fin)
@@ -92,11 +81,8 @@ function DetalleOperadorContent() {
       setContactosRestantes(empresa.contactos_disponibles)
 
       const { data: desbloqueoPrevio } = await supabase
-        .from('contactos_desbloqueados')
-        .select('id')
-        .eq('empresa_id', empresa.id)
-        .eq('operador_id', id)
-        .maybeSingle()
+        .from('contactos_desbloqueados').select('id')
+        .eq('empresa_id', empresa.id).eq('operador_id', id).maybeSingle()
 
       if (desbloqueoPrevio) {
         setContactoDesbloqueado(true)
@@ -130,6 +116,17 @@ function DetalleOperadorContent() {
   const iniciales = `${op.nombre?.charAt(0) || ''}. ${op.apellido?.charAt(0) || ''}.`
   const maquinarias: string[] = op.maquinaria || []
 
+  const disponibilidadInfo = () => {
+    if (op.disponibilidad === 'disponible') return { color: 'bg-green-400', texto: 'Disponible' }
+    if (op.fecha_disponibilidad) return {
+      color: 'bg-yellow-400',
+      texto: `Disponible desde ${new Date(op.fecha_disponibilidad).toLocaleDateString('es-MX')}`
+    }
+    return { color: 'bg-red-400', texto: 'No disponible' }
+  }
+
+  const disp = disponibilidadInfo()
+
   return (
     <div className="bg-gray-50 pb-6">
 
@@ -142,8 +139,8 @@ function DetalleOperadorContent() {
         <div className="absolute bottom-4 left-4 text-white">
           <span className="text-xs font-bold px-2 py-1 rounded-full" style={{backgroundColor: '#9A2120'}}>{op.tipo_operador}</span>
           <div className="flex items-center gap-2 mt-2">
-            <span className="h-2 w-2 rounded-full bg-green-400 inline-block"></span>
-            <span className="text-xs">{op.disponibilidad}</span>
+            <span className={`h-2 w-2 rounded-full inline-block ${disp.color}`}></span>
+            <span className="text-xs">{disp.texto}</span>
           </div>
         </div>
       </section>

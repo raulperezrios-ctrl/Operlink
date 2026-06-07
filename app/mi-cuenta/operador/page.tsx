@@ -47,6 +47,7 @@ function PerfilOperadorContent() {
           experiencia_anos: op.experiencia_anos || '',
           descripcion: op.descripcion || '',
           disponibilidad: op.disponibilidad || 'disponible',
+          fecha_disponibilidad: op.fecha_disponibilidad || '',
         })
         setTextoExperiencia(op.experiencia_texto || '')
         if (op.foto_url) setFotoPreview(op.foto_url)
@@ -77,6 +78,8 @@ function PerfilOperadorContent() {
     if (name === 'estado') {
       const municipios = estadosMunicipios[value] || []
       setFormPerfil({...formPerfil, estado: value, municipio: municipios[0] || ''})
+    } else if (name === 'disponibilidad' && value === 'disponible') {
+      setFormPerfil({...formPerfil, disponibilidad: value, fecha_disponibilidad: ''})
     } else {
       setFormPerfil({...formPerfil, [name]: value})
     }
@@ -174,6 +177,14 @@ function PerfilOperadorContent() {
 
   const municipios = estadosMunicipios[formPerfil.estado] || []
 
+  const disponibilidadTexto = () => {
+    if (operador.disponibilidad === 'disponible') return '✅ Disponible'
+    if (operador.fecha_disponibilidad) {
+      return `🗓 Disponible desde ${new Date(operador.fecha_disponibilidad).toLocaleDateString('es-MX')}`
+    }
+    return '❌ No disponible'
+  }
+
   return (
     <div className="bg-gray-50 min-h-screen pb-24">
 
@@ -266,10 +277,28 @@ function PerfilOperadorContent() {
                     <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Disponibilidad</label>
                     <select name="disponibilidad" value={formPerfil.disponibilidad} onChange={handleFormChange}
                       className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm">
-                      <option value="disponible">Disponible</option>
-                      <option value="no_disponible">No disponible</option>
+                      <option value="disponible">✅ Disponible ahora</option>
+                      <option value="no_disponible">❌ No disponible</option>
                     </select>
                   </div>
+                  {formPerfil.disponibilidad === 'no_disponible' && (
+                    <div>
+                      <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>
+                        ¿Cuándo estarás disponible?
+                      </label>
+                      <input
+                        type="date"
+                        name="fecha_disponibilidad"
+                        value={formPerfil.fecha_disponibilidad || ''}
+                        onChange={handleFormChange}
+                        min={new Date().toISOString().split('T')[0]}
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none"
+                      />
+                      <p className="text-[10px] text-gray-400 mt-1">
+                        Te reactivaremos automáticamente en esa fecha
+                      </p>
+                    </div>
+                  )}
                   <div>
                     <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Descripción breve</label>
                     <textarea name="descripcion" value={formPerfil.descripcion || ''} onChange={handleFormChange}
@@ -291,7 +320,7 @@ function PerfilOperadorContent() {
                     {label: 'Municipio', value: operador.municipio || 'No especificado'},
                     {label: 'Tipo', value: operador.tipo_operador},
                     {label: 'Experiencia', value: `${operador.experiencia_anos} años`},
-                    {label: 'Disponibilidad', value: operador.disponibilidad === 'disponible' ? '✅ Disponible' : '❌ No disponible'},
+                    {label: 'Disponibilidad', value: disponibilidadTexto()},
                   ].map((item, i) => (
                     <div key={i} className="flex justify-between">
                       <span className="text-xs text-gray-400">{item.label}</span>

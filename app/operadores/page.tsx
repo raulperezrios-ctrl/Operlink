@@ -24,6 +24,15 @@ export default function Operadores() {
 
   useEffect(() => {
     const cargar = async () => {
+      // Reactivar automáticamente operadores cuya fecha de disponibilidad ya llegó
+      const hoy = new Date().toISOString().split('T')[0]
+      await supabase
+        .from('operadores')
+        .update({ disponibilidad: 'disponible', fecha_disponibilidad: null })
+        .eq('disponibilidad', 'no_disponible')
+        .lte('fecha_disponibilidad', hoy)
+        .not('fecha_disponibilidad', 'is', null)
+
       const { data } = await supabase
         .from('operadores')
         .select('*')
