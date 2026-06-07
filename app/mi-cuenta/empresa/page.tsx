@@ -6,7 +6,6 @@ import { supabase } from '../../lib/supabase'
 
 function CalificarBoton({ empresaId, operadorId }: { empresaId: string, operadorId: string }) {
   const [calificacion, setCalificacion] = useState(0)
-  const [hover, setHover] = useState(0)
   const [calificado, setCalificado] = useState(false)
   const [mostrar, setMostrar] = useState(false)
   const [guardando, setGuardando] = useState(false)
@@ -67,19 +66,21 @@ function CalificarBoton({ empresaId, operadorId }: { empresaId: string, operador
   )
 
   if (mostrar) return (
-    <div className="flex flex-col items-center gap-1">
-      <div className="flex gap-1">
+    <div className="flex flex-col items-center gap-2 bg-gray-50 rounded-xl p-2">
+      <p className="text-[10px] text-gray-500">¿Cómo calificarías a este operador?</p>
+      <div className="flex gap-2">
         {[1,2,3,4,5].map((s) => (
           <button
             key={s}
-            onClick={() => handleCalificar(s)}
-            onMouseEnter={() => setHover(s)}
-            onMouseLeave={() => setHover(0)}
-            onTouchStart={() => setHover(s)}
+            onPointerDown={() => handleCalificar(s)}
             disabled={guardando}
-            className="text-2xl leading-none"
-            style={{color: s <= (hover || calificacion) ? '#f59e0b' : '#d1d5db'}}>
-            ★
+            className="w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold border-2"
+            style={{
+              borderColor: s <= calificacion ? '#f59e0b' : '#e5e7eb',
+              backgroundColor: s <= calificacion ? '#fef3c7' : 'white',
+              color: s <= calificacion ? '#f59e0b' : '#9ca3af'
+            }}>
+            {s}
           </button>
         ))}
       </div>
