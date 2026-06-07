@@ -78,14 +78,11 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
 
     if (!sesion) return (
       <>
-        {/* Iniciar sesión — botón principal */}
         <a href="/login" onClick={() => setMenuAbierto(false)}
           className="w-full py-3 rounded-xl text-white text-sm font-bold text-center block mb-4"
           style={{backgroundColor: '#9A2120'}}>
           Iniciar sesión
         </a>
-
-        {/* Navegación */}
         <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">Navegación</p>
         <a href="/" onClick={() => setMenuAbierto(false)}
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
@@ -103,8 +100,6 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
           💳 Planes
         </a>
-
-        {/* Únete */}
         <div className="border-t border-gray-100 my-3" />
         <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">Únete a OperLink</p>
         <a href="/registro-operador" onClick={() => setMenuAbierto(false)}
@@ -114,6 +109,20 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         <a href="/registro-empresa" onClick={() => setMenuAbierto(false)}
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
           🏢 Soy Empresa
+        </a>
+        <div className="border-t border-gray-100 my-3" />
+        <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">Legal</p>
+        <a href="/aviso-privacidad" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
+          📄 Aviso de Privacidad
+        </a>
+        <a href="/terminos-condiciones" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
+          📋 Términos y Condiciones
+        </a>
+        <a href="/politica-devoluciones" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
+          💳 Política de Devoluciones
         </a>
       </>
     )
@@ -138,6 +147,20 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 w-full text-left">
           🚪 Cerrar sesión
         </button>
+        <div className="border-t border-gray-100 my-3" />
+        <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">Legal</p>
+        <a href="/aviso-privacidad" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
+          📄 Aviso de Privacidad
+        </a>
+        <a href="/terminos-condiciones" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
+          📋 Términos y Condiciones
+        </a>
+        <a href="/politica-devoluciones" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
+          💳 Política de Devoluciones
+        </a>
       </>
     )
 
@@ -165,6 +188,20 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 w-full text-left">
           🚪 Cerrar sesión
         </button>
+        <div className="border-t border-gray-100 my-3" />
+        <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">Legal</p>
+        <a href="/aviso-privacidad" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
+          📄 Aviso de Privacidad
+        </a>
+        <a href="/terminos-condiciones" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
+          📋 Términos y Condiciones
+        </a>
+        <a href="/politica-devoluciones" onClick={() => setMenuAbierto(false)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50">
+          💳 Política de Devoluciones
+        </a>
       </>
     )
 
@@ -279,6 +316,14 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           </a>
 
         </div>
+
+        {/* Footer legal */}
+        <div className="flex justify-center gap-4 pb-2 pt-1 border-t border-gray-100">
+          <a href="/aviso-privacidad" className="text-[9px] text-gray-400">Aviso de Privacidad</a>
+          <a href="/terminos-condiciones" className="text-[9px] text-gray-400">Términos y Condiciones</a>
+          <a href="/politica-devoluciones" className="text-[9px] text-gray-400">Devoluciones</a>
+        </div>
+
       </nav>
     </>
   )
