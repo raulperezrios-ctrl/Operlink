@@ -172,7 +172,6 @@ function PerfilOperadorContent() {
     { id: 'documentos', label: '📄 Documentos' },
     { id: 'experiencia', label: '💼 Experiencia' },
     { id: 'postulaciones', label: '📋 Postulaciones' },
-    { id: 'plan', label: '💳 Plan' },
   ]
 
   const municipios = estadosMunicipios[formPerfil.estado] || []
@@ -511,7 +510,6 @@ function PerfilOperadorContent() {
               postulaciones.map((post, i) => {
                 const sol = post.solicitudes
                 const empresa = sol?.empresas
-                const tieneplan = !!suscripcion
                 return (
                   <div key={i} className="bg-white rounded-xl shadow-sm p-3 border border-gray-100">
                     <div className="flex items-center justify-between mb-2">
@@ -533,24 +531,7 @@ function PerfilOperadorContent() {
                       </p>
                     )}
                     <div className="mt-2 pt-2 border-t border-gray-100">
-                      {tieneplan ? (
-                        <p className="text-xs font-semibold" style={{color: '#575757'}}>
-                          🏢 {empresa?.nombre_empresa || 'Empresa'}
-                        </p>
-                      ) : (
-                        <div className="rounded-xl p-2 flex items-center justify-between"
-                          style={{backgroundColor: '#fff5f5', border: '1px dashed #9A2120'}}>
-                          <div>
-                            <p className="text-xs font-bold" style={{color: '#9A2120'}}>🔒 Empresa bloqueada</p>
-                            <p className="text-[10px] text-gray-400">Activa un plan para ver quién te contrataría</p>
-                          </div>
-                          <a href="/planes?tipo=operador"
-                            className="text-[10px] px-2 py-1 rounded-full text-white font-bold"
-                            style={{backgroundColor: '#9A2120'}}>
-                            Ver planes
-                          </a>
-                        </div>
-                      )}
+                      <p className="text-xs text-gray-400">Empresa visible próximamente</p>
                     </div>
                     {post.estatus === 'pendiente' && (
                       <button onClick={() => handleCancelarPostulacion(post.id)}
@@ -562,37 +543,6 @@ function PerfilOperadorContent() {
                   </div>
                 )
               })
-            )}
-          </div>
-        )}
-
-        {/* Tab Plan */}
-        {tab === 'plan' && (
-          <div className="flex flex-col gap-3">
-            {suscripcion ? (
-              <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
-                <h2 className="text-sm font-bold mb-3" style={{color: '#575757'}}>Plan activo</h2>
-                <p className="text-base font-black" style={{color: '#9A2120'}}>{suscripcion.planes?.nombre}</p>
-                <p className="text-xs text-gray-400">${suscripcion.planes?.precio?.toLocaleString('es-MX')} MXN</p>
-                {suscripcion.fecha_fin && (
-                  <p className="text-xs text-gray-400 mt-1">
-                    Vence: {new Date(suscripcion.fecha_fin).toLocaleDateString('es-MX')}
-                  </p>
-                )}
-              </div>
-            ) : (
-              <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 text-center">
-                <div className="text-3xl mb-2">⭐</div>
-                <p className="text-sm font-bold mb-1" style={{color: '#575757'}}>Sin plan activo</p>
-                <p className="text-xs text-gray-400 mb-3 leading-relaxed">
-                  Con un plan puedes ver qué empresas buscan operadores como tú y contactarlas directamente.
-                </p>
-                <a href="/planes?tipo=operador"
-                  className="w-full py-2.5 rounded-xl text-white text-xs font-bold text-center block"
-                  style={{backgroundColor: '#9A2120'}}>
-                  Ver planes desde $99 MXN
-                </a>
-              </div>
             )}
           </div>
         )}
