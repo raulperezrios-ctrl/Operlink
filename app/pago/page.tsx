@@ -78,7 +78,6 @@ function PagoContent() {
     setProcesando(true)
     setError('')
 
-    // Nuevo formato de Conekta con objeto único
     window.Conekta.token.create(
       {
         card: {
@@ -163,12 +162,6 @@ function PagoContent() {
           </div>
         </div>
 
-        <div className="bg-yellow-50 rounded-xl p-3 border border-yellow-200">
-          <p className="text-xs font-bold text-yellow-800 mb-1">🧪 Modo pruebas — usa esta tarjeta:</p>
-          <p className="text-xs text-yellow-700">Número: <strong>4111 1111 1111 1111</strong></p>
-          <p className="text-xs text-yellow-700">Vencimiento: <strong>12/25</strong> — CVC: <strong>123</strong></p>
-        </div>
-
         <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
           <h2 className="text-sm font-bold mb-3" style={{color: '#575757'}}>💳 Datos de pago</h2>
 
@@ -189,7 +182,7 @@ function PagoContent() {
 
             <div>
               <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Número de tarjeta</label>
-              <input type="text" placeholder="4111 1111 1111 1111" value={tarjeta}
+              <input type="text" placeholder="XXXX XXXX XXXX XXXX" value={tarjeta}
                 onChange={(e) => setTarjeta(e.target.value.replace(/\D/g, '').slice(0, 16))}
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
             </div>
