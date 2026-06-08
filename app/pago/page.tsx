@@ -39,9 +39,6 @@ function PagoContent() {
 
       const { data: sessionData } = await supabase.auth.getSession()
       setSesion(sessionData.session)
-      if (sessionData.session?.user?.email) {
-        setCorreo(sessionData.session.user.email)
-      }
 
       setLoading(false)
     }
@@ -59,7 +56,7 @@ function PagoContent() {
   }, [planId])
 
   const handlePagar = async () => {
-    if (!nombre || !tarjeta || !expiry || !cvc) {
+    if (!nombre || !correo || !tarjeta || !expiry || !cvc) {
       setError('Por favor completa todos los campos')
       return
     }
@@ -200,7 +197,7 @@ function PagoContent() {
               </div>
               <div>
                 <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>CVC</label>
-                <input type="text" placeholder="123" value={cvc}
+                <input type="text" placeholder="•••" value={cvc}
                   onChange={(e) => setCvc(e.target.value.replace(/\D/g, '').slice(0, 4))}
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
               </div>
