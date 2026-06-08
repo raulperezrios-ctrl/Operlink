@@ -49,7 +49,7 @@ function PagoContent() {
 
     const verificarConekta = setInterval(() => {
       if (window.Conekta) {
-        window.Conekta.setPublicKey('key_B67CMqaqhbTVDKZ7mZOHntj')
+        window.Conekta.setPublicKey(process.env.NEXT_PUBLIC_CONEKTA_PUBLIC_KEY || '')
         setConektaListo(true)
         clearInterval(verificarConekta)
       }
