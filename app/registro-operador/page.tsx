@@ -99,6 +99,20 @@ export default function RegistroOperador() {
       correo: form.email,
     })
 
+    // Enviar correo de bienvenida
+    try {
+      await fetch('/api/email/bienvenida', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: form.nombre,
+          correo: form.email,
+        })
+      })
+    } catch (e) {
+      console.error('Error enviando correo bienvenida:', e)
+    }
+
     router.push('/registro-operador/maquinaria')
     setLoading(false)
   }
