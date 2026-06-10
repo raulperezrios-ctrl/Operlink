@@ -110,20 +110,23 @@ function PerfilEmpresaContent() {
   const [solicitudes, setSolicitudes] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState(searchParams.get('tab') || 'perfil')
+  const [cancelando, setCancelando] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
     const cargar = async () => {
       const { data: sessionData } = await supabase.auth.getSession()
-      const userId = sessionData.session?.user?.id
-      if (!userId) {
+      const uid = sessionData.session?.user?.id
+      if (!uid) {
         window.location.href = '/login'
         return
       }
+      setUserId(uid)
 
       const { data: emp } = await supabase
         .from('empresas')
         .select('*')
-        .eq('user_id', userId)
+        .eq('user_id', uid)
         .single()
       setEmpresa(emp)
 
@@ -131,7 +134,7 @@ function PerfilEmpresaContent() {
         const { data: sus } = await supabase
           .from('suscripciones')
           .select('*, planes(nombre, precio, duracion)')
-          .eq('user_id', userId)
+          .eq('user_id', uid)
           .eq('estatus', 'activa')
           .order('fecha_inicio', { ascending: false })
           .limit(1)
@@ -141,7 +144,7 @@ function PerfilEmpresaContent() {
         const { data: pag } = await supabase
           .from('pagos')
           .select('*')
-          .eq('comprador_id', userId)
+          .eq('comprador_id', uid)
           .order('id', { ascending: false })
         setPagos(pag || [])
 
@@ -163,6 +166,38 @@ function PerfilEmpresaContent() {
     }
     cargar()
   }, [])
+
+  const handleCancelarPlan = async () => {
+    if (!confirm('¿Estás seguro de cancelar tu plan? Seguirás con acceso hasta que venza el período pagado.')) return
+    setCancelando(true)
+
+    // Cancelar suscripción en Conekta si existe
+    if (empresa?.conekta_customer_id) {
+      try {
+        await fetch('/api/cancelar-plan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            conektaCustomerId: empresa.conekta_customer_id,
+            suscripcionId: suscripcion?.id,
+            userId,
+          })
+        })
+      } catch (e) {
+        console.error('Error cancelando plan:', e)
+      }
+    }
+
+    // Marcar suscripción como cancelada en Supabase
+    await supabase
+      .from('suscripciones')
+      .update({ estatus: 'cancelada' })
+      .eq('id', suscripcion?.id)
+
+    setSuscripcion({ ...suscripcion, estatus: 'cancelada' })
+    setCancelando(false)
+    alert('Tu plan fue cancelado. Seguirás con acceso hasta que venza el período pagado.')
+  }
 
   const handleCerrarSesion = async () => {
     await supabase.auth.signOut()
@@ -264,7 +299,7 @@ function PerfilEmpresaContent() {
         {/* Tab Plan */}
         {tab === 'plan' && (
           <div className="flex flex-col gap-3">
-            {suscripcion ? (
+            {suscripcion && suscripcion.estatus === 'activa' ? (
               <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
                 <h2 className="text-sm font-bold mb-3" style={{color: '#575757'}}>Plan activo</h2>
                 <div className="flex items-center justify-between mb-3">
@@ -290,11 +325,32 @@ function PerfilEmpresaContent() {
                     </span>
                   </div>
                 )}
+
+                {/* Aviso renovación automática */}
+                {(suscripcion.planes?.duracion === 'mensual' || suscripcion.planes?.duracion === 'anual') && (
+                  <div className="mt-3 p-3 rounded-xl" style={{backgroundColor: '#fff5f5'}}>
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      🔄 Tu plan se renueva automáticamente. Si deseas cancelar, puedes hacerlo en cualquier momento y seguirás con acceso hasta que venza el período pagado.
+                    </p>
+                  </div>
+                )}
+
                 <a href="/planes"
-                  className="mt-4 w-full py-2.5 rounded-xl text-white text-xs font-bold text-center block"
+                  className="mt-3 w-full py-2.5 rounded-xl text-white text-xs font-bold text-center block"
                   style={{backgroundColor: '#9A2120'}}>
                   Mejorar plan
                 </a>
+
+                {/* Botón cancelar — solo para planes recurrentes */}
+                {(suscripcion.planes?.duracion === 'mensual' || suscripcion.planes?.duracion === 'anual') && (
+                  <button
+                    onClick={handleCancelarPlan}
+                    disabled={cancelando}
+                    className="mt-2 w-full py-2.5 rounded-xl text-xs font-bold border-2 text-center block"
+                    style={{borderColor: '#e5e7eb', color: '#6b7280', opacity: cancelando ? 0.7 : 1}}>
+                    {cancelando ? 'Cancelando...' : 'Cancelar plan'}
+                  </button>
+                )}
               </div>
             ) : (
               <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 text-center">
