@@ -38,6 +38,20 @@ function DetalleOperadorAdminContent() {
     await supabase.from('operadores').update({ verificado: true }).eq('id', id)
     setOp({ ...op, verificado: true })
     setAccion('verificado')
+
+    // Enviar correo de verificación
+    try {
+      await fetch('/api/email/verificado', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: op.nombre,
+          correo: op.correo,
+        })
+      })
+    } catch (e) {
+      console.error('Error enviando correo verificado:', e)
+    }
   }
 
   const handleDesactivar = async () => {
