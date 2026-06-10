@@ -285,7 +285,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         target="_blank"
         className="fixed z-50 flex items-center justify-center shadow-lg"
         style={{
-          bottom: '90px',
+          bottom: '120px',
           right: '16px',
           backgroundColor: '#25D366',
           borderRadius: '50%',
