@@ -133,7 +133,7 @@ function PagoContent() {
       <div className="text-6xl mb-4">🎉</div>
       <h1 className="text-xl font-black mb-2" style={{color: '#575757'}}>¡Pago exitoso!</h1>
       <p className="text-sm text-gray-500 mb-6">Tu plan <strong>{plan.nombre}</strong> está activo. Ya puedes ver los contactos de los operadores.</p>
-      <a href="/operadores" className="py-3 px-8 rounded-xl text-white font-bold text-sm" style={{backgroundColor: '#9A2120'}}>
+      <a href="/empresas" className="py-3 px-8 rounded-xl text-white font-bold text-sm" style={{backgroundColor: '#9A2120'}}>
         Ver operadores
       </a>
     </div>
@@ -157,6 +157,13 @@ function PagoContent() {
             <p className="text-xs text-gray-500">Total a pagar</p>
             <p className="text-xl font-black" style={{color: '#9A2120'}}>${plan.precio.toLocaleString('es-MX')} MXN</p>
           </div>
+          {(plan.duracion === 'mensual' || plan.duracion === 'anual') && (
+            <div className="mt-3 p-3 rounded-xl" style={{backgroundColor: '#fff5f5'}}>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                🔄 Este plan se renueva automáticamente cada {plan.duracion === 'mensual' ? 'mes' : 'año'}. Puedes cancelarlo en cualquier momento desde tu cuenta.
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
@@ -214,7 +221,11 @@ function PagoContent() {
             {procesando ? 'Procesando pago...' : !conektaListo ? 'Cargando...' : `Pagar $${plan.precio.toLocaleString('es-MX')} MXN`}
           </button>
 
-          <p className="text-[10px] text-gray-400 text-center mt-2">🔒 Pago seguro con Conekta</p>
+          <div className="mt-3 flex flex-col gap-1">
+            <p className="text-[10px] text-gray-400 text-center">🔒 Pago seguro con Conekta</p>
+            <p className="text-[10px] text-gray-400 text-center">No almacenamos los datos de tu tarjeta. Cumplimos con los estándares PCI DSS de seguridad en pagos.</p>
+          </div>
+
         </div>
 
       </div>
