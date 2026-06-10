@@ -69,7 +69,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
     window.location.href = '/'
   }
 
-  const whatsappUrl = "https://wa.me/5233345881177?text=Hola%2C%20tengo%20una%20duda%20sobre%20OperLink"
+  const whatsappUrl = "https://wa.me/33345881177?text=Hola%2C%20tengo%20una%20duda%20sobre%20OperLink"
 
   const menuContenido = () => {
     if (cargando) return (
