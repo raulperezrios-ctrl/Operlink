@@ -127,6 +127,10 @@ function DetalleOperadorContent() {
 
   const disp = disponibilidadInfo()
 
+  const mensajeWhatsApp = op.telefono
+    ? `https://wa.me/52${op.telefono.replace(/\s/g, '')}?text=Hola%20${op.nombre}%2C%20te%20encontr%C3%A9%20en%20OperLink%20y%20me%20gustar%C3%ADa%20que%20subieras%20tus%20documentos%20%28licencia%20y%20certificaciones%29%20a%20tu%20perfil%20para%20poder%20evaluarte%20mejor.`
+    : null
+
   return (
     <div className="bg-gray-50 pb-6">
 
@@ -210,25 +214,49 @@ function DetalleOperadorContent() {
       )}
 
       {/* Documentos */}
-      {op.licencia_url && (
-        <section className="px-4 py-4 bg-white mt-2 border-b border-gray-100">
-          <h2 className="text-sm font-bold mb-2" style={{color: '#575757'}}>📄 Documentos</h2>
-          <div className="flex flex-col gap-2">
+      <section className="px-4 py-4 bg-white mt-2 border-b border-gray-100">
+        <h2 className="text-sm font-bold mb-3" style={{color: '#575757'}}>📄 Documentos</h2>
+        <div className="flex flex-col gap-2">
+
+          {/* Licencia */}
+          {op.licencia_url ? (
             <a href={op.licencia_url} target="_blank"
               className="text-xs px-3 py-2 rounded-xl border flex items-center gap-2"
               style={{borderColor: '#9A2120', color: '#9A2120'}}>
               🚗 Ver licencia de conducir
             </a>
-            {op.certificaciones?.map((cert: string, i: number) => (
+          ) : (
+            <div className="text-xs px-3 py-2 rounded-xl border border-gray-200 flex items-center gap-2 text-gray-400">
+              🚗 Sin licencia subida aún
+            </div>
+          )}
+
+          {/* Certificaciones */}
+          {op.certificaciones?.length > 0 ? (
+            op.certificaciones.map((cert: string, i: number) => (
               <a key={i} href={cert} target="_blank"
                 className="text-xs px-3 py-2 rounded-xl border flex items-center gap-2"
                 style={{borderColor: '#9A2120', color: '#9A2120'}}>
                 📜 Ver certificación {i + 1}
               </a>
-            ))}
-          </div>
-        </section>
-      )}
+            ))
+          ) : (
+            <div className="text-xs px-3 py-2 rounded-xl border border-gray-200 flex items-center gap-2 text-gray-400">
+              📜 Sin certificaciones subidas aún
+            </div>
+          )}
+
+          {/* Botón solicitar documentos */}
+          {contactoDesbloqueado && (!op.licencia_url || !op.certificaciones?.length) && mensajeWhatsApp && (
+            <a href={mensajeWhatsApp} target="_blank"
+              className="text-xs px-3 py-2 rounded-xl text-white font-bold text-center mt-1"
+              style={{backgroundColor: '#25D366'}}>
+              💬 Solicitar documentos por WhatsApp
+            </a>
+          )}
+
+        </div>
+      </section>
 
       {/* Contacto */}
       <section className="px-4 py-4 mt-2">
@@ -244,6 +272,13 @@ function DetalleOperadorContent() {
                 <span className="text-xs text-gray-400">Correo:</span>
                 <a href={`mailto:${op.correo}`} className="text-sm font-bold" style={{color: '#9A2120'}}>{op.correo}</a>
               </div>
+              {mensajeWhatsApp && (
+                <a href={mensajeWhatsApp} target="_blank"
+                  className="mt-2 w-full py-2.5 rounded-xl text-white text-xs font-bold text-center block"
+                  style={{backgroundColor: '#25D366'}}>
+                  💬 Contactar por WhatsApp
+                </a>
+              )}
             </div>
           </div>
         ) : sinContactos ? (
