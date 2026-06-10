@@ -115,7 +115,7 @@ export default function RegistroEmpresa() {
       console.error('Error enviando correo bienvenida empresa:', e)
     }
 
-    router.push('/registro-empresa/logo')
+    router.push('/registro-empresa/listo')
     setLoading(false)
   }
 
@@ -138,10 +138,10 @@ export default function RegistroEmpresa() {
         <h1 className="text-lg font-black" style={{color: '#575757'}}>Crear perfil de empresa</h1>
         <p className="text-xs text-gray-500 mt-1">Encuentra los mejores operadores para tu negocio</p>
         <div className="flex gap-2 mt-3">
-          {['Datos', 'Logo'].map((paso, i) => (
+          {['Datos'].map((paso, i) => (
             <div key={i} className="flex-1 text-center">
-              <div className="h-1.5 rounded-full mb-1" style={{backgroundColor: i === 0 ? '#9A2120' : '#e5e7eb'}}></div>
-              <span className="text-[9px]" style={{color: i === 0 ? '#9A2120' : '#9ca3af'}}>{paso}</span>
+              <div className="h-1.5 rounded-full mb-1" style={{backgroundColor: '#9A2120'}}></div>
+              <span className="text-[9px]" style={{color: '#9A2120'}}>{paso}</span>
             </div>
           ))}
         </div>
@@ -250,7 +250,7 @@ export default function RegistroEmpresa() {
           <button onClick={handleRegistro} disabled={loading}
             className="w-full py-3 rounded-xl text-white font-bold text-sm mt-2"
             style={{backgroundColor: '#9A2120', opacity: loading ? 0.7 : 1}}>
-            {loading ? 'Registrando...' : 'Continuar →'}
+            {loading ? 'Registrando...' : 'Finalizar ✅'}
           </button>
 
         </div>
