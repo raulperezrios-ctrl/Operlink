@@ -249,9 +249,12 @@ function DetalleOperadorContent() {
           {/* Botón solicitar documentos */}
           {contactoDesbloqueado && (!op.licencia_url || !op.certificaciones?.length) && mensajeWhatsApp && (
             <a href={mensajeWhatsApp} target="_blank"
-              className="text-xs px-3 py-2 rounded-xl text-white font-bold text-center mt-1"
+              className="text-xs px-3 py-2 rounded-xl text-white font-bold text-center mt-1 block"
               style={{backgroundColor: '#25D366'}}>
               💬 Solicitar documentos por WhatsApp
+              <span className="block text-[10px] font-normal mt-0.5 opacity-80">
+                "Hola {op.nombre}, te encontré en OperLink y me gustaría que subieras tus documentos (licencia y certificaciones) a tu perfil para poder evaluarte mejor."
+              </span>
             </a>
           )}
 
