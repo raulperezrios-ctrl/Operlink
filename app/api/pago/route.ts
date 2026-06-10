@@ -82,6 +82,22 @@ export async function POST(req: NextRequest) {
       estatus: 'completado',
     })
 
+    // 4. Enviar correo de plan activado
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL ? 'https://www.operlink.mx' : 'http://localhost:3000'}/api/email/plan-activado`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre,
+          correo,
+          plan: plan.nombre,
+          contactos: plan.contactos,
+        })
+      })
+    } catch (e) {
+      console.error('Error enviando correo plan activado:', e)
+    }
+
     return NextResponse.json({ success: true, orden: ordenData.id })
 
   } catch (err: any) {

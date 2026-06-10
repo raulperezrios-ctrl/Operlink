@@ -101,6 +101,20 @@ export default function RegistroEmpresa() {
       return
     }
 
+    // Enviar correo de bienvenida
+    try {
+      await fetch('/api/email/bienvenida-empresa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: form.nombre_contacto,
+          correo: form.email,
+        })
+      })
+    } catch (e) {
+      console.error('Error enviando correo bienvenida empresa:', e)
+    }
+
     router.push('/registro-empresa/logo')
     setLoading(false)
   }
