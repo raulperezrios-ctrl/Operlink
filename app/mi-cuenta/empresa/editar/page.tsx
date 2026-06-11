@@ -169,8 +169,8 @@ export default function EditarEmpresa() {
       <div className="bg-white px-4 py-4 border-b border-gray-100 flex items-center gap-3">
         <a href="/mi-cuenta/empresa" className="text-gray-400 text-lg">←</a>
         <div>
-          <h1 className="text-lg font-black" style={{color: '#575757'}}>Editar perfil</h1>
-          <p className="text-xs text-gray-500">Actualiza la información de tu empresa</p>
+          <h1 className="text-lg font-black" style={{color: '#575757'}}>Editar perfil / Datos de Facturacion</h1>
+          <p className="text-xs text-gray-500">Actualiza la información de tu empresa y datos de facturacion</p>
         </div>
       </div>
 
