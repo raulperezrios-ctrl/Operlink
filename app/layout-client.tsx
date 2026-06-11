@@ -55,16 +55,30 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
 
     cargar()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN') {
-      setSesion(session)
-      } else if (event === 'SIGNED_OUT') {
-      setSesion(null)
-      setTipoUsuario(null)
-      setNombreUsuario(null)
-      }
-    })
-
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'SIGNED_IN' && session?.user?.id) {
+    setSesion(session)
+    const { data: usuario } = await supabase
+      .from('usuarios').select('tipo').eq('id', session.user.id).single()
+    const tipo = usuario?.tipo || null
+    setTipoUsuario(tipo)
+    if (tipo === 'operador') {
+      const { data: op } = await supabase
+        .from('operadores').select('nombre').eq('user_id', session.user.id).single()
+      setNombreUsuario(op?.nombre || null)
+    } else if (tipo === 'empresa') {
+      const { data: emp } = await supabase
+        .from('empresas').select('nombre_contacto').eq('user_id', session.user.id).single()
+      setNombreUsuario(emp?.nombre_contacto?.split(' ')[0] || null)
+    } else if (tipo === 'admin') {
+      setNombreUsuario('Admin')
+    }
+  } else if (event === 'SIGNED_OUT') {
+    setSesion(null)
+    setTipoUsuario(null)
+    setNombreUsuario(null)
+  }
+})
     return () => subscription.unsubscribe()
     }, [])
 
