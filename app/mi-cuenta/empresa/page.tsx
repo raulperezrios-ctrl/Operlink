@@ -290,7 +290,7 @@ function PerfilEmpresaContent() {
               <a href="/mi-cuenta/empresa/editar"
                 className="mt-4 w-full py-2.5 rounded-xl text-white text-xs font-bold text-center block"
                 style={{backgroundColor: '#9A2120'}}>
-                ✏️ Editar perfil
+                ✏️ Editar perfil / Datos de Facturacion
               </a>
             </div>
           </div>
