@@ -10,43 +10,41 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   const [menuAbierto, setMenuAbierto] = useState(false)
   const [cargando, setCargando] = useState(true)
 
-  const cargarUsuario = async (userId: string) => {
-    const { data: usuario } = await supabase
-      .from('usuarios')
-      .select('tipo')
-      .eq('id', userId)
-      .single()
-
-    const tipo = usuario?.tipo || null
-    setTipoUsuario(tipo)
-
-    if (tipo === 'operador') {
-      const { data: op } = await supabase
-        .from('operadores')
-        .select('nombre')
-        .eq('user_id', userId)
-        .single()
-      setNombreUsuario(op?.nombre || null)
-    } else if (tipo === 'empresa') {
-      const { data: emp } = await supabase
-        .from('empresas')
-        .select('nombre_contacto')
-        .eq('user_id', userId)
-        .single()
-      setNombreUsuario(emp?.nombre_contacto?.split(' ')[0] || null)
-    } else if (tipo === 'admin') {
-      setNombreUsuario('Admin')
-    }
-  }
-
   useEffect(() => {
     const cargar = async () => {
       try {
         const { data: sessionData } = await supabase.auth.getSession()
         const session = sessionData.session
+        const userId = session?.user?.id
         setSesion(session)
-        if (session?.user?.id) {
-          await cargarUsuario(session.user.id)
+
+        if (userId) {
+          const { data: usuario } = await supabase
+            .from('usuarios')
+            .select('tipo')
+            .eq('id', userId)
+            .single()
+
+          const tipo = usuario?.tipo || null
+          setTipoUsuario(tipo)
+
+          if (tipo === 'operador') {
+            const { data: op } = await supabase
+              .from('operadores')
+              .select('nombre')
+              .eq('user_id', userId)
+              .single()
+            setNombreUsuario(op?.nombre || null)
+          } else if (tipo === 'empresa') {
+            const { data: emp } = await supabase
+              .from('empresas')
+              .select('nombre_contacto')
+              .eq('user_id', userId)
+              .single()
+            setNombreUsuario(emp?.nombre_contacto?.split(' ')[0] || null)
+          } else if (tipo === 'admin') {
+            setNombreUsuario('Admin')
+          }
         }
       } catch (e) {
         console.error('Error cargando sesión:', e)
@@ -57,16 +55,10 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
 
     cargar()
 
-    // Escuchar cambios de sesión en tiempo real
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setSesion(session)
-      if (session?.user?.id) {
-        await cargarUsuario(session.user.id)
-      } else {
-        setTipoUsuario(null)
-        setNombreUsuario(null)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+        window.location.reload()
       }
-      setCargando(false)
     })
 
     return () => subscription.unsubscribe()
