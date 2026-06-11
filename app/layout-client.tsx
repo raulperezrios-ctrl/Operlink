@@ -56,13 +56,17 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
     cargar()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
-        window.location.reload()
+      if (event === 'SIGNED_IN') {
+      setSesion(session)
+      } else if (event === 'SIGNED_OUT') {
+      setSesion(null)
+      setTipoUsuario(null)
+      setNombreUsuario(null)
       }
     })
 
     return () => subscription.unsubscribe()
-  }, [])
+    }, [])
 
   const cuentaUrl = () => {
     if (!sesion) return '/login'
