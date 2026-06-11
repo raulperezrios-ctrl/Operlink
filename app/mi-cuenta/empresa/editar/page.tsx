@@ -22,6 +22,11 @@ export default function EditarEmpresa() {
     municipio: 'Guadalajara',
     sitio_web: '',
     descripcion: '',
+    rfc: '',
+    razon_social: '',
+    regimen_fiscal: '',
+    uso_cfdi: '',
+    codigo_postal_fiscal: '',
   })
 
   useEffect(() => {
@@ -48,6 +53,11 @@ export default function EditarEmpresa() {
           municipio: emp.municipio || 'Guadalajara',
           sitio_web: emp.sitio_web || '',
           descripcion: emp.descripcion || '',
+          rfc: emp.rfc || '',
+          razon_social: emp.razon_social || '',
+          regimen_fiscal: emp.regimen_fiscal || '',
+          uso_cfdi: emp.uso_cfdi || '',
+          codigo_postal_fiscal: emp.codigo_postal_fiscal || '',
         })
       }
       setLoading(false)
@@ -82,6 +92,11 @@ export default function EditarEmpresa() {
         industria: industria,
         sitio_web: form.sitio_web,
         descripcion: form.descripcion,
+        rfc: form.rfc,
+        razon_social: form.razon_social,
+        regimen_fiscal: form.regimen_fiscal,
+        uso_cfdi: form.uso_cfdi,
+        codigo_postal_fiscal: form.codigo_postal_fiscal,
       })
       .eq('id', empresaId)
 
@@ -103,6 +118,46 @@ export default function EditarEmpresa() {
     {emoji: '🔧', label: 'Otra'},
   ]
 
+  const regimenesFiscales = [
+    '601 - General de Ley Personas Morales',
+    '603 - Personas Morales con Fines no Lucrativos',
+    '605 - Sueldos y Salarios e Ingresos Asimilados a Salarios',
+    '606 - Arrendamiento',
+    '608 - Demás ingresos',
+    '609 - Consolidación',
+    '610 - Residentes en el Extranjero sin Establecimiento Permanente en México',
+    '611 - Ingresos por Dividendos (socios y accionistas)',
+    '612 - Personas Físicas con Actividades Empresariales y Profesionales',
+    '614 - Ingresos por intereses',
+    '616 - Sin obligaciones fiscales',
+    '620 - Sociedades Cooperativas de Producción que optan por diferir sus ingresos',
+    '621 - Incorporación Fiscal',
+    '622 - Actividades Agrícolas, Ganaderas, Silvícolas y Pesqueras',
+    '623 - Opcional para Grupos de Sociedades',
+    '624 - Coordinados',
+    '625 - Régimen de las Actividades Empresariales con ingresos a través de Plataformas Tecnológicas',
+    '626 - Régimen Simplificado de Confianza',
+  ]
+
+  const usosCFDI = [
+    'G01 - Adquisición de mercancias',
+    'G02 - Devoluciones, descuentos o bonificaciones',
+    'G03 - Gastos en general',
+    'I01 - Construcciones',
+    'I02 - Mobilario y equipo de oficina por inversiones',
+    'I03 - Equipo de transporte',
+    'I04 - Equipo de computo y accesorios',
+    'I05 - Dados, troqueles, moldes, matrices y herramental',
+    'I06 - Comunicaciones telefónicas',
+    'I07 - Comunicaciones satelitales',
+    'I08 - Otra maquinaria y equipo',
+    'D01 - Honorarios médicos, dentales y gastos hospitalarios',
+    'D10 - Pagos por servicios educativos (colegiaturas)',
+    'S01 - Sin efectos fiscales',
+    'CP01 - Pagos',
+    'CN01 - Nómina',
+  ]
+
   const municipios = estadosMunicipios[form.estado] || []
 
   if (loading) return <div className="text-center py-20 text-sm text-gray-400">Cargando...</div>
@@ -119,7 +174,9 @@ export default function EditarEmpresa() {
         </div>
       </div>
 
-      <div className="px-4 py-4">
+      <div className="px-4 py-4 flex flex-col gap-4">
+
+        {/* Información general */}
         <div className="bg-white rounded-2xl shadow-sm p-4 flex flex-col gap-3">
 
           <h2 className="text-sm font-bold" style={{color: '#575757'}}>Información de la empresa</h2>
@@ -197,24 +254,77 @@ export default function EditarEmpresa() {
               rows={3} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none resize-none" />
           </div>
 
-          {error && <p className="text-xs text-red-500 text-center">{error}</p>}
+        </div>
 
-          <div className="flex gap-2 mt-2">
-            <a href="/mi-cuenta/empresa"
-              className="flex-1 border-2 rounded-xl py-3 text-xs font-bold text-center"
-              style={{borderColor: '#9A2120', color: '#9A2120'}}>
-              Cancelar
-            </a>
-            <button onClick={handleGuardar} disabled={guardando}
-              className="flex-1 rounded-xl py-3 text-xs font-bold text-white"
-              style={{backgroundColor: '#9A2120', opacity: guardando ? 0.7 : 1}}>
-              {guardando ? 'Guardando...' : 'Guardar cambios'}
-            </button>
+        {/* Datos de facturación */}
+        <div className="bg-white rounded-2xl shadow-sm p-4 flex flex-col gap-3">
+
+          <div>
+            <h2 className="text-sm font-bold" style={{color: '#575757'}}>Datos de facturación</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Opcional — necesarios para emitir facturas</p>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>RFC</label>
+            <input name="rfc" type="text" value={form.rfc} onChange={handleChange}
+              placeholder="Ej. XAXX010101000"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none uppercase" />
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Razón social</label>
+            <input name="razon_social" type="text" value={form.razon_social} onChange={handleChange}
+              placeholder="Nombre fiscal completo"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Código postal fiscal</label>
+            <input name="codigo_postal_fiscal" type="text" value={form.codigo_postal_fiscal} onChange={handleChange}
+              placeholder="Ej. 45085"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none" />
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Régimen fiscal</label>
+            <select name="regimen_fiscal" value={form.regimen_fiscal} onChange={handleChange}
+              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
+              <option value="">Selecciona tu régimen</option>
+              {regimenesFiscales.map((r, i) => (
+                <option key={i} value={r}>{r}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold block mb-1" style={{color: '#575757'}}>Uso de CFDI</label>
+            <select name="uso_cfdi" value={form.uso_cfdi} onChange={handleChange}
+              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm">
+              <option value="">Selecciona el uso</option>
+              {usosCFDI.map((u, i) => (
+                <option key={i} value={u}>{u}</option>
+              ))}
+            </select>
           </div>
 
         </div>
-      </div>
 
+        {error && <p className="text-xs text-red-500 text-center">{error}</p>}
+
+        <div className="flex gap-2">
+          <a href="/mi-cuenta/empresa"
+            className="flex-1 border-2 rounded-xl py-3 text-xs font-bold text-center"
+            style={{borderColor: '#9A2120', color: '#9A2120'}}>
+            Cancelar
+          </a>
+          <button onClick={handleGuardar} disabled={guardando}
+            className="flex-1 rounded-xl py-3 text-xs font-bold text-white"
+            style={{backgroundColor: '#9A2120', opacity: guardando ? 0.7 : 1}}>
+            {guardando ? 'Guardando...' : 'Guardar cambios'}
+          </button>
+        </div>
+
+      </div>
     </div>
   )
 }
