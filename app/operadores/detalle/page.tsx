@@ -10,100 +10,18 @@ const fotaPorTipo: Record<string, string> = {
   'Transporte': '/Operador_Tractocamion.png',
 }
 
-function DetalleOperadorContent() {
+function DetalleOperadorAdminContent() {
   const searchParams = useSearchParams()
   const id = searchParams.get('id')
   const [op, setOp] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [tipoUsuario, setTipoUsuario] = useState<string | null>(null)
-  const [contactoDesbloqueado, setContactoDesbloqueado] = useState(false)
-  const [sinContactos, setSinContactos] = useState(false)
-  const [planVencido, setPlanVencido] = useState(false)
-  const [sinMembresia, setSinMembresia] = useState(false)
-  const [sinSesion, setSinSesion] = useState(false)
-  const [contactosRestantes, setContactosRestantes] = useState(0)
 
   useEffect(() => {
     const cargar = async () => {
       if (!id) return
-
       const { data: operador } = await supabase
         .from('operadores').select('*').eq('id', id).single()
       setOp(operador)
-
-      const { data: sessionData } = await supabase.auth.getSession()
-      const userId = sessionData.session?.user?.id
-
-      if (!userId) {
-        setSinSesion(true)
-        setLoading(false)
-        return
-      }
-
-      const { data: usuario } = await supabase
-        .from('usuarios').select('tipo').eq('id', userId).single()
-      setTipoUsuario(usuario?.tipo || null)
-
-      if (usuario?.tipo !== 'empresa') {
-        setLoading(false)
-        return
-      }
-
-      const { data: empresa } = await supabase
-        .from('empresas')
-        .select('id, membresia_activa, contactos_disponibles')
-        .eq('user_id', userId).single()
-
-      if (!empresa?.membresia_activa) {
-        setSinMembresia(true)
-        setLoading(false)
-        return
-      }
-
-      const { data: suscripcion } = await supabase
-        .from('suscripciones').select('*')
-        .eq('user_id', userId).eq('estatus', 'activa')
-        .order('fecha_inicio', { ascending: false })
-        .limit(1).single()
-
-      if (suscripcion?.fecha_fin) {
-        const fechaFin = new Date(suscripcion.fecha_fin)
-        const ahora = new Date()
-        if (ahora > fechaFin) {
-          await supabase.from('empresas').update({ membresia_activa: false, contactos_disponibles: 0 }).eq('id', empresa.id)
-          await supabase.from('suscripciones').update({ estatus: 'expirada' }).eq('id', suscripcion.id)
-          setPlanVencido(true)
-          setLoading(false)
-          return
-        }
-      }
-
-      setContactosRestantes(empresa.contactos_disponibles)
-
-      const { data: desbloqueoPrevio } = await supabase
-        .from('contactos_desbloqueados').select('id')
-        .eq('empresa_id', empresa.id).eq('operador_id', id).maybeSingle()
-
-      if (desbloqueoPrevio) {
-        setContactoDesbloqueado(true)
-        setLoading(false)
-        return
-      }
-
-      if (empresa.contactos_disponibles <= 0) {
-        setSinContactos(true)
-        setLoading(false)
-        return
-      }
-
-      await supabase.from('contactos_desbloqueados').insert({ empresa_id: empresa.id, operador_id: id })
-
-      if (empresa.contactos_disponibles < 9999) {
-        await supabase.from('empresas').update({ contactos_disponibles: empresa.contactos_disponibles - 1 }).eq('id', empresa.id)
-        setContactosRestantes(empresa.contactos_disponibles - 1)
-      }
-
-      setContactoDesbloqueado(true)
       setLoading(false)
     }
     cargar()
@@ -113,7 +31,6 @@ function DetalleOperadorContent() {
   if (!op) return <div className="text-center py-20 text-sm text-gray-400">Operador no encontrado</div>
 
   const foto = op.foto_url || fotaPorTipo[op.tipo_operador] || '/Operador_MAquinaria.png'
-  const iniciales = `${op.nombre?.charAt(0) || ''}. ${op.apellido?.charAt(0) || ''}.`
   const maquinarias: string[] = op.maquinaria || []
 
   const disponibilidadInfo = () => {
@@ -128,18 +45,23 @@ function DetalleOperadorContent() {
   const disp = disponibilidadInfo()
 
   const mensajeWhatsApp = op.telefono
-    ? `https://wa.me/52${op.telefono.replace(/\s/g, '')}?text=Hola%20${op.nombre}%2C%20te%20encontr%C3%A9%20en%20OperLink%20y%20me%20gustar%C3%ADa%20que%20subieras%20tus%20documentos%20%28licencia%20y%20certificaciones%29%20a%20tu%20perfil%20para%20poder%20evaluarte%20mejor.`
+    ? `https://wa.me/52${op.telefono.replace(/\s/g, '')}?text=Hola%20${op.nombre}%2C%20te%20contactamos%20desde%20OperLink.`
     : null
 
   return (
     <div className="bg-gray-50 pb-6">
 
+      {/* Header admin */}
+      <div className="bg-white px-4 py-3 border-b border-gray-100 flex items-center gap-3">
+        <a href="/admin/operadores" className="text-gray-400 text-lg">←</a>
+        <h1 className="text-base font-black" style={{color: '#575757'}}>Detalle Operador</h1>
+        <span className="ml-auto text-xs px-2 py-1 rounded-full font-bold text-white" style={{backgroundColor: '#9A2120'}}>Admin</span>
+      </div>
+
       {/* Foto principal */}
       <section className="relative overflow-hidden bg-gray-100">
         <img src={foto} alt="Operador" className="w-full object-contain max-h-80" />
         <div className="absolute inset-0" style={{background: 'linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.7) 100%)'}}></div>
-        <a href={searchParams.get('volver') === 'mi-cuenta' ? '/mi-cuenta/empresa?tab=operadores' : '/operadores'}
-          className="absolute top-4 left-4 bg-black/40 rounded-full px-3 py-1 text-white text-xs">← Volver</a>
         <div className="absolute bottom-4 left-4 text-white">
           <span className="text-xs font-bold px-2 py-1 rounded-full" style={{backgroundColor: '#9A2120'}}>{op.tipo_operador}</span>
           <div className="flex items-center gap-2 mt-2">
@@ -153,21 +75,13 @@ function DetalleOperadorContent() {
       <section className="px-4 py-4 bg-white border-b border-gray-100">
         <div className="flex items-center gap-2 mb-1">
           <h1 className="text-lg font-black" style={{color: '#575757'}}>
-            {contactoDesbloqueado ? `${op.nombre} ${op.apellido}` : iniciales}
+            {op.nombre} {op.apellido}
           </h1>
           {op.verificado && (
             <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{backgroundColor: '#dbeafe', color: '#1d4ed8'}}>✔ Verificado</span>
           )}
         </div>
         <p className="text-xs text-gray-500">📍 {op.ciudad}, {op.estado}</p>
-
-        {contactoDesbloqueado && contactosRestantes < 9999 && (
-          <div className="mt-2 inline-flex items-center gap-1 bg-gray-100 rounded-full px-3 py-1">
-            <span className="text-xs text-gray-500">Contactos restantes:</span>
-            <span className="text-xs font-bold" style={{color: '#9A2120'}}>{contactosRestantes}</span>
-          </div>
-        )}
-
         <div className="flex gap-4 mt-3">
           <div className="text-center">
             <p className="text-xl font-black" style={{color: '#9A2120'}}>{op.experiencia_anos || '0'}</p>
@@ -186,6 +100,28 @@ function DetalleOperadorContent() {
               </>
             )}
           </div>
+        </div>
+      </section>
+
+      {/* Contacto — admin ve todo */}
+      <section className="px-4 py-4 bg-white mt-2 border-b border-gray-100">
+        <h2 className="text-sm font-bold mb-3" style={{color: '#575757'}}>📞 Información de contacto</h2>
+        <div className="flex flex-col gap-2">
+          <div className="flex justify-between">
+            <span className="text-xs text-gray-400">Teléfono</span>
+            <a href={`tel:${op.telefono}`} className="text-xs font-bold" style={{color: '#9A2120'}}>{op.telefono}</a>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-xs text-gray-400">Correo</span>
+            <a href={`mailto:${op.correo}`} className="text-xs font-bold" style={{color: '#9A2120'}}>{op.correo}</a>
+          </div>
+          {mensajeWhatsApp && (
+            <a href={mensajeWhatsApp} target="_blank"
+              className="mt-2 w-full py-2.5 rounded-xl text-white text-xs font-bold text-center block"
+              style={{backgroundColor: '#25D366'}}>
+              💬 Contactar por WhatsApp
+            </a>
+          )}
         </div>
       </section>
 
@@ -217,8 +153,6 @@ function DetalleOperadorContent() {
       <section className="px-4 py-4 bg-white mt-2 border-b border-gray-100">
         <h2 className="text-sm font-bold mb-3" style={{color: '#575757'}}>📄 Documentos</h2>
         <div className="flex flex-col gap-2">
-
-          {/* Licencia */}
           {op.licencia_url ? (
             <a href={op.licencia_url} target="_blank"
               className="text-xs px-3 py-2 rounded-xl border flex items-center gap-2"
@@ -230,8 +164,6 @@ function DetalleOperadorContent() {
               🚗 Sin licencia subida aún
             </div>
           )}
-
-          {/* Certificaciones */}
           {op.certificaciones?.length > 0 ? (
             op.certificaciones.map((cert: string, i: number) => (
               <a key={i} href={cert} target="_blank"
@@ -245,92 +177,40 @@ function DetalleOperadorContent() {
               📜 Sin certificaciones subidas aún
             </div>
           )}
-
-          {/* Botón solicitar documentos */}
-          {contactoDesbloqueado && (!op.licencia_url || !op.certificaciones?.length) && mensajeWhatsApp && (
-            <a href={mensajeWhatsApp} target="_blank"
-              className="text-xs px-3 py-2 rounded-xl text-white font-bold text-center mt-1 block"
-              style={{backgroundColor: '#25D366'}}>
-              💬 Solicitar documentos por WhatsApp
-              <span className="block text-[10px] font-normal mt-0.5 opacity-80">
-                "Hola {op.nombre}, te encontré en OperLink y me gustaría que subieras tus documentos (licencia y certificaciones) a tu perfil para poder evaluarte mejor."
-              </span>
-            </a>
-          )}
-
         </div>
       </section>
 
-      {/* Contacto */}
-      <section className="px-4 py-4 mt-2">
-        {contactoDesbloqueado ? (
-          <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100">
-            <h2 className="text-sm font-bold mb-3" style={{color: '#575757'}}>📞 Información de contacto</h2>
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-400">Teléfono:</span>
-                <a href={`tel:${op.telefono}`} className="text-sm font-bold" style={{color: '#9A2120'}}>{op.telefono}</a>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-400">Correo:</span>
-                <a href={`mailto:${op.correo}`} className="text-sm font-bold" style={{color: '#9A2120'}}>{op.correo}</a>
-              </div>
-              {mensajeWhatsApp && (
-                <a href={mensajeWhatsApp} target="_blank"
-                  className="mt-2 w-full py-2.5 rounded-xl text-white text-xs font-bold text-center block"
-                  style={{backgroundColor: '#25D366'}}>
-                  💬 Contactar por WhatsApp
-                </a>
-              )}
-            </div>
+      {/* Datos adicionales admin */}
+      <section className="px-4 py-4 bg-white mt-2">
+        <h2 className="text-sm font-bold mb-3" style={{color: '#575757'}}>📋 Datos adicionales</h2>
+        <div className="flex flex-col gap-2">
+          <div className="flex justify-between">
+            <span className="text-xs text-gray-400">ID</span>
+            <span className="text-xs font-mono text-gray-500">{op.id?.slice(0,8)}...</span>
           </div>
-        ) : sinContactos ? (
-          <div className="rounded-2xl border-2 border-dashed p-6 text-center" style={{borderColor: '#9A2120'}}>
-            <div className="text-3xl mb-2">🔒</div>
-            <h2 className="font-black text-base" style={{color: '#575757'}}>Sin contactos disponibles</h2>
-            <p className="text-xs text-gray-500 mt-2 leading-relaxed">Usaste todos tus contactos. Adquiere más para seguir conectando.</p>
-            <a href="/planes" className="mt-4 w-full py-3 rounded-xl text-white font-bold text-sm text-center block" style={{backgroundColor: '#9A2120'}}>
-              Ver planes
-            </a>
+          <div className="flex justify-between">
+            <span className="text-xs text-gray-400">Municipio</span>
+            <span className="text-xs font-semibold">{op.municipio}</span>
           </div>
-        ) : planVencido ? (
-          <div className="rounded-2xl border-2 border-dashed p-6 text-center" style={{borderColor: '#9A2120'}}>
-            <div className="text-3xl mb-2">⏰</div>
-            <h2 className="font-black text-base" style={{color: '#575757'}}>Tu plan venció</h2>
-            <p className="text-xs text-gray-500 mt-2 leading-relaxed">Tu membresía expiró. Renueva para seguir viendo contactos.</p>
-            <a href="/planes" className="mt-4 w-full py-3 rounded-xl text-white font-bold text-sm text-center block" style={{backgroundColor: '#9A2120'}}>
-              Renovar plan
-            </a>
+          <div className="flex justify-between">
+            <span className="text-xs text-gray-400">Verificado</span>
+            <span className="text-xs font-semibold">{op.verificado ? '✅ Sí' : '❌ No'}</span>
           </div>
-        ) : sinMembresia ? (
-          <div className="rounded-2xl border-2 border-dashed p-6 text-center" style={{borderColor: '#9A2120'}}>
-            <div className="text-3xl mb-2">🔒</div>
-            <h2 className="font-black text-base" style={{color: '#575757'}}>Activa tu plan</h2>
-            <p className="text-xs text-gray-500 mt-2 leading-relaxed">Para ver el contacto de este operador necesitas activar un plan OperLink.</p>
-            <a href="/planes" className="mt-4 w-full py-3 rounded-xl text-white font-bold text-sm text-center block" style={{backgroundColor: '#9A2120'}}>
-              Ver planes
-            </a>
+          <div className="flex justify-between">
+            <span className="text-xs text-gray-400">Disponibilidad</span>
+            <span className="text-xs font-semibold">{op.disponibilidad}</span>
           </div>
-        ) : (
-          <div className="rounded-2xl border-2 border-dashed p-6 text-center" style={{borderColor: '#9A2120'}}>
-            <div className="text-3xl mb-2">🔒</div>
-            <h2 className="font-black text-base" style={{color: '#575757'}}>Contacto protegido</h2>
-            <p className="text-xs text-gray-500 mt-2 leading-relaxed">Inicia sesión como empresa para ver el contacto de este operador.</p>
-            <a href="/login" className="mt-4 w-full py-3 rounded-xl text-white font-bold text-sm text-center block" style={{backgroundColor: '#9A2120'}}>
-              Iniciar sesión
-            </a>
-          </div>
-        )}
+        </div>
       </section>
 
     </div>
   )
 }
 
-export default function DetalleOperador() {
+export default function DetalleOperadorAdmin() {
   return (
     <Suspense fallback={<div className="text-center py-20 text-sm text-gray-400">Cargando...</div>}>
-      <DetalleOperadorContent />
+      <DetalleOperadorAdminContent />
     </Suspense>
   )
 }
