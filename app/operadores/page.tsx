@@ -32,7 +32,7 @@ export default function Operadores() {
         .from('operadores')
         .select('id, nombre, apellido, tipo_operador, ciudad, municipio, estado, experiencia_anos, disponibilidad, fecha_disponibilidad, maquinaria, calificacion_promedio, total_calificaciones, foto_url')
         .neq('disponibilidad', 'desactivado')
-        .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
         .range(0, POR_PAGINA - 1)
 
       console.log('Operadores cargados:', data?.length, data)
@@ -71,7 +71,7 @@ export default function Operadores() {
       .from('operadores')
       .select('id, nombre, apellido, tipo_operador, ciudad, municipio, estado, experiencia_anos, disponibilidad, fecha_disponibilidad, maquinaria, calificacion_promedio, total_calificaciones, foto_url')
       .neq('disponibilidad', 'desactivado')
-      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
       .range(nuevaPagina * POR_PAGINA, (nuevaPagina + 1) * POR_PAGINA - 1)
 
     if (data) {
