@@ -224,9 +224,9 @@ export default function Operadores() {
           <div className="text-center py-10">
             <p className="text-sm text-gray-400">Cargando operadores...</p>
           </div>
-        ) : operadoresFiltrados.length === 0 ? (
+        ) : operadores.length === 0 ? (
           <div className="text-center py-10">
-            <p className="text-sm text-gray-400">No hay operadores con estos filtros.</p>
+            <p className="text-sm text-gray-400">No hay operadores disponibles.</p>
             {hayFiltrosActivos && (
               <button onClick={limpiarFiltros}
                 className="mt-3 text-xs px-4 py-2 rounded-xl text-white font-bold"
