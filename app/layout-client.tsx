@@ -56,7 +56,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
     cargar()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-  if (event === 'SIGNED_IN' && session?.user?.id) {
+  if (event === 'SIGNED_IN' && session?.user?.id && !sesion) {
     setSesion(session)
     const { data: usuario } = await supabase
       .from('usuarios').select('tipo').eq('id', session.user.id).single()
