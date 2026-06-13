@@ -23,29 +23,22 @@ export default function Operadores() {
   const [empresa, setEmpresa] = useState<any>(null)
   const [pagina, setPagina] = useState(0)
   const [hayMas, setHayMas] = useState(true)
+  const [cargandoMas, setCargandoMas] = useState(false)
   const POR_PAGINA = 20
-
-  const cargarOperadores = async (paginaNum: number, reset = false) => {
-    const { data } = await supabase
-      .from('operadores')
-      .select('id, nombre, apellido, tipo_operador, ciudad, municipio, estado, experiencia_anos, disponibilidad, fecha_disponibilidad, maquinaria, calificacion_promedio, total_calificaciones, foto_url')
-      .neq('disponibilidad', 'desactivado')
-      .order('created_at', { ascending: false })
-      .range(paginaNum * POR_PAGINA, (paginaNum + 1) * POR_PAGINA - 1)
-
-    if (data) {
-      if (reset) {
-        setOperadores(data)
-      } else {
-        setOperadores(prev => [...prev, ...data])
-      }
-      setHayMas(data.length === POR_PAGINA)
-    }
-  }
 
   useEffect(() => {
     const cargar = async () => {
-      await cargarOperadores(0, true)
+      const { data } = await supabase
+        .from('operadores')
+        .select('id, nombre, apellido, tipo_operador, ciudad, municipio, estado, experiencia_anos, disponibilidad, fecha_disponibilidad, maquinaria, calificacion_promedio, total_calificaciones, foto_url')
+        .neq('disponibilidad', 'desactivado')
+        .order('created_at', { ascending: false })
+        .range(0, POR_PAGINA - 1)
+
+      if (data) {
+        setOperadores(data)
+        setHayMas(data.length === POR_PAGINA)
+      }
 
       const { data: sessionData } = await supabase.auth.getSession()
       const userId = sessionData.session?.user?.id
@@ -69,6 +62,24 @@ export default function Operadores() {
     }
     cargar()
   }, [])
+
+  const cargarMas = async () => {
+    setCargandoMas(true)
+    const nuevaPagina = pagina + 1
+    const { data } = await supabase
+      .from('operadores')
+      .select('id, nombre, apellido, tipo_operador, ciudad, municipio, estado, experiencia_anos, disponibilidad, fecha_disponibilidad, maquinaria, calificacion_promedio, total_calificaciones, foto_url')
+      .neq('disponibilidad', 'desactivado')
+      .order('created_at', { ascending: false })
+      .range(nuevaPagina * POR_PAGINA, (nuevaPagina + 1) * POR_PAGINA - 1)
+
+    if (data) {
+      setOperadores(prev => [...prev, ...data])
+      setHayMas(data.length === POR_PAGINA)
+      setPagina(nuevaPagina)
+    }
+    setCargandoMas(false)
+  }
 
   const municipios = filtroEstado ? estadosMunicipios[filtroEstado] || [] : []
 
@@ -216,11 +227,13 @@ export default function Operadores() {
         ) : operadoresFiltrados.length === 0 ? (
           <div className="text-center py-10">
             <p className="text-sm text-gray-400">No hay operadores con estos filtros.</p>
-            <button onClick={limpiarFiltros}
-              className="mt-3 text-xs px-4 py-2 rounded-xl text-white font-bold"
-              style={{backgroundColor: '#9A2120'}}>
-              Limpiar filtros
-            </button>
+            {hayFiltrosActivos && (
+              <button onClick={limpiarFiltros}
+                className="mt-3 text-xs px-4 py-2 rounded-xl text-white font-bold"
+                style={{backgroundColor: '#9A2120'}}>
+                Limpiar filtros
+              </button>
+            )}
           </div>
         ) : (
           <>
@@ -233,8 +246,6 @@ export default function Operadores() {
 
                 return (
                   <div key={op.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
-
-                    {/* Foto */}
                     <div className="relative h-32">
                       <img src={foto} alt="Operador" className="w-full h-full object-cover object-top" />
                       <div className="absolute bottom-1 right-1 bg-black/70 rounded-full px-1.5 py-0.5 text-white text-[8px] flex items-center gap-1">
@@ -246,7 +257,6 @@ export default function Operadores() {
                       </div>
                     </div>
 
-                    {/* Info */}
                     <div className="p-2">
                       <div className="flex items-center justify-between mb-1">
                         <p className="text-[10px] font-bold" style={{color: '#575757'}}>
@@ -257,7 +267,6 @@ export default function Operadores() {
                       {op.estado && (
                         <p className="text-[9px] text-gray-400 mb-1">{op.estado}</p>
                       )}
-
                       {op.calificacion_promedio > 0 && (
                         <div className="flex items-center gap-1 mb-1">
                           <span className="text-[10px] text-yellow-500">★</span>
@@ -265,7 +274,6 @@ export default function Operadores() {
                           <span className="text-[9px] text-gray-400">({op.total_calificaciones})</span>
                         </div>
                       )}
-
                       {maquinarias.length > 0 && (
                         <div className="flex flex-wrap gap-1 mb-2">
                           {maquinarias.slice(0, 2).map((m, i) => (
@@ -280,7 +288,6 @@ export default function Operadores() {
                           )}
                         </div>
                       )}
-
                       <button
                         onClick={() => handleDesbloquear(op.id)}
                         className="w-full py-1.5 rounded-xl text-white text-[10px] font-bold"
@@ -288,23 +295,18 @@ export default function Operadores() {
                         🔓 Desbloquear
                       </button>
                     </div>
-
                   </div>
                 )
               })}
             </div>
 
-            {/* Botón cargar más */}
             {hayMas && (
               <button
-                onClick={async () => {
-                  const nuevaPagina = pagina + 1
-                  setPagina(nuevaPagina)
-                  await cargarOperadores(nuevaPagina)
-                }}
+                onClick={cargarMas}
+                disabled={cargandoMas}
                 className="w-full mt-4 py-3 rounded-xl text-xs font-bold border-2"
-                style={{borderColor: '#9A2120', color: '#9A2120'}}>
-                Cargar más operadores
+                style={{borderColor: '#9A2120', color: '#9A2120', opacity: cargandoMas ? 0.7 : 1}}>
+                {cargandoMas ? 'Cargando...' : 'Cargar más operadores'}
               </button>
             )}
           </>
