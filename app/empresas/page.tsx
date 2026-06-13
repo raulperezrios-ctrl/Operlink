@@ -40,11 +40,7 @@ export default function Empresas() {
   }, [])
 
   const handleBuscar = () => {
-    const params = new URLSearchParams()
-    if (maquinariaBusqueda) params.set('maquinaria', maquinariaBusqueda)
-    if (estadoBusqueda) params.set('estado', estadoBusqueda)
-    if (municipioBusqueda) params.set('municipio', municipioBusqueda)
-    window.location.href = `/operadores?${params.toString()}`
+    window.location.href = '/operadores'
   }
 
   return (
