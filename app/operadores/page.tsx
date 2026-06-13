@@ -241,7 +241,7 @@ export default function Operadores() {
             <p className="text-xs text-gray-400 mb-3">{operadoresFiltrados.length} operadores</p>
             <div className="grid grid-cols-2 gap-3">
               {operadoresFiltrados.map((op) => {
-                const foto = op.foto_url || fotaPorTipo[op.tipo_operador] || '/Operador_MAquinaria.png'
+                const foto = fotaPorTipo[op.tipo_operador] || '/Operador_MAquinaria.png'
                 const maquinarias: string[] = op.maquinaria || []
                 const badge = badgeDisponibilidad(op)
 
