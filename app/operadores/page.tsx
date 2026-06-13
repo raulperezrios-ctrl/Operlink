@@ -21,24 +21,31 @@ export default function Operadores() {
   const [sesion, setSesion] = useState<any>(null)
   const [tipoUsuario, setTipoUsuario] = useState<string | null>(null)
   const [empresa, setEmpresa] = useState<any>(null)
+  const [pagina, setPagina] = useState(0)
+  const [hayMas, setHayMas] = useState(true)
+  const POR_PAGINA = 20
+
+  const cargarOperadores = async (paginaNum: number, reset = false) => {
+    const { data } = await supabase
+      .from('operadores')
+      .select('id, nombre, apellido, tipo_operador, ciudad, municipio, estado, experiencia_anos, disponibilidad, fecha_disponibilidad, maquinaria, calificacion_promedio, total_calificaciones, foto_url')
+      .neq('disponibilidad', 'desactivado')
+      .order('created_at', { ascending: false })
+      .range(paginaNum * POR_PAGINA, (paginaNum + 1) * POR_PAGINA - 1)
+
+    if (data) {
+      if (reset) {
+        setOperadores(data)
+      } else {
+        setOperadores(prev => [...prev, ...data])
+      }
+      setHayMas(data.length === POR_PAGINA)
+    }
+  }
 
   useEffect(() => {
     const cargar = async () => {
-      // Reactivar automáticamente operadores cuya fecha de disponibilidad ya llegó
-      const hoy = new Date().toISOString().split('T')[0]
-      await supabase
-        .from('operadores')
-        .update({ disponibilidad: 'disponible', fecha_disponibilidad: null })
-        .eq('disponibilidad', 'no_disponible')
-        .lte('fecha_disponibilidad', hoy)
-        .not('fecha_disponibilidad', 'is', null)
-
-      // Cargar todos excepto desactivados por admin
-      const { data } = await supabase
-        .from('operadores')
-        .select('*')
-        .neq('disponibilidad', 'desactivado')
-      if (data) setOperadores(data)
+      await cargarOperadores(0, true)
 
       const { data: sessionData } = await supabase.auth.getSession()
       const userId = sessionData.session?.user?.id
@@ -220,7 +227,7 @@ export default function Operadores() {
             <p className="text-xs text-gray-400 mb-3">{operadoresFiltrados.length} operadores</p>
             <div className="grid grid-cols-2 gap-3">
               {operadoresFiltrados.map((op) => {
-                const foto = fotaPorTipo[op.tipo_operador] || '/Operador_MAquinaria.png'
+                const foto = op.foto_url || fotaPorTipo[op.tipo_operador] || '/Operador_MAquinaria.png'
                 const maquinarias: string[] = op.maquinaria || []
                 const badge = badgeDisponibilidad(op)
 
@@ -251,7 +258,6 @@ export default function Operadores() {
                         <p className="text-[9px] text-gray-400 mb-1">{op.estado}</p>
                       )}
 
-                      {/* Calificación */}
                       {op.calificacion_promedio > 0 && (
                         <div className="flex items-center gap-1 mb-1">
                           <span className="text-[10px] text-yellow-500">★</span>
@@ -260,7 +266,6 @@ export default function Operadores() {
                         </div>
                       )}
 
-                      {/* Maquinaria */}
                       {maquinarias.length > 0 && (
                         <div className="flex flex-wrap gap-1 mb-2">
                           {maquinarias.slice(0, 2).map((m, i) => (
@@ -276,7 +281,6 @@ export default function Operadores() {
                         </div>
                       )}
 
-                      {/* Botón */}
                       <button
                         onClick={() => handleDesbloquear(op.id)}
                         className="w-full py-1.5 rounded-xl text-white text-[10px] font-bold"
@@ -289,6 +293,20 @@ export default function Operadores() {
                 )
               })}
             </div>
+
+            {/* Botón cargar más */}
+            {hayMas && (
+              <button
+                onClick={async () => {
+                  const nuevaPagina = pagina + 1
+                  setPagina(nuevaPagina)
+                  await cargarOperadores(nuevaPagina)
+                }}
+                className="w-full mt-4 py-3 rounded-xl text-xs font-bold border-2"
+                style={{borderColor: '#9A2120', color: '#9A2120'}}>
+                Cargar más operadores
+              </button>
+            )}
           </>
         )}
       </section>
