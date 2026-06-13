@@ -35,6 +35,7 @@ export default function Operadores() {
         .order('created_at', { ascending: false })
         .range(0, POR_PAGINA - 1)
 
+      console.log('Operadores cargados:', data?.length, data)
       if (data) {
         setOperadores(data)
         setHayMas(data.length === POR_PAGINA)
