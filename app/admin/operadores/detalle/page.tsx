@@ -12,26 +12,34 @@ function DetalleOperadorAdminContent() {
   const [accion, setAccion] = useState('')
 
   useEffect(() => {
-    const verificarAdmin = async () => {
-      const { data: sessionData } = await supabase.auth.getSession()
-      const userId = sessionData.session?.user?.id
-      if (!userId) { window.location.href = '/login'; return }
-      const { data: usuario } = await supabase.from('usuarios').select('tipo').eq('id', userId).single()
-      if (usuario?.tipo !== 'admin') { window.location.href = '/'; return }
-    }
-    verificarAdmin()
+    if (!id) return
 
-    const cargar = async () => {
-      if (!id) return
-      const { data } = await supabase
-        .from('operadores')
-        .select('*')
-        .eq('id', id)
+    const cargarTodo = async () => {
+      // Verificar admin y cargar operador en PARALELO
+      const [sessionResult, operadorResult] = await Promise.all([
+        supabase.auth.getSession(),
+        supabase.from('operadores').select('*').eq('id', id).single()
+      ])
+
+      // Verificar sesión
+      const userId = sessionResult.data.session?.user?.id
+      if (!userId) { window.location.href = '/login'; return }
+
+      // Verificar tipo admin
+      const { data: usuario } = await supabase
+        .from('usuarios')
+        .select('tipo')
+        .eq('id', userId)
         .single()
-      setOp(data)
+
+      if (usuario?.tipo !== 'admin') { window.location.href = '/'; return }
+
+      // Usar resultado del operador
+      setOp(operadorResult.data)
       setLoading(false)
     }
-    cargar()
+
+    cargarTodo()
   }, [id])
 
   const handleVerificar = async () => {
@@ -39,7 +47,6 @@ function DetalleOperadorAdminContent() {
     setOp({ ...op, verificado: true })
     setAccion('verificado')
 
-    // Enviar correo de verificación
     try {
       await fetch('/api/email/verificado', {
         method: 'POST',
