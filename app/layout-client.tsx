@@ -19,6 +19,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         setSesion(session)
 
         if (userId) {
+          // Query usuario en paralelo con operador/empresa
           const { data: usuario } = await supabase
             .from('usuarios')
             .select('tipo')
@@ -54,33 +55,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
     }
 
     cargar()
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-  if (event === 'SIGNED_IN' && session?.user?.id && !sesion) {
-    setSesion(session)
-    const { data: usuario } = await supabase
-      .from('usuarios').select('tipo').eq('id', session.user.id).single()
-    const tipo = usuario?.tipo || null
-    setTipoUsuario(tipo)
-    if (tipo === 'operador') {
-      const { data: op } = await supabase
-        .from('operadores').select('nombre').eq('user_id', session.user.id).single()
-      setNombreUsuario(op?.nombre || null)
-    } else if (tipo === 'empresa') {
-      const { data: emp } = await supabase
-        .from('empresas').select('nombre_contacto').eq('user_id', session.user.id).single()
-      setNombreUsuario(emp?.nombre_contacto?.split(' ')[0] || null)
-    } else if (tipo === 'admin') {
-      setNombreUsuario('Admin')
-    }
-  } else if (event === 'SIGNED_OUT') {
-    setSesion(null)
-    setTipoUsuario(null)
-    setNombreUsuario(null)
-  }
-})
-    return () => subscription.unsubscribe()
-    }, [])
+  }, [])
 
   const cuentaUrl = () => {
     if (!sesion) return '/login'
@@ -98,9 +73,17 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   const whatsappUrl = "https://wa.me/3334588117?text=Hola%2C%20tengo%20una%20duda%20sobre%20OperLink"
 
   const menuContenido = () => {
+    // Si está cargando pero ya hay sesión en localStorage, mostrar cerrar sesión de inmediato
     if (cargando) return (
-      <div className="flex items-center justify-center py-10">
-        <p className="text-xs text-gray-400">Cargando...</p>
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center justify-center py-6">
+          <p className="text-xs text-gray-400">Cargando...</p>
+        </div>
+        <div className="border-t border-gray-100 my-2" />
+        <button onClick={handleCerrarSesion}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 w-full text-left">
+          🚪 Cerrar sesión
+        </button>
       </div>
     )
 
