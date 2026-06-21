@@ -59,24 +59,6 @@ export default function RegistroListo() {
         {/* Botones */}
         <div className="w-full flex flex-col gap-3">
 
-          <a href="/solicitudes"
-            className="w-full py-3 rounded-xl text-white font-bold text-sm text-center block"
-            style={{backgroundColor: '#9A2120'}}>
-            🏢 Ver empresas que buscan operadores
-          </a>
-
-          <div className="bg-white rounded-2xl shadow-sm p-4 border-2 w-full text-left" style={{borderColor: '#9A2120'}}>
-            <p className="text-xs font-black mb-1" style={{color: '#9A2120'}}>⭐ Destaca tu perfil</p>
-            <p className="text-xs text-gray-500 mb-3 leading-relaxed">
-              Con un plan OperLink puedes ver qué empresas están buscando operadores como tú y contactarlas directamente.
-            </p>
-            <a href="/planes"
-              className="w-full py-2.5 rounded-xl font-bold text-sm text-center block"
-              style={{backgroundColor: '#9A2120', color: 'white'}}>
-              Ver planes desde $99 MXN
-            </a>
-          </div>
-
           <a href="/operadores"
             className="text-xs text-center text-gray-400 underline mt-2">
             Ver catálogo de operadores
