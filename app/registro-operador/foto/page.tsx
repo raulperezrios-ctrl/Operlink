@@ -38,8 +38,8 @@ export default function RegistroFoto() {
   }
 
   const handleGuardar = async () => {
-    if (!foto || !userId || !operadorId) {
-      setError('Por favor selecciona una foto')
+    if (!userId || !operadorId) {
+      setError('Ocurrió un error. Por favor intenta de nuevo.')
       return
     }
 
@@ -47,23 +47,27 @@ export default function RegistroFoto() {
     setError('')
 
     try {
-      const extension = foto.name.split('.').pop()
-      const nombreArchivo = `${operadorId}.${extension}`
+      // Si el operador seleccionó una foto, la subimos.
+      // Si no, simplemente avanzamos sin foto (se usará una genérica).
+      if (foto) {
+        const extension = foto.name.split('.').pop()
+        const nombreArchivo = `${operadorId}.${extension}`
 
-      const { error: uploadError } = await supabase.storage
-        .from('fotos-operadores')
-        .upload(nombreArchivo, foto, { upsert: true })
+        const { error: uploadError } = await supabase.storage
+          .from('fotos-operadores')
+          .upload(nombreArchivo, foto, { upsert: true })
 
-      if (uploadError) throw uploadError
+        if (uploadError) throw uploadError
 
-      const { data: urlData } = supabase.storage
-        .from('fotos-operadores')
-        .getPublicUrl(nombreArchivo)
+        const { data: urlData } = supabase.storage
+          .from('fotos-operadores')
+          .getPublicUrl(nombreArchivo)
 
-      await supabase
-        .from('operadores')
-        .update({ foto_url: urlData.publicUrl })
-        .eq('id', operadorId)
+        await supabase
+          .from('operadores')
+          .update({ foto_url: urlData.publicUrl })
+          .eq('id', operadorId)
+      }
 
       router.push('/registro-operador/listo')
 
@@ -120,10 +124,10 @@ export default function RegistroFoto() {
               style={{borderColor: '#9A2120', color: '#9A2120'}}>
               ← Atrás
             </a>
-            <button onClick={handleGuardar} disabled={loading || !foto}
+            <button onClick={handleGuardar} disabled={loading}
               className="flex-1 rounded-xl py-3 text-xs font-bold text-white"
-              style={{backgroundColor: '#9A2120', opacity: (loading || !foto) ? 0.7 : 1}}>
-              {loading ? 'Subiendo...' : 'Guardar →'}
+              style={{backgroundColor: '#9A2120', opacity: loading ? 0.7 : 1}}>
+              {loading ? 'Guardando...' : 'Guardar →'}
             </button>
           </div>
 
